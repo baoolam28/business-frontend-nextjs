@@ -1,4 +1,4 @@
-import Product from '../../../components/component/product'
+import Product from '../../../components/component/dashboard-product'
 export default function product() {
   return (
     <div>
