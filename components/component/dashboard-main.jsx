@@ -190,6 +190,15 @@ export default function dashboardMain() {
                 <Button>View Reports</Button>
               </CardFooter>
             </Card>
+            <Card x-chunk="dashboard-01-chunk-4">
+              <CardHeader className="pb-3">
+                <CardTitle>Inventory</CardTitle>
+                <CardDescription>hello World!</CardDescription>
+              </CardHeader>
+              <CardFooter>
+                <Button>View Reports</Button>
+              </CardFooter>
+            </Card>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             <Card x-chunk="dashboard-01-chunk-5">
