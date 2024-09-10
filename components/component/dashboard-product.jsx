@@ -17,81 +17,150 @@ To read more about using these font, please visit the Next.js documentation:
 - App Directory: https://nextjs.org/docs/app/building-your-application/optimizing/fonts
 - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
 **/
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Button } from "@/components/ui/button"
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import Menu from "../component/menu"
+import { useState, useMemo, useEffect } from "react";
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+} from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import Menu from "../component/menu";
+import BarcodePrinter from "../component/barcode-printer"
+import Document from "../component/document";
+import productAPI from "../../api/product";
+import inventoryAPI from "../../api/inventory";
+import supplierAPI from "../../api/supplier";
+import originAPI from "../../api/origin";
+import categoryAPI from "../../api/category";
+import AddProductDialog from "../../components/component/addProduct"
 
-export default function dashboardProduct() {
+export default function DashboardProduct() {
   const [filters, setFilters] = useState({
     category: [],
     origin: [],
     supplier: [],
-  })
-  const [sortBy, setSortBy] = useState("price-asc")
-  const products = [
-    {
-      id: "ACME-DL-001",
-      name: "Acme Desk Lamp",
-      sku: "ACME-DL-001",
-      price: 49.99,
-      quantity: 120,
-      barcode: "/placeholder.svg",
-      category: "Lighting",
-      origin: "China",
-      supplier: "Acme Inc",
-    },
-    {
-      id: "ACME-WH-002",
-      name: "Acme Wireless Headphones",
-      sku: "ACME-WH-002",
-      price: 99.99,
-      quantity: 75,
-      barcode: "/placeholder.svg",
-      category: "Electronics",
-      origin: "Japan",
-      supplier: "Acme Inc",
-    },
-    {
-      id: "ACME-ST-003",
-      name: "Acme Smart Thermostat",
-      sku: "ACME-ST-003",
-      price: 129.99,
-      quantity: 50,
-      barcode: "/placeholder.svg",
-      category: "Home Automation",
-      origin: "USA",
-      supplier: "Acme Inc",
-    },
-    {
-      id: "ACME-RV-004",
-      name: "Acme Robotic Vacuum",
-      sku: "ACME-RV-004",
-      price: 199.99,
-      quantity: 30,
-      barcode: "/placeholder.svg",
-      category: "Appliances",
-      origin: "Germany",
-      supplier: "Acme Inc",
-    },
-  ]
+  });
+
+  
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const handleOpenDialog = () => setDialogOpen(true);
+  const handleCloseDialog = () => setDialogOpen(false);
+
+
+  const [sortBy, setSortBy] = useState("price-asc");
+  const [products, setProducts] = useState([]);
+  const [inventories, setInventories] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [origins, setOrigins] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await productAPI.getAllProduct();
+        setProducts(response);
+      } catch (error) {
+        setError("Error fetching products. Please try again.");
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const fetchOrigins = async () => {
+      try {
+        const response = await originAPI.getAllOrigin();
+        setOrigins(response);
+      } catch (error) {
+        console.error("Failed to fetch origins", error);
+      }
+    }
+    const fetchCategories = async () => {
+      try {
+        const response = await categoryAPI.getAllCategory();
+        
+        setCategories(response);
+        
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+      }
+    }
+
+    const fetchSuppliers = async () => {
+      try {
+        const response = await supplierAPI.getAllSupplier();
+        setSuppliers(response);
+      } catch (error) {
+        console.error("Failed to fetch suppliers", error);
+      }
+    }
+
+    const fetchInventories = async () => {
+      try {
+        const response = await inventoryAPI.getAllInventory();
+        setInventories(response);
+        
+      } catch (error) {
+        console.error("Failed to fetch inventories", error);
+      }
+    }
+
+    fetchProducts();
+    fetchOrigins();
+    fetchCategories();
+    fetchSuppliers();
+    fetchInventories();
+
+  }, []);
+
+  
+
   const filteredProducts = useMemo(() => {
-    let result = products
+    let result = products;
     if (filters.category.length > 0) {
-      result = result.filter((product) => filters.category.includes(product.category))
+      result = result.filter((product) =>
+        filters.category.includes(product.categoryName)
+      );
     }
     if (filters.origin.length > 0) {
-      result = result.filter((product) => filters.origin.includes(product.origin))
+      result = result.filter((product) =>
+        filters.origin.includes(product.originName)
+      );
     }
     if (filters.supplier.length > 0) {
-      result = result.filter((product) => filters.supplier.includes(product.supplier))
+      result = result.filter((product) =>
+        filters.supplier.includes(product.supplierName)
+      );
     }
     switch (sortBy) {
       case "price-asc":
@@ -99,57 +168,101 @@ export default function dashboardProduct() {
       case "price-desc":
         return result.sort((a, b) => b.price - a.price);
       default:
-        return result
+        return result;
     }
-  }, [filters, sortBy])
+  }, [filters, sortBy, products]);
+
   const handleFilterChange = (type, value) => {
     setFilters((prevFilters) => ({
       ...prevFilters,
       [type]: prevFilters[type].includes(value)
         ? prevFilters[type].filter((item) => item !== value)
         : [...prevFilters[type], value],
-    }))
-  }
+    }));
+  };
+
   const handleSortChange = (value) => {
-    setSortBy(value)
+    setSortBy(value);
+  };
+
+  
+
+  const handleSaveProduct = async (productData) => {
+    
+    try {
+      const response = await productAPI.createProduct(productData);
+      setProducts((prev) => [...prev, response]);
+    } catch (error) {
+      console.log('create product error: ', error);
+    }
+    
+  };
+
+  if (loading) {
+    return <p>Loading products...</p>;
   }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
   return (
-    (<div className="flex min-h-screen w-full flex-col bg-muted/40">
-      <Menu/>
-      
+    <div className="flex min-h-screen w-full flex-col bg-muted/40">
+      <Menu />
+
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6" >
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Product Admin</h1>
-          
-        </div>
-      </header>
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl font-bold">Quản lý sản phẩm</h1>
+          </div>
+        </header>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <Tabs defaultValue="products" className="w-full">
             <TabsList className="flex items-center justify-between border-b">
-              <TabsTrigger value="products">Products</TabsTrigger>
-              <TabsTrigger value="reports">Reports</TabsTrigger>
-              <TabsTrigger value="scanner">Scanner</TabsTrigger>
+              <TabsTrigger value="products">Sản Phẩm</TabsTrigger>
+              <TabsTrigger value="printer">In Mã Vạch</TabsTrigger>
+              <TabsTrigger value="imports">Nhập Hàng</TabsTrigger>
             </TabsList>
             <TabsContent value="products" className="py-8">
               <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Product Inventory</h1>
-                <Button size="sm">Add Product</Button>
+                <h1 className="text-2xl font-bold">Kho sản phẩm</h1>
+                
+                <Button onClick={handleOpenDialog}>Thêm sản phẩm</Button>
+                  <AddProductDialog
+                    open={dialogOpen}
+                    onClose={handleCloseDialog}
+                    onSave={handleSaveProduct}
+                    categories={categories}
+                    suppliers={suppliers}
+                    origins={origins}
+                    setCategories={setCategories}
+                    setSuppliers={setSuppliers}
+                    setOrigins={setOrigins}
+                  />
+                
               </div>
               <div className="mt-6 border shadow-sm rounded-lg">
                 <div className="p-4 border-b">
                   <div className="grid md:grid-cols-3 gap-4">
                     <Accordion type="single" collapsible>
                       <AccordionItem value="category">
-                        <AccordionTrigger className="text-base">Category</AccordionTrigger>
+                        <AccordionTrigger className="text-base">
+                          Loại hàng
+                        </AccordionTrigger>
                         <AccordionContent>
                           <div className="grid gap-2">
-                            {["Lighting", "Electronics", "Home Automation", "Appliances"].map((category) => (
-                              <Label key={category} className="flex items-center gap-2 font-normal">
+                            {categories.map((category) => (
+                              <Label
+                                key={category.categoryName}
+                                className="flex items-center gap-2 font-normal"
+                              >
                                 <Checkbox
-                                  checked={filters.category.includes(category)}
-                                  onCheckedChange={() => handleFilterChange("category", category)} />
-                                {category}
+                                  checked={filters.category.includes(category.categoryName)}
+                                  onCheckedChange={() =>
+                                    handleFilterChange("category", category.categoryName)
+                                  }
+                                />
+                                {category.categoryName}
                               </Label>
                             ))}
                           </div>
@@ -158,15 +271,23 @@ export default function dashboardProduct() {
                     </Accordion>
                     <Accordion type="single" collapsible>
                       <AccordionItem value="origin">
-                        <AccordionTrigger className="text-base">Origin</AccordionTrigger>
+                        <AccordionTrigger className="text-base">
+                          Quốc gia
+                        </AccordionTrigger>
                         <AccordionContent>
                           <div className="grid gap-2">
-                            {["China", "Japan", "USA", "Germany"].map((origin) => (
-                              <Label key={origin} className="flex items-center gap-2 font-normal">
+                            {origins.map((origin) => (
+                              <Label
+                                key={origin.originName}
+                                className="flex items-center gap-2 font-normal"
+                              >
                                 <Checkbox
-                                  checked={filters.origin.includes(origin)}
-                                  onCheckedChange={() => handleFilterChange("origin", origin)} />
-                                {origin}
+                                  checked={filters.origin.includes(origin.originName)}
+                                  onCheckedChange={() =>
+                                    handleFilterChange("origin", origin.originName)
+                                  }
+                                />
+                                {origin.originName}
                               </Label>
                             ))}
                           </div>
@@ -175,15 +296,25 @@ export default function dashboardProduct() {
                     </Accordion>
                     <Accordion type="single" collapsible>
                       <AccordionItem value="supplier">
-                        <AccordionTrigger className="text-base">Supplier</AccordionTrigger>
+                        <AccordionTrigger className="text-base">
+                          Nhà cung cấp
+                        </AccordionTrigger>
                         <AccordionContent>
                           <div className="grid gap-2">
-                            <Label className="flex items-center gap-2 font-normal">
-                              <Checkbox
-                                checked={filters.supplier.includes("Acme Inc")}
-                                onCheckedChange={() => handleFilterChange("supplier", "Acme Inc")} />
-                              Acme Inc
-                            </Label>
+                            {suppliers.map((supplier) => (
+                              <Label
+                                key={supplier.supplierName}
+                                className="flex items-center gap-2 font-normal"
+                              >
+                                <Checkbox
+                                  checked={filters.supplier.includes(supplier.supplierName)}
+                                  onCheckedChange={() =>
+                                    handleFilterChange("supplier", supplier.supplierName)
+                                  }
+                                />
+                                {supplier.supplierName}
+                              </Label>
+                            ))}
                           </div>
                         </AccordionContent>
                       </AccordionItem>
@@ -195,13 +326,20 @@ export default function dashboardProduct() {
                     <DropdownMenuTrigger asChild>
                       <Button variant="outline" className="ml-auto">
                         <ListOrderedIcon className="w-4 h-4 mr-2" />
-                        Sort by
+                        Sắp xếp theo
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-[200px]">
-                      <DropdownMenuRadioGroup value={sortBy} onValueChange={handleSortChange}>
-                        <DropdownMenuRadioItem value="price-asc">Price: Low to High</DropdownMenuRadioItem>
-                        <DropdownMenuRadioItem value="price-desc">Price: High to Low</DropdownMenuRadioItem>
+                      <DropdownMenuRadioGroup
+                        value={sortBy}
+                        onValueChange={handleSortChange}
+                      >
+                        <DropdownMenuRadioItem value="price-asc">
+                          Giá: Thấp đến Cao
+                        </DropdownMenuRadioItem>
+                        <DropdownMenuRadioItem value="price-desc">
+                          Giá: Cao đến Thấp
+                        </DropdownMenuRadioItem>
                       </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -209,57 +347,70 @@ export default function dashboardProduct() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>SKU</TableHead>
-                      <TableHead>Price</TableHead>
-                      <TableHead>Quantity</TableHead>
+                      <TableHead>Tên SP</TableHead>
                       <TableHead>Barcode</TableHead>
-                      <TableHead>Actions</TableHead>
+                      <TableHead>Giá</TableHead>
+                      <TableHead>Tồn kho</TableHead>
+                      <TableHead>Loại hàng</TableHead>
+                      <TableHead>Nhà cung cấp</TableHead>
+                      <TableHead>Quốc gia</TableHead>
+                      <TableHead>Hình ảnh</TableHead>
+                      <TableHead>Sửa/Xóa</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredProducts.map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.sku}</TableCell>
-                        <TableCell>${product.price.toFixed(2)}</TableCell>
-                        <TableCell>{product.quantity}</TableCell>
-                        <TableCell>
-                          <img
-                            src="/placeholder.svg"
-                            width={100}
-                            height={50}
-                            alt="Barcode"
-                            className="w-full object-contain"
-                            style={{ aspectRatio: "100/50", objectFit: "cover" }} />
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button aria-haspopup="true" size="icon" variant="ghost">
-                                <MoveVerticalIcon className="h-4 w-4" />
-                                <span className="sr-only">Toggle menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem>Edit</DropdownMenuItem>
-                              <DropdownMenuItem>Delete</DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                    {filteredProducts.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={9}>
+                          Không có sản phẩm nào.
                         </TableCell>
                       </TableRow>
-                    ))}
+                    ) : (
+                      filteredProducts.map((product) => (
+                        <TableRow key={product.id}>
+                          <TableCell>{product.productName}</TableCell>
+                          <TableCell>{product.barcode}</TableCell>
+                          <TableCell>{product.price}</TableCell>
+                          <TableCell>
+                            {inventories.map((inventory) => inventory.barcode === product.barcode ? inventory.quantityInStock : null)}
+                          </TableCell>
+                          <TableCell>{product.categoryName}</TableCell>
+                          <TableCell>{product.supplierName}</TableCell>
+                          <TableCell>{product.originName}</TableCell>
+                          <TableCell>
+                            <img
+                              src={product.image}
+                              alt={product.productName}
+                              className="h-10 w-10 rounded-lg"  
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              <Button variant="outline">Sửa</Button>
+                              <Button variant="destructive">Xóa</Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
                   </TableBody>
                 </Table>
               </div>
             </TabsContent>
-            <Tabs />
+            <TabsContent value="printer" className="py-8">
+              <BarcodePrinter/>
+            </TabsContent>
+            <TabsContent value="imports" className="py-8">
+              <Document/>
+            </TabsContent>
           </Tabs>
         </main>
       </div>
-    </div>)
+    </div>
   );
 }
+
+
 
 function ListOrderedIcon(props) {
   return (
@@ -303,4 +454,26 @@ function MoveVerticalIcon(props) {
       <line x1="12" x2="12" y1="2" y2="22" />
     </svg>)
   );
+}
+
+
+
+function PlusIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M5 12h14" />
+      <path d="M12 5v14" />
+    </svg>
+  )
 }

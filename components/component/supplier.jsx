@@ -17,112 +17,109 @@ To read more about using these font, please visit the Next.js documentation:
 - App Directory: https://nextjs.org/docs/app/building-your-application/optimizing/fonts
 - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
 **/
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+"use client";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link"
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb"
-import { Input } from "@/components/ui/input"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle , CardContent } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import Menu from "../component/menu"
+import AddSupplierDialog from "../../components/component/addSupplier"
+import { Label } from "@/components/ui/label";
+import supplierAPI from "../../api/supplier";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+export default function Supplier() {
+  const [suppliers, setSuppliers] = useState([]);
 
-export default function supplier() {
+  const [editingSupplier, setEditingSupplier] = useState(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    supplierName: '',
+    email: '',
+    phone: '',
+    fax: '',
+    address: ''
+  });
+
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const response = await supplierAPI.getAllSupplier();
+        setSuppliers(response);
+      } catch (error) {
+        console.error("Failed to fetch suppliers", error);
+      }
+    };
+    
+    fetchSuppliers();
+
+  }, []);
+
+  useEffect(() => {
+    if (editingSupplier) {
+      setFormData({
+        supplierName: editingSupplier.supplierName || '',
+        email: editingSupplier.email || '',
+        phone: editingSupplier.phone || '',
+        fax: editingSupplier.fax || '',
+        address: editingSupplier.address || ''
+      });
+    }
+  }, [editingSupplier]);
+
+  const handleSaveSupplier = async (supplierData) => {
+    try {
+      if (editingSupplier) {
+        const response = await supplierAPI.updateSupplier(editingSupplier.supplierID,supplierData);
+        setSuppliers((prevSuppliers) => [...prevSuppliers, response]);
+      } else {
+        const response = await supplierAPI.createSupplier(supplierData);
+        setSuppliers((prevSuppliers) => [...prevSuppliers, response]);
+      }
+      setEditingSupplier(null);
+      setFormData({
+        supplierName: '',
+        email: '',
+        phone: '',
+        fax: '',
+        address: ''
+      });
+      setIsDialogOpen(false);
+    } catch (error) {
+      console.error("Error saving supplier:", error);
+    }
+  };
+
+  const handleDeleteSupplier = async (supplierId) => {
+    try {
+      await supplierAPI.deleteSupplier(supplierId);
+      setSuppliers(suppliers.filter((supplier) => supplier.supplierID !== supplierId));
+    } catch (error) {
+      console.error("deleteSupplier failed", error);
+    }
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    handleSaveSupplier(formData);
+  };
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
+
   return (
     (<div className="flex min-h-screen w-full flex-col bg-muted/40">
-      <aside
-        className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
-        <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-          <TooltipProvider>
-            <Link
-              href="#"
-              className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
-              prefetch={false}>
-              <Package2Icon className="h-4 w-4 transition-all group-hover:scale-110" />
-              <span className="sr-only">Acme Inc</span>
-            </Link>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="#"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                  prefetch={false}>
-                  <UsersIcon className="h-5 w-5" />
-                  <span className="sr-only">Customers</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Customers</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="#"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                  prefetch={false}>
-                  <UsersIcon className="h-5 w-5" />
-                  <span className="sr-only">Suppliers</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Suppliers</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="#"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                  prefetch={false}>
-                  <PackageIcon className="h-5 w-5" />
-                  <span className="sr-only">Products</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Products</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="#"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                  prefetch={false}>
-                  <ShoppingCartIcon className="h-5 w-5" />
-                  <span className="sr-only">Orders</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Orders</TooltipContent>
-            </Tooltip>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="#"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                  prefetch={false}>
-                  <LineChartIcon className="h-5 w-5" />
-                  <span className="sr-only">Reports</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Reports</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </nav>
-        <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link
-                  href="#"
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                  prefetch={false}>
-                  <SettingsIcon className="h-5 w-5" />
-                  <span className="sr-only">Settings</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">Settings</TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </nav>
-      </aside>
+      <Menu/>
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header
           className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
@@ -147,28 +144,28 @@ export default function supplier() {
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                   prefetch={false}>
                   <UsersIcon className="h-5 w-5" />
-                  Customers
+                  Khách Hàng
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-foreground"
                   prefetch={false}>
                   <UsersIcon className="h-5 w-5" />
-                  Suppliers
+                  Nhà Cung Cấp
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                   prefetch={false}>
                   <PackageIcon className="h-5 w-5" />
-                  Products
+                  Sản Phẩm
                 </Link>
                 <Link
                   href="#"
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                   prefetch={false}>
                   <ShoppingCartIcon className="h-5 w-5" />
-                  Orders
+                  Bán Hàng
                 </Link>
                 <Link
                   href="#"
@@ -182,7 +179,7 @@ export default function supplier() {
                   className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
                   prefetch={false}>
                   <SettingsIcon className="h-5 w-5" />
-                  Settings
+                  Cài Đặt
                 </Link>
               </nav>
             </SheetContent>
@@ -192,13 +189,13 @@ export default function supplier() {
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
                   <Link href="#" prefetch={false}>
-                    Suppliers
+                    Nhà Cung Cấp
                   </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>All Suppliers</BreadcrumbPage>
+                <BreadcrumbPage>Quản Lý Nhà Cung Cấp</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
@@ -234,159 +231,154 @@ export default function supplier() {
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <Card x-chunk="dashboard-06-chunk-0">
             <CardHeader>
-              <CardTitle>Suppliers</CardTitle>
-              <CardDescription>Manage your suppliers and view their details.</CardDescription>
+              <CardTitle>Quản Lý Nhà Cung Cấp</CardTitle>
               <div className="ml-auto flex items-center gap-2">
-              <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline">Add Supplier</Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>Add New Supplier</DialogTitle>
-          <DialogDescription>Fill out the form to add a new supplier to your business.</DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">
-              Name
-            </Label>
-            <Input id="name" placeholder="Supplier Name" className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="email" className="text-right">
-              Email
-            </Label>
-            <Input id="email" type="email" placeholder="supplier@example.com" className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="phone" className="text-right">
-              Phone
-            </Label>
-            <Input id="phone" type="tel" placeholder="(123) 456-7890" className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="fax" className="text-right">
-              Fax
-            </Label>
-            <Input id="fax" type="tel" placeholder="(123) 456-7890" className="col-span-3" />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="address" className="text-right">
-              Address
-            </Label>
-            <Textarea id="address" placeholder="123 Main St, Anytown USA" className="col-span-3" />
-          </div>
-        </div>
-        <DialogFooter>
-          <div>
-            <Button type="submit">Save Supplier</Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+              <AddSupplierDialog className="outline" onSave={handleSaveSupplier} />
               </div>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
+                    <TableHead>Tên Nhà Cung Cấp</TableHead>
                     <TableHead className="hidden sm:table-cell">Email</TableHead>
-                    <TableHead className="hidden sm:table-cell">Phone</TableHead>
-                    <TableHead className="hidden md:table-cell">Fax</TableHead>
-                    <TableHead className="hidden md:table-cell">Address</TableHead>
+                    <TableHead className="hidden sm:table-cell">SDT</TableHead>
+                    <TableHead className="hidden md:table-cell">Số Fax</TableHead>
+                    <TableHead className="hidden md:table-cell">Địa chỉ</TableHead>
                     <TableHead>
                       <span className="sr-only">Actions</span>
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell className="font-medium">Acme Supplies</TableCell>
-                    <TableCell className="hidden sm:table-cell">acme@example.com</TableCell>
-                    <TableCell className="hidden sm:table-cell">(123) 456-7890</TableCell>
-                    <TableCell className="hidden md:table-cell">(123) 456-7891</TableCell>
-                    <TableCell className="hidden md:table-cell">123 Main St, Anytown USA</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoveVerticalIcon className="h-4 w-4" />
-                            <span className="sr-only">More</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <FilePenIcon className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <TrashIcon className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Globex Enterprises</TableCell>
-                    <TableCell className="hidden sm:table-cell">globex@example.com</TableCell>
-                    <TableCell className="hidden sm:table-cell">(987) 654-3210</TableCell>
-                    <TableCell className="hidden md:table-cell">(987) 654-3211</TableCell>
-                    <TableCell className="hidden md:table-cell">456 Oak Rd, Somewhere City</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoveVerticalIcon className="h-4 w-4" />
-                            <span className="sr-only">More</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <FilePenIcon className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <TrashIcon className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell className="font-medium">Stark Industries</TableCell>
-                    <TableCell className="hidden sm:table-cell">stark@example.com</TableCell>
-                    <TableCell className="hidden sm:table-cell">(555) 987-6543</TableCell>
-                    <TableCell className="hidden md:table-cell">(555) 987-6544</TableCell>
-                    <TableCell className="hidden md:table-cell">789 Oak Ln, Metropolis</TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button aria-haspopup="true" size="icon" variant="ghost">
-                            <MoveVerticalIcon className="h-4 w-4" />
-                            <span className="sr-only">More</span>
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <FilePenIcon className="h-4 w-4 mr-2" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <TrashIcon className="h-4 w-4 mr-2" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
+                  {suppliers.map((supplier) => (
+            <TableRow key={supplier.supplierID}>
+              <TableCell className="font-medium">{supplier.supplierName}</TableCell>
+              <TableCell className="hidden sm:table-cell">{supplier.email}</TableCell>
+              <TableCell className="hidden sm:table-cell">{supplier.phone}</TableCell>
+              <TableCell className="hidden md:table-cell">{supplier.fax}</TableCell>
+              <TableCell className="hidden md:table-cell">{supplier.address}</TableCell>
+              <TableCell>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button aria-haspopup="true" size="icon" variant="ghost">
+                      <MoveVerticalIcon className="h-4 w-4" />
+                      <span className="sr-only">More</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => {
+                            setEditingSupplier(supplier);
+                            setIsDialogOpen(true);
+                          }}>
+                      <FilePenIcon className="h-4 w-4 mr-2" />
+                      Sửa
+                      
+                      
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDeleteSupplier(supplier.supplierID)}>
+                      <TrashIcon className="h-4 w-4 mr-2" />
+                      Xóa
+                      
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </TableCell>
+            </TableRow>
+          ))}
+
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogContent className="sm:max-w-[600px]" aria-labelledby="dialog-edit">
+              <DialogHeader>
+                <DialogTitle>Sửa thông tin nhà cung cấp</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit}>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="supplierName" className="text-right">
+                      Tên nhà cung cấp
+                    </Label>
+                    <Input
+                      id="supplierName"
+                      name="supplierName"
+                      value={formData.supplierName}
+                      onChange={handleChange}
+                      placeholder="Nhập tên nhà cung cấp"
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="supplierName" className="text-right">
+                      Email 
+                    </Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Nhập Email nhà cung cấp"
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="supplierName" className="text-right">
+                      Số điện thoại
+                    </Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="Nhập số điện thoại"
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="supplierName" className="text-right">
+                      Số Fax
+                    </Label>
+                    <Input
+                      id="fax"
+                      name="fax"
+                      value={formData.fax}
+                      onChange={handleChange}
+                      placeholder="Nhập số fax"
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="supplierName" className="text-right">
+                      Tên nhà cung cấp
+                    </Label>
+                    <Input
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      placeholder="Nhập địa chỉ"
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+               
+                </div>
+                <DialogFooter>
+                  <Button type="submit">Lưu</Button>
+                  <DialogClose asChild>
+                    <Button variant="outline">Đóng</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </form>
+            </DialogContent>
+          </Dialog>
         </main>
       </div>
     </div>)

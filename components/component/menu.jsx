@@ -2,6 +2,9 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import Link from "next/link"
 
 export default function menu() {
+
+
+
   return (
     <div>
       <aside
@@ -30,7 +33,7 @@ export default function menu() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="#"
+                  href="/dashboard/supplier"
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                   prefetch={false}>
                   <TruckIcon className="h-5 w-5" />
@@ -54,14 +57,14 @@ export default function menu() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="#"
+                  href="/dashboard/sale"
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                   prefetch={false}>
                   <ShoppingCartIcon className="h-5 w-5" />
-                  <span className="sr-only">Orders</span>
+                  <span className="sr-only">Sale</span>
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="right">Orders</TooltipContent>
+              <TooltipContent side="right">Sale</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
