@@ -34,7 +34,11 @@ import inventoryAPI from "../../api/inventory";
 import BarcodeScanner from "./barcodeScanner"
 import AddCustomerDialog from "../../components/component/addCustomer"
 import inventory from "./inventory"
+import { useRouter } from 'next/navigation';
+import formatVND from "../../utils/formatVND"
+
 export default function sales() {
+
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
   const [inventories, setInventories] = useState([]);
@@ -45,6 +49,9 @@ export default function sales() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
+
+  const router = useRouter();
+  
 
   useEffect(() => {
   const fetchProducts = async () => {
@@ -183,6 +190,7 @@ const handleIncreaseQuantity = (index) => {
   };
 
   const handleCheckout = async () => {
+      
       if (cart.length === 0) {
         alert("Giỏ hàng đang trống!");
         return;
@@ -222,10 +230,21 @@ const handleIncreaseQuantity = (index) => {
         return;
       }
 
-      const order = await orderAPI.createOrder(orderData);
-      console.log(order)
-      setCart([]);
-      setSelectedCustomer(null); 
+
+      
+      try {
+        const order = await orderAPI.createOrder(orderData);
+
+        if (order) {
+          setCart([]);
+          setSelectedCustomer(null);
+          // Use await to ensure the router.push is executed after the order is created
+          await router.push(`/payment?orderId=${order.orderId}`);
+        }
+      } catch (error) {
+        console.error("Error during checkout:", error);
+        alert("Đã xảy ra lỗi khi thực hiện thanh toán. Vui lòng thử lại.");
+      }
 
   };
 
@@ -303,7 +322,7 @@ const handleIncreaseQuantity = (index) => {
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-primary font-medium">{product.price.toFixed(2)} VND</span>
+                    <span className="text-primary font-medium">{formatVND(product.price.toFixed(2))} </span>
                     <span className="text-xs text-muted-foreground">{product.barcode}</span>
                   </div>
                 </div>
@@ -344,7 +363,7 @@ const handleIncreaseQuantity = (index) => {
                   style={{ aspectRatio: "50/50", objectFit: "cover" }} />
                 <div>
                   <h3 className="font-medium">{product.name}</h3>
-                  <div className="text-sm text-muted-foreground">${product.price.toFixed(2)}</div>
+                  <div className="text-sm text-muted-foreground">{formatVND(product.price.toFixed(2))}</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Button
@@ -379,24 +398,24 @@ const handleIncreaseQuantity = (index) => {
         ) : (
           <div className="flex flex-col items-center justify-center h-full">
             <ShoppingCartIcon className="h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">Your cart is empty.</p>
+            <p className="text-muted-foreground">Giỏ hàng đang trống.</p>
           </div>
         )}
 
         <div className="mt-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground">Subtotal:</span>
-            <span className="font-medium">${cart.reduce((total, product) => total + product.price * product.quantity, 0).toFixed(2)}</span>
+            <span className="text-muted-foreground">Tổng:</span>
+            <span className="font-medium">{formatVND(cart.reduce((total, product) => total + product.price * product.quantity, 0).toFixed(2))}</span>
           </div>
           <div className="flex items-center justify-between mb-4">
-            <span className="text-muted-foreground">Tax:</span>
-            <span className="font-medium">$0.00</span>
+            <span className="text-muted-foreground">Thuế:</span>
+            <span className="font-medium">0.00đ</span>
           </div>
           <Separator />
           <div className="flex items-center justify-between mt-4">
-            <span className="text-lg font-medium">Total:</span>
+            <span className="text-lg font-medium">Tổng cộng:</span>
             <span className="text-lg font-medium">
-              ${cart.reduce((total, product) => total + product.price * product.quantity, 0).toFixed(2)}
+              {formatVND(cart.reduce((total, product) => total + product.price * product.quantity, 0).toFixed(2))}
             </span>
           </div>
         </div>

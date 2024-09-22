@@ -1,10 +1,9 @@
-
-import Inventory from '../../../components/component/inventory'
+import Inventory from "../../../components/component/inventory";
 
 export default function inventory() {
   return (
     <div>
-      <Inventory/>
+      <Inventory />
     </div>
-  )
+  );
 }

@@ -23,6 +23,8 @@ To read more about using these font, please visit the Next.js documentation:
 - App Directory: https://nextjs.org/docs/app/building-your-application/optimizing/fonts
 - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
 **/
+"use client"
+import React, {useState, useEffect} from "react"
 import Link from "next/link"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
@@ -31,7 +33,47 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
 import Menu from "../component/menu"
+import { useSearchParams } from 'next/navigation'
+import orderAPI from '../../api/order'
+import formatVND from "../../utils/formatVND"
 export default function paymentView() {
+
+  const [order, setOrder] = useState({});
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentAmount, setPaymentAmount] = useState(0);
+
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('orderId');
+
+  useEffect(() => {
+    const fetchOrder = async () =>{
+      try {
+        const response = await orderAPI.getOrder(orderId);
+        console.log(response);
+        if(response){
+          setOrder(response);
+          caculatePayAmount(response);
+        }
+        
+      } catch (error) {
+        console.error("fetch order failed", error);
+      }
+    }
+    fetchOrder();
+  },[orderId]);
+
+  const caculatePayAmount = (order) => {
+    let payAmount = 0;
+    order.orderDetails.map((detail) => {
+      payAmount += detail.price * detail.quantity;
+    });
+    setPaymentAmount(payAmount);
+  }
+
+  if (!order) {
+    return <div>Loading...</div>;
+  }
+
   return (
     (<div className="flex min-h-screen flex-col bg-muted/40">
       <Menu/>
@@ -65,24 +107,24 @@ export default function paymentView() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Hóa Đơn | </CardTitle>
+              <CardTitle>Hóa Đơn | {order.orderId}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="customer-name">Tên khách hàng</Label>
-                <Input id="customer-name"  readOnly  />
+                <Input id="customer-name" value={order.customer ? order.customer.name : ''} readOnly  />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="customer-phone">Số điện thoại</Label>
-                <Input id="customer-phone"  readOnly />
+                <Input id="customer-phone" value={order.customer ? order.customer.phone : ''}  readOnly />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="customer-email">Email</Label>
-                <Input id="customer-email" type="email"  readOnly  />
+                <Input id="customer-email" value={order.customer ? order.customer.email : ''} type="email"  readOnly  />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="customer-address">Địa chỉ</Label>
-                <Textarea id="customer-address"  rows={3} readOnly />
+                <Textarea id="customer-address" value={order.customer ? order.customer.address : ''} rows={3} readOnly />
               </div>
               <div className="grid gap-2">
 
@@ -96,17 +138,22 @@ export default function paymentView() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell>Acme Widgets</TableCell>
-                      <TableCell>2</TableCell>
-                      <TableCell>VND</TableCell>
-                      <TableCell>VND</TableCell>
-                    </TableRow>
+                    {
+                      order.orderDetails ? order.orderDetails.map((order) => {
+                        return (
+                          <TableRow>
+                            <TableCell>{order.productName}</TableCell>
+                            <TableCell>{order.quantity}</TableCell>
+                            <TableCell>{formatVND(order.price)}</TableCell>
+                            <TableCell>{formatVND(order.quantity * order.price)}</TableCell>
+                          </TableRow>
+                        )
+                      }) : null
+                    }
                   </TableBody>
                 </Table>
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">Tổng:</span>
-                  <span className="font-medium">VND</span>
+                  <span className="font-medium">Tổng: {formatVND(paymentAmount)}</span>
                 </div>
               </div>
             </CardContent>

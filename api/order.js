@@ -24,6 +24,12 @@ const order = {
     const url = `/orders/${orderId}`;
     return axiosClient.delete(url);
   },
+
+  // Fetch a single order
+  getOrder(orderId) {
+    const url = `/orders/${orderId}`;
+    return axiosClient.get(url);
+  },
 };
 
 export default order;
