@@ -60,7 +60,7 @@ import supplierAPI from "../../api/supplier";
 import originAPI from "../../api/origin";
 import categoryAPI from "../../api/category";
 import AddProductDialog from "../../components/component/addProduct"
-
+import formatVND from "../../utils/formatVND"
 export default function DashboardProduct() {
   const [filters, setFilters] = useState({
     category: [],
@@ -370,7 +370,7 @@ export default function DashboardProduct() {
                         <TableRow key={product.id}>
                           <TableCell>{product.productName}</TableCell>
                           <TableCell>{product.barcode}</TableCell>
-                          <TableCell>{product.price}</TableCell>
+                          <TableCell>{formatVND(product.price)}</TableCell>
                           <TableCell>
                             {inventories.map((inventory) => inventory.barcode === product.barcode ? inventory.quantityInStock : null)}
                           </TableCell>

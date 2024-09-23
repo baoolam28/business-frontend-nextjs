@@ -34,6 +34,7 @@ import { Toggle } from "@/components/ui/toggle"
 import categoryAPI from "../../api/document";
 import productAPI from "../../api/product";
 import BarcodeScanner from './barcodeScanner';
+import formatVND from "../../utils/formatVND";
 export default function document() {
 
   const [documentDetails, setDocumentDetails] = useState([]);

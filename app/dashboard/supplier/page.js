@@ -1,8 +1,8 @@
-import Supplier from '../../../components/component/supplier'
+import Supplier from "../../../components/component/supplier";
 export default function suplier() {
   return (
     <div>
-      <Supplier/>
+      <Supplier />
     </div>
-  )
+  );
 }
