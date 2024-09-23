@@ -17,7 +17,7 @@ const categories = [
 
 const CategoryList = () => {
   return (
-    <nav className="flex flex-col w-[21%] max-md:ml-0 max-md:w-full">
+    <nav className="flex flex-col self-start w-[21%] max-md:ml-0 max-md:w-full">
       <div className="flex grow gap-4 text-base text-center text-black max-md:mt-10">
         <div className="flex flex-col items-start self-end mt-10">
           {categories.map((category, index) => (

@@ -11,7 +11,7 @@ import Features from "./Features";
 function About() {
   return (
     <Layout>
-      <div className="flex gap-3 items-center text-sm text-black whitespace-nowrap">
+      <div className="flex gap-3 items-center self-start   text-sm text-black whitespace-nowrap">
         <a href="/" className="self-stretch my-auto opacity-50">
           Home
         </a>

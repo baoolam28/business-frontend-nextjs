@@ -92,10 +92,10 @@ const NewArrival = () => {
               alt="Perfume bottle"
               className="object-contain self-stretch my-auto aspect-[0.95] min-w-[240px] w-[270px]"
             />
-            <div className="flex overflow-hidden flex-col justify-center items-center self-stretch px-8 my-auto bg-black rounded aspect-square min-w-[240px] w-[270px] max-md:px-5">
+            <div className="flex flex-wrap gap-8 justify-center items-center mt-8 max-md:max-w-full">
               <img
                 loading="lazy"
-                src="https://cdn.builder.io/api/v1/image/assets/TEMP/e37fd4f2-c0c2-4659-9537-ed425d5f8e86?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb"
+                src="https://cdn.builder.io/api/v1/image/assets/TEMP/78e006a9362764ea479a7b111062aa5b46cb97c6f12a1acfefc3d3c5f420e333?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb"
                 alt="Speakers"
                 className="object-contain aspect-[1.04] w-[211px]"
               />

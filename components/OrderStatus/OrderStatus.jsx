@@ -1,5 +1,5 @@
 import React from "react";
-import Header from "./Header";
+import Header from "../../components/component/Header";
 import Footer from "./Footer";
 import OrderStatusBar from "./OrderStatusBar";
 import OrderDetails from "./OrderDetails";
@@ -10,7 +10,7 @@ function OrderStatus() {
     <div className="flex flex-col pb-12 bg-white">
       <Header />
       <main className="flex flex-col px-6">
-        {/* Navigation */}
+
         <nav className="flex gap-3 items-center mt-10 text-sm text-black whitespace-nowrap">
           <span className="opacity-50">Home</span>
           <span>Order Status</span>

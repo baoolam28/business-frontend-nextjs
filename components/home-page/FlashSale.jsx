@@ -49,7 +49,7 @@ const flashSaleProducts = [
 
 const FlashSale = () => {
   return (
-    <section className="flex flex-col items-start self-end mt-10 w-full max-w-[1305px] max-md:max-w-full">
+    <section className="flex flex-col items-center self-center mt-10 w-full max-w-[1305px] max-md:max-w-full">
       <div className="flex flex-wrap gap-10 items-end self-start max-md:max-w-full">
         <div className="flex flex-wrap gap-10 items-end min-w-[240px] max-md:max-w-full">
           <div className="flex flex-col h-[103px]">

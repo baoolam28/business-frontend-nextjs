@@ -15,7 +15,7 @@ const HomePage = () => {
   return (
     <Layout>
       <div className="flex flex-col items-center w-full">
-  <div className="flex flex-col items-start self-end mt-10 w-full max-w-[1305px] max-md:max-w-full">
+  <div className="flex flex-col items-center self-center mt-10 w-full max-w-[1305px] max-md:max-w-full">
     <div className="flex gap-5 max-md:flex-col">
       <CategoryList />
       <HeroBanner />
