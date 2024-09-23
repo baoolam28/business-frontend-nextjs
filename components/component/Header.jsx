@@ -15,7 +15,7 @@ function Header() {
           <span className="text-neutral-50 font-medium text-center mx-auto">
             Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%! &nbsp;
             <a
-              href="#"
+              href="/home-page"
               className="font-semibold underline text-neutral-50"
             >
               Shop Now
@@ -29,26 +29,31 @@ function Header() {
 
       <nav className="flex justify-between items-center px-16 py-6 max-md:flex-col max-md:px-5 max-md:items-start">
         <div className="flex items-center gap-10">
-          <h1 className="text-2xl font-bold tracking-wider">Exclusive</h1>
+          <h1 className="text-2xl font-bold tracking-wider">Shop VN</h1>
           <ul className="flex gap-8 text-base">
             <li>
-              <a href="#" className="hover:underline">
+              <a href="/home-page" className="hover:underline">
                 Home
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="/contact" className="hover:underline">
                 Contact
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="/about" className="hover:underline">
                 About
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline">
+              <a href="/login" className="hover:underline">
                 Sign Up
+              </a>
+            </li>
+            <li>
+              <a href="/wishlist" className="hover:underline">
+                Wish List
               </a>
             </li>
           </ul>
@@ -57,18 +62,25 @@ function Header() {
         <div className="flex items-center gap-6">
           <SearchBar />
           <div className="flex gap-4">
-            <IconButton
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/2f46b01d8f56846dabad72a61fd444f3085a8b624cfad99f0b703fb6b78182f5?placeholderIfAbsent=true&apiKey=907845159c31450ca87b5b226dbf1f02"
-              alt="Wishlist"
+            <a href="/wishlist">
+              <IconButton
+                src="https://cdn.builder.io/api/v1/image/assets/TEMP/2f46b01d8f56846dabad72a61fd444f3085a8b624cfad99f0b703fb6b78182f5?placeholderIfAbsent=true&apiKey=907845159c31450ca87b5b226dbf1f02"
+                alt="Wishlist"
+              />
+            </a>
+            <a href="/cart">
+              <IconButton
+                src="https://cdn.builder.io/api/v1/image/assets/TEMP/f1602ef0e88675df931f73ee88ccd85c7a919ff3264f5e5c09b7ad94b1f6df9c?placeholderIfAbsent=true&apiKey=907845159c31450ca87b5b226dbf1f02"
+                alt="Cart"
+              
+              />
+            </a>
+            <a href="/account">
+              <IconButton
+                src="https://cdn.builder.io/api/v1/image/assets/TEMP/505a01368e57ac667ecd551fd161eb3fa8202cee72841e5b11d9f712055e4607?placeholderIfAbsent=true&apiKey=907845159c31450ca87b5b226dbf1f02"
+                alt="User profile"
             />
-            <IconButton
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/f1602ef0e88675df931f73ee88ccd85c7a919ff3264f5e5c09b7ad94b1f6df9c?placeholderIfAbsent=true&apiKey=907845159c31450ca87b5b226dbf1f02"
-              alt="Cart"
-            />
-            <IconButton
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/505a01368e57ac667ecd551fd161eb3fa8202cee72841e5b11d9f712055e4607?placeholderIfAbsent=true&apiKey=907845159c31450ca87b5b226dbf1f02"
-              alt="User profile"
-            />
+            </a>
           </div>
         </div>
       </nav>
