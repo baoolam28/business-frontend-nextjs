@@ -1,16 +1,39 @@
 "use client"
-import React from 'react'
-import {
-  showSuccessAlert,
-  showErrorAlert,
-  showCustomAlert,
-} from "../../utils/reactSweetAlert";
+import {useState, useEffect} from "react"
+import buyerAPI from "../../api/buyer"
+
+
 export default function page() {
+
+  const [carts, setCarts] = useState([]);
+
+  useEffect(() =>{
+
+    const fetchCartData = async () => {
+      try {
+        const response = await buyerAPI.cart.getAllCarts();
+        if(response.statusCode === 200) {
+          setCarts(response.data);
+        }
+        console.log(response.data)
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    fetchCartData();
+
+  },[]);
+
+
   return <div>
-    <button onClick={() => showSuccessAlert("success","Success Alert")}>Success Alert</button>
-    <button onClick={() => showErrorAlert("error","Error Alert")}>Error Alert</button>
-    <button onClick={() => showCustomAlert("Custom Alert", "Are you sure?")}>
-      Custom Alert
-    </button>
+    <h1>Carts Page</h1>
+    {carts.map((cart) => (
+      <div key={cart.cartId}>
+        <h2>Cart ID: {cart.cartId}</h2>
+        <p>Total Items: {cart.totalItems}</p>
+        <p>Total Price: {cart.totalPrice}</p>
+      </div>
+    ))}
   </div>;
 }

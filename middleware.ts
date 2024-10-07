@@ -29,7 +29,6 @@ export default async function middleware(req) {
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
   const isAuth = !!token; // Kiểm tra xem người dùng có được xác thực không
   const userRole = token?.role; // Lấy vai trò của người dùng từ token
-  console.log(token)
   const pathname = req.nextUrl.pathname;
 
   // Xác định nếu đường dẫn yêu cầu là trang đăng nhập hoặc đăng ký
