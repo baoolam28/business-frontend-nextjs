@@ -1,9 +1,9 @@
 import React from "react";
-import Sale from "../../../components/component/sales";
+import OrderPage from "../../../../components/order-page-seller/orderPage";
 export default function page() {
   return (
     <div>
-      <Sale />
+      <OrderPage />
     </div>
   );
 }

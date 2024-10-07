@@ -6,18 +6,12 @@ import React , {useEffect, useState} from "react";
 import LanguageSelector from "./LanguageSelector";
 import SearchBar from "./SearchBar";
 import IconButton from "./IconButton";
-import { useSession } from "next-auth/react";
+import { useUser } from "../../context/UserContext";
 import AccountDropdown from "./account-dropdown";
 function Header() {
-  const { data: session, status } = useSession();
-  const [user, setUser] = useState(null);
 
-  // Khi session đã sẵn sàng, gán giá trị vào state user
-  useEffect(() => {
-    if (session && session.user) {
-      setUser(session.user);
-    }
-  }, [session]);
+  const { user } = useUser();
+
 
 
   return (
@@ -66,7 +60,7 @@ function Header() {
             </li>
             <li>
               <a href="/wishlist" className="hover:underline">
-                Wish List
+                Wish List 
               </a>
             </li>
           </ul>
