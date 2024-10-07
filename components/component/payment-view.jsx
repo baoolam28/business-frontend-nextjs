@@ -26,12 +26,12 @@ To read more about using these font, please visit the Next.js documentation:
 "use client"
 import React, {useState, useEffect} from "react"
 import Link from "next/link"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card"
+import { Label } from "../../components/ui/label"
+import { Input } from "../../components/ui/input"
+import { Button } from "../../components/ui/button"
+import { Textarea } from "../../components/ui/textarea"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../../components/ui/table"
 import Menu from "../component/menu"
 import { useSearchParams } from 'next/navigation'
 import orderAPI from '../../api/order'

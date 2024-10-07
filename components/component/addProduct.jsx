@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@/components/ui/select";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "../../components/ui/dialog";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Label } from "../../components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "../../components/ui/select";
 import AddSupplierDialog from "../../components/component/addSupplier";
 import AddCategoryDialog from "../../components/component/addCategory";
 import AddOriginDialog from "../../components/component/addOrigin";

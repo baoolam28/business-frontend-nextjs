@@ -19,12 +19,12 @@ To read more about using these font, please visit the Next.js documentation:
 **/
 "use client"
 import React, { useState, useMemo, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '../../components/ui/input';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem } from '../../components/ui/dropdown-menu';
+import { Button } from '../../components/ui/button';
+import { Checkbox } from '../../components/ui/checkbox';
 import productAPI from '../../api/product';
-import BarcodeRender from './BarcodeRender';
+import BarcodeRender from './barcodeRender';
 import BarcodePagePrinter from './BarcodePagePrinter';
 import PrintButton from './PrintButtonBarcode';
 export default function BarcodePrinter() {

@@ -25,16 +25,16 @@ import {
   TabsList,
   TabsTrigger,
   TabsContent,
-} from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+} from "../../components/ui/tabs";
+import { Button } from "../../components/ui/button";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/accordion";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+} from "../../components/ui/accordion";
+import { Label } from "../../components/ui/label";
+import { Checkbox } from "../../components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -42,7 +42,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+} from "../../components/ui/dropdown-menu";
 import {
   Table,
   TableHeader,
@@ -50,7 +50,7 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from "@/components/ui/table";
+} from "../../components/ui/table";
 import Menu from "../component/menu";
 import BarcodePrinter from "../component/barcode-printer"
 import Document from "../component/document";

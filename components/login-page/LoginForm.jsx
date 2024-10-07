@@ -5,7 +5,7 @@
 import React, {useState} from "react";
 import {Input} from "../../components/ui/Input"
 import { useRouter } from "next/navigation";
-
+import { signIn } from "next-auth/react";
 
 
 const LoginForm = () => {
@@ -18,12 +18,11 @@ const LoginForm = () => {
   const router = useRouter();
 
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
-    const email = e.target.value;
-    const password = e.target.value;
-    setFormData({email: email, password: password});
-    router.push("/dashboard");
+    const email = e.target.email.value;
+    const password = e.target.password.value;
+    const data = await signIn("credentials", {email, password, redirect: false});
   };
 
   return (

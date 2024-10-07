@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react';
-import BarcodeRender from './BarcodeRender';
+import BarcodeRender from './barcodeRender';
 
 const BarcodePagePrinter = forwardRef(({ contentPrinter }, ref) => {
 

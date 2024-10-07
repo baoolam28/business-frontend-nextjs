@@ -20,19 +20,19 @@ To read more about using these font, please visit the Next.js documentation:
 "use client";
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link"
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Card, CardHeader, CardTitle , CardContent } from "@/components/ui/card"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Sheet, SheetTrigger, SheetContent } from "../../components/ui/sheet"
+import { Button } from "../../components/ui/button"
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "../../components/ui/breadcrumb"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "../../components/ui/dropdown-menu"
+import { Card, CardHeader, CardTitle , CardContent } from "../../components/ui/card"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../../components/ui/table"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "../../components/ui/dialog";
 import Menu from "../component/menu"
 import AddSupplierDialog from "../../components/component/addSupplier"
-import { Label } from "@/components/ui/label";
+import { Label } from "../../components/ui/label";
 import supplierAPI from "../../api/supplier";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "../../components/ui/textarea";
+import { Input } from "../../components/ui/input";
 export default function Supplier() {
   const [suppliers, setSuppliers] = useState([]);
 

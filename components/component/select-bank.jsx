@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import Select from 'react-select'
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Button } from "../../components/ui/button"
+import { Input } from "../../components/ui/input"
+import { Label } from "../../components/ui/label"
 import { AlertCircle } from "lucide-react"
 import Banks from "../../utils/BankData"
 
