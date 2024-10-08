@@ -1,9 +1,15 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import authAPI from "./api/auth";
+import Google from "next-auth/providers/google";
+
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+    }),
     Credentials({
       credentials: {
         email: { label: "Email", type: "text" },
@@ -12,12 +18,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       authorize: async (credentials) => {
         try {
           const res = await authAPI.login(credentials.email, credentials.password);
-
           if (res.statusCode === 200) {
             const user = res.data.userInfo;
-
             if (user) {
-              // Ensure that accessToken is added to the user object
               return {
                 ...user,
                 accessToken: res.data.access_token,
@@ -37,29 +40,49 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        const roleMatch = user.role ? user.role.match(/roleName=([A-Z_]+)/) : null;
+        const role = roleMatch ? roleMatch[1] : null;
+
+        // Update the existing token object
         token.id = user.userId;
         token.accessToken = user.accessToken;
-        
-        // Extract roleName from the role string using a regex match
-        const roleMatch = user.role.match(/roleName=([A-Z_]+)/);
-        token.role = roleMatch ? roleMatch[1] : null; // Assign the roleName if found
+        token.role = role;
+        token.user = {
+          id: user.userId,
+          username: user.username,
+          fullName: user.fullName,
+          phoneNumber: user.phoneNumber,
+          active: user.active,
+        };
       }
       return token;
     },
     async session({ session, token }) {
-      session.user.id = token.id;
-      session.user.accessToken = token.accessToken;
-      session.user.role = token.role; // Attach the role to the session
+      session.user = token.user;
       return session;
     },
+    async signIn({ user, account, profile }) {
+      if (account.provider === "google") {
+        try {
+          console.log("User___: ", JSON.stringify(user));
+          console.log("Profile___: ", JSON.stringify(profile));
+          return true; 
+        } catch (error) {
+          console.error("Error during authentication:", error);
+          return false; 
+        }
+      }
+      return true;
+    },
+
   },
   cookies: {
     sessionToken: {
       name: 'authjs.session-token',
       options: {
-        httpOnly: true, // Prevents JavaScript from accessing the cookie
-        secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-        sameSite: 'lax', // Helps mitigate CSRF attacks
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
       },
     },
   },

@@ -66,7 +66,7 @@ const BestSelling = () => {
             discount:0,
             currentPrice: product.price, 
             originalPrice: "", 
-            rating: 4.5, 
+            rating: 5, 
             reviews: 65, 
             image: fallbackImage, 
           }));

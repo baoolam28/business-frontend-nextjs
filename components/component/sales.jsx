@@ -57,6 +57,10 @@ export default function sales() {
   const fetchProducts = async () => {
     try {
       const response = await productAPI.getAllProduct();
+      statusCode
+      message
+      data
+      date
       setProducts(response);
     } catch (error) {
       console.error("Error fetching products:", error);
