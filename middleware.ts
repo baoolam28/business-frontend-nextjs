@@ -1,5 +1,4 @@
 import { getToken } from "next-auth/jwt";
-import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import { auth } from "./auth"; // Import the existing auth middleware
 // Định nghĩa các quyền truy cập cho từng vai trò
@@ -19,7 +18,7 @@ const redirectTo = (role) => {
         case "ROLE_ADMIN":
           return "/admin-panel";
         case "ROLE_STAFF":
-          return "/dashboard";
+          return "/store/sale";
         default:
           return "/login"; 
     }
