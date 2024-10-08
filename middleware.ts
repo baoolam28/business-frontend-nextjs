@@ -1,6 +1,7 @@
 import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
-import { auth } from "./auth"; // Import the existing auth middleware
+import { auth } from "./auth"; // Import middleware xác thực hiện tại
+
 // Định nghĩa các quyền truy cập cho từng vai trò
 const roleAccess = {
   ROLE_BUYER: ["/home-page", "/wishlist"],
@@ -8,6 +9,9 @@ const roleAccess = {
   ROLE_ADMIN: ["/admin-panel"],
   ROLE_STAFF: ["/dashboard"],
 };
+
+// Đường dẫn không yêu cầu đăng nhập
+const publicPaths = ["/home-page", "/about", "/contact"]; // Thêm đường dẫn cần thiết
 
 const redirectTo = (role) => {
     switch (role) {
@@ -33,12 +37,20 @@ export default async function middleware(req) {
   // Xác định nếu đường dẫn yêu cầu là trang đăng nhập hoặc đăng ký
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
 
-  // Nếu trang yêu cầu là trang đăng nhập hoặc đăng ký
+  // Nếu trang không yêu cầu đăng nhập
+  const isPublicPage = publicPaths.some((path) => pathname.startsWith(path));
+
+  // Nếu trang yêu cầu là public, không cần kiểm tra xác thực
+  if (isPublicPage) {
+    return NextResponse.next();
+  }
+
+  // Nếu là trang login hoặc register và người dùng đã đăng nhập, chuyển hướng đến trang phù hợp
   if (isAuthPage) {
     if (isAuth) {
-      return NextResponse.redirect(new URL(redirectTo(userRole), req.url)); 
+      return NextResponse.redirect(new URL(redirectTo(userRole), req.url));
     }
-    return NextResponse.next(); // Nếu chưa đăng nhập, tiếp tục để vào trang login/register
+    return NextResponse.next();
   }
 
   // Nếu người dùng chưa đăng nhập và cố gắng truy cập các trang được bảo vệ
@@ -70,6 +82,8 @@ export const config = {
   matcher: [
     "/home-page/:path*",
     "/wishlist/:path*",
+    "/dashboard/:path*",
+    "/admin-panel/:path*",
     "/login",
     "/register",
   ],

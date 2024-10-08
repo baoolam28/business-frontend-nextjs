@@ -9,44 +9,44 @@ import buyerAPI from "../../api/buyer";
 
 
 
-const bestSellingProducts = [
-  {
-    name: "The north coat",
-    currentPrice: "$260",
-    originalPrice: "$360",
-    rating: 4.5,
-    reviews: 65,
-    image:
-      "https://cdn.builder.io/api/v1/image/assets/TEMP/8df32f72626d6c595bc895d23788b5db8bea86f835004daa71d72ea73b1c564a?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb",
-  },
-  {
-    name: "Gucci duffle bag",
-    currentPrice: "$960",
-    originalPrice: "$1160",
-    rating: 4.5,
-    reviews: 65,
-    image:
-      "https://cdn.builder.io/api/v1/image/assets/TEMP/7b818e13f340bb8cd1eb0ee2f19630d6ef298450b9f4c21d9917d8191df83149?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb",
-  },
-  {
-    name: "RGB liquid CPU Cooler",
-    currentPrice: "$160",
-    originalPrice: "$170",
-    rating: 4.5,
-    reviews: 65,
-    image:
-      "https://cdn.builder.io/api/v1/image/assets/TEMP/77df63255e1f8f35a38fd7eab0768ddb40a29cbc390236342065233025d7a750?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb",
-  },
-  {
-    name: "Small BookSelf",
-    currentPrice: "$360",
-    originalPrice: "",
-    rating: 4.5,
-    reviews: 65,
-    image:
-      "https://cdn.builder.io/api/v1/image/assets/TEMP/4102cacaf17a5ad27c592496189716e3b8b61aa5e08689528dae6877338ab7d2?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb",
-  },
-];
+// const bestSellingProducts = [
+//   {
+//     name: "The north coat",
+//     currentPrice: "$260",
+//     originalPrice: "$360",
+//     rating: 4.5,
+//     reviews: 65,
+//     image:
+//       "https://cdn.builder.io/api/v1/image/assets/TEMP/8df32f72626d6c595bc895d23788b5db8bea86f835004daa71d72ea73b1c564a?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb",
+//   },
+//   {
+//     name: "Gucci duffle bag",
+//     currentPrice: "$960",
+//     originalPrice: "$1160",
+//     rating: 4.5,
+//     reviews: 65,
+//     image:
+//       "https://cdn.builder.io/api/v1/image/assets/TEMP/7b818e13f340bb8cd1eb0ee2f19630d6ef298450b9f4c21d9917d8191df83149?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb",
+//   },
+//   {
+//     name: "RGB liquid CPU Cooler",
+//     currentPrice: "$160",
+//     originalPrice: "$170",
+//     rating: 4.5,
+//     reviews: 65,
+//     image:
+//       "https://cdn.builder.io/api/v1/image/assets/TEMP/77df63255e1f8f35a38fd7eab0768ddb40a29cbc390236342065233025d7a750?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb",
+//   },
+//   {
+//     name: "Small BookSelf",
+//     currentPrice: "$360",
+//     originalPrice: "",
+//     rating: 4.5,
+//     reviews: 65,
+//     image:
+//       "https://cdn.builder.io/api/v1/image/assets/TEMP/4102cacaf17a5ad27c592496189716e3b8b61aa5e08689528dae6877338ab7d2?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb",
+//   },
+// ];
 
 const BestSelling = () => {
 
@@ -72,6 +72,7 @@ const BestSelling = () => {
           }));
 
           setBestSellingProducts(filteredProducts);
+          console.log("filteredProducts: " + filteredProducts);
         } else {
           console.error("Failed to fetch products");
         }
