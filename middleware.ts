@@ -14,19 +14,19 @@ const roleAccess = {
 const publicPaths = ["/home-page", "/about", "/contact"]; // Thêm đường dẫn cần thiết
 
 const redirectTo = (role) => {
-    switch (role) {
-        case "ROLE_BUYER":
-          return "/home-page";
-        case "ROLE_SELLER":
-          return "/store/dashboard";
-        case "ROLE_ADMIN":
-          return "/admin-panel";
-        case "ROLE_STAFF":
-          return "/dashboard";
-        default:
-          return "/login"; 
-    }
-}
+  switch (role) {
+    case "ROLE_BUYER":
+      return "/home-page";
+    case "ROLE_SELLER":
+      return "/dashboard";
+    case "ROLE_ADMIN":
+      return "/admin-panel";
+    case "ROLE_STAFF":
+      return "/dashboard";
+    default:
+      return "/login";
+  }
+};
 
 export default async function middleware(req) {
   const token = await getToken({ req, secret: process.env.AUTH_SECRET });
