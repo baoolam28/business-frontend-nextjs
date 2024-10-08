@@ -15,7 +15,7 @@ const redirectTo = (role) => {
         case "ROLE_BUYER":
           return "/home-page";
         case "ROLE_SELLER":
-          return "/dashboard";
+          return "/store/dashboard";
         case "ROLE_ADMIN":
           return "/admin-panel";
         case "ROLE_STAFF":

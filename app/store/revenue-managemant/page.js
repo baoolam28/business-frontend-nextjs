@@ -1,5 +1,5 @@
 import React from "react";
-import RevenueManament from "../../../../components/revenue-page/Dashboard/Dashboard";
+import RevenueManament from "../../../components/revenue-page/Dashboard/Dashboard";
 
 export default function RevenueManagemant() {
   return (

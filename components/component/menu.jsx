@@ -12,7 +12,7 @@ export default function menu() {
         <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
           <TooltipProvider>
             <Link
-              href="/dashboard"
+              href="/store/dashboard"
               className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
               prefetch={false}>
               <Package2Icon className="h-4 w-4 transition-all group-hover:scale-110" />
@@ -21,7 +21,7 @@ export default function menu() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="/dashboard/customer"
+                  href="/store/customer"
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                   prefetch={false}>
                   <UsersIcon className="h-5 w-5" />
@@ -33,7 +33,7 @@ export default function menu() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="/dashboard/supplier"
+                  href="/store/supplier"
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                   prefetch={false}>
                   <TruckIcon className="h-5 w-5" />
@@ -45,7 +45,7 @@ export default function menu() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="/dashboard/product"
+                  href="/store/product"
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                   prefetch={false}>
                   <PackageIcon className="h-5 w-5" />
@@ -57,7 +57,7 @@ export default function menu() {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link
-                  href="/dashboard/sale"
+                  href="/store/sale"
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                   prefetch={false}>
                   <ShoppingCartIcon className="h-5 w-5" />
