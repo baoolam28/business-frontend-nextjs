@@ -7,13 +7,16 @@ import ProductDetails from "./ProductDetails";
 import RelatedProducts from "./RelatedProducts";
 import Footer from "./Footer";
 
+
+
 function ProductPage() {
+
   return (
     <div className="flex overflow-hidden flex-col bg-white">
       <Header />
       <div className="flex justify-center items-center flex-1">
         <main>
-          <ProductDetails />
+          <ProductDetails product={product}/>
           <RelatedProducts />
         </main>
       </div>

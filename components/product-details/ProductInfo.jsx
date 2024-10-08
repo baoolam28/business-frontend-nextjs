@@ -7,23 +7,21 @@ import ColorSelector from "./ColorSelector";
 import SizeSelector from "./SizeSelector";
 import QuantitySelector from "./QuantitySelector";
 import DeliveryInfo from "./DeliveryInfo";
-import ProductId from "../../api/buyer"
+import ProductAPI from "../../api/buyer"
 
 function ProductInfo() {
 
 
   const [productData, setProductData] = useState(null);
 
-  // Lấy id từ URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const productId = urlParams.get('id');
-  console.log(productId);
+
+
   const fallbackImage =
   "https://via.placeholder.com/150";
   useEffect(() => {
     const fetchProductById = async () => {
       try {
-        const response = await ProductId.product.getByIdProduct(productId);
+        const response = await ProductAPI.product.getByIdProduct(id);
         console.log(response.statusCode);
         if (response.statusCode === 200) {
           const productData = {
@@ -50,7 +48,7 @@ function ProductInfo() {
     if (productId) {
       fetchProductById();  // Chỉ fetch khi có productId
     }
-  }, [productId]);
+  }, []);
   
   if (!productData) {
     return <div>Loading...</div>;

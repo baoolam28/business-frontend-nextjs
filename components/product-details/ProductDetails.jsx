@@ -5,7 +5,7 @@ import React from "react";
 import ProductGallery from "./ProductGallery";
 import ProductInfo from "./ProductInfo";
 
-function ProductDetails() {
+function ProductDetails( {product} ) {
   return (
     <section className="flex flex-col self-center mt-20 w-full max-w-[1171px] max-md:mt-10 max-md:max-w-full">
       <nav
@@ -17,7 +17,7 @@ function ProductDetails() {
         </a>
         <span className="self-stretch my-auto opacity-50">/</span>
         <a href="#" className="self-stretch my-auto opacity-50">
-          Gaming
+          {product.categoryN}
         </a>
         <span className="self-stretch my-auto opacity-50">/</span>
         <span className="self-stretch my-auto">Havic HV G-92 Gamepad</span>
