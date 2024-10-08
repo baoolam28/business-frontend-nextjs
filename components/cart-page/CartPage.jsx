@@ -8,6 +8,7 @@ import CartSummary from "./CartSummary";
 import Footer from "./Footer";
 
 function CartPage() {
+  
   return (
     <main className="flex overflow-hidden flex-col bg-white">
       <Header />
@@ -23,7 +24,7 @@ function CartPage() {
           <span className="self-stretch my-auto">Cart</span>
         </nav>
         <div className="flex flex-col mt-20 w-full max-md:mt-10 max-md:max-w-full">
-          <CartItems />
+          <CartItems/>
           <CartSummary />
         </div>
       </section>
