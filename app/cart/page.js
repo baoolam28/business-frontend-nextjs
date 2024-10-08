@@ -1,10 +1,12 @@
-import React from 'react'
-import CartPage from '../../components/cart-Page/CartPage'
 
-export default function () {
+import React from 'react'
+import CartPageComponents from '../../components/cart-Page/CartPage'
+
+export default function CartPage() {
+
   return (
     <div>
-        <CartPage/>
+        <CartPageComponents/>
     </div>
   )
 }
