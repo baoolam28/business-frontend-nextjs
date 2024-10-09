@@ -2,33 +2,22 @@
 import React from "react";
 import buyerAPI from '../../api/buyer'
 import {useState, useEffect} from 'react'
-
+import {useUser} from "../../context/UserContext"
 
 function CartItems() {
 
   const [cartItems, setCartItems] = useState([]);
-  const [userId, setUserId] = useState(null);
   const [cartId, setCartId] = useState(null);
-
-  // lấy userId
-  useEffect(() => {
-    // Lấy userId từ localStorage
-    // const storedUserId = localStorage.getItem('userId');
-    const storedUserId = "C198FCDE-23E1-4CB7-990E-8D18F2E3432A";
-    if (storedUserId) {
-      setUserId(storedUserId);
-      console.log("userId: ", storedUserId)
-    } else {
-      console.error("User ID not found");
-    }
-  }, []);
+  const {user} = useUser();
+  
 
   // lấy cartItem theo userId
   useEffect(() =>{  
-    if(userId){
+    
+    if(user.id){
       const fetchCart = async () =>{
         try{
-          const response = await buyerAPI.cart.getCartByUserId(userId)
+          const response = await buyerAPI.cart.getCartByUserId(user.id)
           console.log("Cart data from API:", response.data);
 
           if(response.statusCode === 200){
@@ -51,7 +40,7 @@ function CartItems() {
     }
     fetchCart()
     };
-  }, [userId])
+  }, [user.id])
 
   // delete product from cart
   const handleDeleteItem = async(index) => {

@@ -84,7 +84,7 @@ const FlashSale = () => {
     const fetchProducts = async () => {
       try {
         const response = await BuyerAPI.product.getAllProducts();
-        console.log("API Response:", response);
+        console.log("API Res ponse:", response);
         if (response.statusCode === 200) {
           const filteredProducts = response.data.map((product) => ({
             id: product.productId,

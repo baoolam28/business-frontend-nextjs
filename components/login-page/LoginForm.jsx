@@ -31,7 +31,7 @@ const LoginForm = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    const data = await signIn("google",{redirect: false});
+    const data = await signIn("google",{redirect: false, callbackUrl:"http://localhost:3000/home-page"});
     console.log(data);
   };
 

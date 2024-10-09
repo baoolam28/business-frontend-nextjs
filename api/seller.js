@@ -2,7 +2,7 @@ import axiosClient from "./axiosClient";
 const baseUrl = "/api/seller";
 const sellerAPI = {
   product: {
-    getAllProducts: () => axiosClient.get(`${baseUrl}/products`),
+    getAllProducts: (storeId) => axiosClient.get(`${baseUrl}/products/${storeId}`),
   },
   category: {
     getAllCategories: () => axiosClient.get(`${baseUrl}/categories`),

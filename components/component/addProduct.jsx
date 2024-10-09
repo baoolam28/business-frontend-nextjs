@@ -11,7 +11,7 @@ import supplierAPI from "../../api/supplier";
 import originAPI from "../../api/origin";
 import categoryAPI from "../../api/category";
 import generateBarcode from "../../utils/GenerationBarcode";
-import BarcodeRender from "./barcodeRender";
+
 const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origins, setCategories, setSuppliers, setOrigins }) => {
   const [productData, setProductData] = useState({
     barcode: '',

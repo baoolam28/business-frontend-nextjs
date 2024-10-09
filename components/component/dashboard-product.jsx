@@ -60,8 +60,13 @@ import supplierAPI from "../../api/supplier";
 import originAPI from "../../api/origin";
 import categoryAPI from "../../api/category";
 import AddProductDialog from "../../components/component/addProduct"
-import formatVND from "../../utils/formatVND"
+import formatVND from "../../utils/formatVND";
+import SellerAPI from "../../api/seller";
+import { useStore } from '../../context/StoreContext';
 export default function DashboardProduct() {
+
+  const { storeId } = useStore();
+
   const [filters, setFilters] = useState({
     category: [],
     origin: [],
@@ -86,11 +91,15 @@ export default function DashboardProduct() {
   
   useEffect(() => {
     const fetchProducts = async () => {
+      console.log(storeId)
       try {
-        const response = await productAPI.getAllProduct();
-        setProducts(response);
+        const response = await SellerAPI.product.getAllProducts(storeId);
+        if(response.statusCode === 200) {
+          console.log(response.data);
+          setProducts(response.data);
+        }
+        
       } catch (error) {
-        setError("Error fetching products. Please try again.");
         console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
@@ -136,12 +145,12 @@ export default function DashboardProduct() {
     }
 
     fetchProducts();
-    fetchOrigins();
-    fetchCategories();
-    fetchSuppliers();
-    fetchInventories();
-
-  }, []);
+    // fetchOrigins();
+    // fetchCategories();
+    // fetchSuppliers();
+    // fetchInventories();
+    
+  }, [storeId]);
 
   
 

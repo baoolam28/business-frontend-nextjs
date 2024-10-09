@@ -1,22 +1,26 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu"
-import { User, Settings, LogOut } from 'lucide-react'
+import { useState } from 'react';
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
+import { User, Settings, LogOut } from 'lucide-react';
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-export default function UserDropdown({user}) {
-  const [isOpen, setIsOpen] = useState(false)
+
+export default function UserDropdown({ user }) {
+  const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
 
-  const onProfileClick = () => {router.push('/account')};
+  const onProfileClick = () => {
+    router.push('/account');
+  };
 
   const onSettingsClick = () => {};
 
-  const onLogoutClick = () => {
-    signOut();
-    window.location.href = "/login";
+  const onLogoutClick = async () => {
+    await signOut({
+      callbackUrl: '/login', // Đường dẫn của trang login
+    });
   };
 
   return (
@@ -27,23 +31,32 @@ export default function UserDropdown({user}) {
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
         >
-          <AvatarImage src={user?.avatar || "/placeholder.svg?height=40&width=40"} alt="User avatar" />
+          <AvatarImage src={user?.image || "/placeholder.svg"} alt="User avatar" />
           <AvatarFallback>{user?.initials || "JD"}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
-        className="w-56" 
+        className="w-64" 
         align="end"
         onMouseEnter={() => setIsOpen(true)}
         onMouseLeave={() => setIsOpen(false)}
       >
-        <div className="flex items-center gap-2 p-2">
-          <div className="rounded-full overflow-hidden">
-            <img src={user?.image || "/placeholder.svg?height=64&width=64"} alt="User profile" className="h-16 w-16 object-cover" />
+        <div className="flex items-center gap-3 p-3">
+          {/* Ensuring the image stays circular */}
+          <div className="h-12 w-12 rounded-full overflow-hidden">
+            <img 
+              src={user?.image || "/placeholder.svg"} 
+              alt="User profile" 
+              className="h-full w-full object-cover rounded-full" 
+            />
           </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold">{user?.fullName || "John Doe"}</span>
-            <span className="text-xs text-muted-foreground">{user?.username || "john.doe@example.com"}</span>
+          <div className="flex flex-col justify-center">
+            <span className="text-sm font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
+              {user?.fullName || "John Doe"}
+            </span>
+            <span className="text-xs text-muted-foreground whitespace-nowrap overflow-hidden text-ellipsis">
+              {user?.username || "john.doe@example.com"}
+            </span>
           </div>
         </div>
         <DropdownMenuItem onClick={onProfileClick}>
@@ -60,5 +73,5 @@ export default function UserDropdown({user}) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
+  );
 }
