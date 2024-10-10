@@ -20,6 +20,8 @@ function QuantitySelector() {
     }
   };
 
+
+
   return (
     <div className="flex items-center gap-0 text-xl leading-snug text-black whitespace-nowrap min-h-[44px]">
       {/* Nút giảm số lượng */}
@@ -60,6 +62,7 @@ function QuantitySelector() {
         />
       </button>
     </div>
+   
   );
 }
 

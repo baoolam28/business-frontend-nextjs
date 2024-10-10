@@ -1,6 +1,7 @@
 "use client"
-import { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+
 
 // User Context
 const UserContext = createContext();

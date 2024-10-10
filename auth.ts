@@ -19,6 +19,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const res = await authAPI.login(credentials.email, credentials.password);
           if (res.statusCode === 200) {
+            console.log("Response Data:", res.data);
             const user = res.data.userInfo;
             if (user) {
               return {
@@ -42,6 +43,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         const roleMatch = user.role ? user.role.match(/roleName=([A-Z_]+)/) : null;
         const role = roleMatch ? roleMatch[1] : null;
+        console.log("User Data:", user);
 
         // Update the existing token object
         token.id = user.userId;
@@ -57,7 +59,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return token;
     },
-    async session({ session, token }) {
+    async session({ session, token}) {
       session.user = token.user;
       return session;
     },

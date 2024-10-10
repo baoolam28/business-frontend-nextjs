@@ -11,17 +11,21 @@ import ProductId from "../../api/buyer"
 
 function ProductPage() {
   const [productData, setProductData] = useState(null);
+  const [productId, setProductId] = useState(null);
 
-  // Lấy id từ URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const productId = urlParams.get('id');
-  console.log(productId);
   const fallbackImage =
   "https://via.placeholder.com/150";
+
   useEffect(() => {
+     // Lấy id từ URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    setProductId(id)
+    console.log(id);
+
     const fetchProductById = async () => {
       try {
-        const response = await ProductId.product.getByIdProduct(productId);
+        const response = await ProductId.product.getByIdProduct(id);
         console.log(response.statusCode);
         if (response.statusCode === 200) {
           const productData = {
@@ -34,7 +38,8 @@ function ProductPage() {
             reviews: 65,  // Lấy số reviews từ API hoặc gán mặc định
             image: fallbackImage,  // Gán ảnh mặc định nếu không có ảnh từ API
           };
-  
+          console.log("API response for product details: ", response.data);
+
           setProductData(productData);  // Gán dữ liệu sản phẩm vào state
           console.log("Product data: ", productData);
         } else {
@@ -45,10 +50,10 @@ function ProductPage() {
       }
     };
   
-    if (productId) {
+    if (id) {
       fetchProductById();  // Chỉ fetch khi có productId
     }
-  }, [productId]);
+  }, []);
   
   if (!productData) {
     return <div>Loading...</div>;
