@@ -5,10 +5,11 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, Dialog
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 
-const AddSupplierDialog = ({ onSave, buttonText = "Thêm nhà cung cấp", buttonIcon: ButtonIcon }) => {
+const AddSupplierDialog = ({ onSave, buttonText = "Thêm nhà cung cấp", buttonIcon: ButtonIcon , storeId}) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     const supplierData = {
+      storeId: storeId,
       supplierName: event.target.supplierName.value,
       email: event.target.email.value,
       phone: event.target.phone.value,

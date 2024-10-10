@@ -11,8 +11,9 @@ import supplierAPI from "../../api/supplier";
 import originAPI from "../../api/origin";
 import categoryAPI from "../../api/category";
 import generateBarcode from "../../utils/GenerationBarcode";
+import sellerAPI from '../../api/seller';
 
-const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origins, setCategories, setSuppliers, setOrigins }) => {
+const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origins, setCategories, setSuppliers, setOrigins, storeId }) => {
   const [productData, setProductData] = useState({
     barcode: '',
     productName: '',
@@ -44,8 +45,11 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
 
   const handleSaveSupplier = async (supplierData) => {
     try {
-      const response = await supplierAPI.createSupplier(supplierData);
-      setSuppliers(prev => [...prev, response]);
+      const response = await sellerAPI.supplier.createSupplier(supplierData);
+      if(response.statusCode === 200){
+        setSuppliers(prev => [...prev, response.data]);
+      }
+      
     } catch (error) {
       console.error("createSupplier failed", error);
     }
@@ -201,6 +205,7 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
                       onSave={handleSaveSupplier}
                       buttonText=""
                       buttonIcon={PlusIcon}
+                      storeId={storeId}
                     />
                   </div>
                 </div>
