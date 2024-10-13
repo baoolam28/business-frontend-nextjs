@@ -3,6 +3,7 @@ const baseUrl = "/api/seller";
 const sellerAPI = {
   product: {
     getAllProducts: (storeId) => axiosClient.get(`${baseUrl}/products/${storeId}`),
+    createProductOnline: (data) => axiosClient.post(`${baseUrl}/products/online`, data),
   },
   category: {
     getAllCategories: () => axiosClient.get(`${baseUrl}/categories`),

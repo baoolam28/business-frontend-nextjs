@@ -9,11 +9,22 @@ const buyerAPI = {
   category:{
     getAllCategories: () => axiosClient.get(`${baseUrl}/categories`),
   },
-  cart:{
-    getCartByUserId: (userId) => axiosClient.get(`${baseUrl}/cart/${userId}`),
-    updateCartItems: (cartId, productId, quantity) => axiosClient.put(`${baseUrl}/cart/${cartId}/product/${productId}`,{quantity}),
-    deleteCartItem: (cartId, productId) => axiosClient.delete(`${baseUrl}/cart/${cartId}/product/${productId}`)
-  }
+  cart : {
+    // Lấy thông tin giỏ hàng theo userId
+    getCartByUserId: (userId) => axiosClient.get(`${baseUrl}/api/buyer/cart/get-by-user/${userId}`),
+
+    // Thêm sản phẩm vào giỏ hàng
+    addToCart: (cartRequest) => axiosClient.post(`${baseUrl}/api/buyer/cart/add-to-cart`, cartRequest),
+
+    // Cập nhật sản phẩm trong giỏ hàng
+    updateCart: (cartRequest) => axiosClient.put(`${baseUrl}/api/buyer/cart/update-cart`, cartRequest),
+
+    // Xóa sản phẩm khỏi giỏ hàng
+    deleteProductFromCart: (cartRequest) => axiosClient.delete(`${baseUrl}/api/buyer/cart/delete-product`, {
+      data: cartRequest
+    })
+  },
+
 };
 
 export default buyerAPI;

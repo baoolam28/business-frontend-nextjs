@@ -18,19 +18,17 @@ function CartItems() {
       const fetchCart = async () =>{
         try{
           const response = await buyerAPI.cart.getCartByUserId(user.id)
-          console.log("Cart data from API:", response.data);
-
+          console.log("Cart fetched successfully: ", response);
           if(response.statusCode === 200){
             const items = response.data && Array.isArray(response.data.cartItems) ? response.data.cartItems : [];
             setCartItems(items) 
 
-            //lưu lại cartId
             setCartId(response.data.cartId)
 
             console.log("Cart items set:", items);
           }else {
             console.error("Error fetching cart items: ", response.message);
-            setCartItems([]); // Thiết lập mảng rỗng nếu không thành công
+            setCartItems([]); 
           }
          
         }catch(error){
@@ -40,7 +38,7 @@ function CartItems() {
     }
     fetchCart()
     };
-  }, [user.id])
+  }, [user])
 
   // delete product from cart
   const handleDeleteItem = async(index) => {
