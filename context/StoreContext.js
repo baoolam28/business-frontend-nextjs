@@ -12,11 +12,14 @@ export const StoreProvider = ({ children }) => {
 
 
   useEffect(() => {
+   
     if (user && user.id) {
+      console.log("Current userId:", user.id);      
       async function fetchStore() {
         try {
           const res = await sellerAPI.store.getStoreByUserId(user.id);
           setStoreId(res.data.storeId);
+          console.log("Store ID: ", res.data.storeId)
         } catch (error) {
           console.error("Error fetching store:", error);
         }
@@ -24,6 +27,8 @@ export const StoreProvider = ({ children }) => {
       fetchStore();
     }
   }, [user]);
+
+ 
 
   return (
     <StoreContext.Provider value={{ storeId, setStoreId }}>
