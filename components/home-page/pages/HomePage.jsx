@@ -12,6 +12,7 @@ import NewArrival from "../../home-page/NewArrival";
 import Features from "../../home-page/Features";
 
 const HomePage = () => {
+
   return (
     <Layout>
       <div className="flex flex-col items-center w-full">

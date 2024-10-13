@@ -25,6 +25,12 @@ var buyerAPI = {
   category: {
     getAllCategories: function getAllCategories() {
       return _axiosClient["default"].get("".concat(baseUrl, "/categories"));
+    },
+    getProductByCategory: function getProductByCategory(id) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/products/category/").concat(id));
+    },
+    getAllSotre: function getAllSotre() {
+      return _axiosClient["default"].get("".concat(baseUrl, "/stores"));
     }
   }
 };
