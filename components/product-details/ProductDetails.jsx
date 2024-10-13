@@ -17,7 +17,7 @@ function ProductDetails({productData}) {
         </a>
         <span className="self-stretch my-auto opacity-50">/</span>
         <a href="#" className="self-stretch my-auto opacity-50">
-          Gaming
+      
         </a>
         <span className="self-stretch my-auto opacity-50">/</span>
         <span className="self-stretch my-auto">{productData.name}</span>

@@ -3,7 +3,7 @@
  */
 import React from "react";
 import Header from "../../components/component/Header";
-import CartItems from "./CartItems";
+import CartItems from "./CartItems"
 import CartSummary from "./CartSummary";
 import Footer from "./Footer";
 

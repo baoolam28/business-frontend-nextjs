@@ -2,14 +2,26 @@ import axiosClient from "./axiosClient";
 const baseUrl = "/api/seller";
 const sellerAPI = {
   product: {
-    getAllProducts: () => axiosClient.get(`${baseUrl}/products`),
+    getAllProducts: (storeId) => axiosClient.get(`${baseUrl}/products/${storeId}`),
   },
   category: {
     getAllCategories: () => axiosClient.get(`${baseUrl}/categories`),
   },
+  origin: {
+    getAllOrigins: () => axiosClient.get(`${baseUrl}/origins`),
+  },
+  supplier: {
+    getAllSuppliers: (storeId) => axiosClient.get(`${baseUrl}/suppliers/${storeId}`),
+    createSupplier: (supplierData) => axiosClient.post(`${baseUrl}/suppliers`, supplierData),
+    updateSupplier: (supplierId, supplierData) => axiosClient.put(`${baseUrl}/suppliers/${supplierId}`, supplierData),
+    deleteSupplier: (supplierId) => axiosClient.delete(`${baseUrl}/suppliers/${supplierId}`)
+  },
+  inventory: {
+    getAllInventory: () => axiosClient.get(`${baseUrl}/inventories/${storeId}`),
+  },
   store: {
     getStoreByUserId: (userId) =>
-      axiosClient.get(`${baseUrl}/store/by-user?userId=${userId}`),
+      axiosClient.get(`${baseUrl}/store/${userId}`),
   },
 };
 

@@ -36,6 +36,7 @@ import AddCustomerDialog from "../../components/component/addCustomer"
 import inventory from "./inventory"
 import { useRouter } from 'next/navigation';
 import formatVND from "../../utils/formatVND"
+import Navbar from "../component/navbar"
 
 export default function sales() {
 
@@ -272,6 +273,9 @@ const handleIncreaseQuantity = (index) => {
   return (
     (<div className="flex min-h-screen w-full bg-muted/40">
       <Menu/>
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+        <Navbar/>
+      </div>
       <BarcodeScanner 
       onValidBarcode={handleValidBarcode}
       onInvalidBarcode={handleInvalidBarcode} 
