@@ -1,8 +1,11 @@
 "use client"
-import React, { useState, useEffect } from "react";
-import AttributeSelector from "./AttributeSelector";
+import React, { useState, useEffect } from "react"; // Giữ lại dòng này
+import ColorSelector from "./ColorSelector";
+import SizeSelector from "./SizeSelector";
 import QuantitySelector from "./QuantitySelector";
 import DeliveryInfo from "./DeliveryInfo";
+import buyerAPI from '../../api/buyer';
+import { useUser } from '../../context/UserContext';
 
 function ProductInfo({ productData }) {
   const [selectedAttributes, setSelectedAttributes] = useState({});
@@ -20,62 +23,78 @@ function ProductInfo({ productData }) {
     });
   });
 
-  const attributes = Object.keys(attributeOptions).reduce((acc, key) => {
-    acc[key] = Array.from(attributeOptions[key]);
-    return acc;
-  }, {});
+  const [cartId, setCartId] = useState(null);
+  const { user } = useUser();
+  const userId = user ? user.id : null; 
+ 
+  useEffect(() =>{  
+    console.log("Current userId:", userId);
+    if(userId){
+      const fetchCart = async () =>{
+        try{
+          const response = await buyerAPI.cart.getCartByUserId(userId)
+          console.log("Full response from API:", response)
+          
+          if(response.statusCode === 200){
+            //lưu lại cartId
+            setCartId(response.data.cartId)
 
-  // Cập nhật biến thể phù hợp và các tùy chọn khả dụng
-  useEffect(() => {
-    const matchingVariant = productData.variants.find((variant) =>
-      Object.keys(selectedAttributes).every(
-        (key) => variant.attributes[key] === selectedAttributes[key]
-      )
-    );
-    setFilteredVariant(matchingVariant);
-
-    const newAvailableOptions = {};
-    productData.variants.forEach((variant) => {
-      Object.keys(variant.attributes).forEach((attrKey) => {
-        if (!newAvailableOptions[attrKey]) {
-          newAvailableOptions[attrKey] = new Set();
+            console.log("Cart Id set: ", response.data.cartId);
+          }else {
+            console.error("Error fetching cart items: ", response.message);
+          }
+        }catch(error){
+          console.log("Error fetching Cart: ", error)
         }
-        const isMatching = Object.keys(selectedAttributes).every(
-          (key) =>
-            key === attrKey ||
-            !selectedAttributes[key] ||
-            variant.attributes[key] === selectedAttributes[key]
-        );
-        if (isMatching) {
-          newAvailableOptions[attrKey].add(variant.attributes[attrKey]);
-        }
-      });
-    });
+    }
+    fetchCart()
+    }else{
+      console.log("userId is null, cannot fetch cart.");
+    }
+  }, [userId])
 
-    setAvailableOptions(
-      Object.keys(newAvailableOptions).reduce((acc, key) => {
-        acc[key] = Array.from(newAvailableOptions[key]);
-        return acc;
-      }, {})
-    );
+  const handleAddToCart = async () => {
+    if (!cartId) {
+      console.error("Cart ID not found, cannot add product to cart.");
+      return;
+    }
 
-    // Tự động bỏ chọn các thuộc tính không còn khả dụng
-    const newSelectedAttributes = { ...selectedAttributes };
-    Object.keys(newSelectedAttributes).forEach((key) => {
-      if (!newAvailableOptions[key] || !newAvailableOptions[key].has(newSelectedAttributes[key])) {
-        delete newSelectedAttributes[key];
+    const productId = productData.id;
+    const quantity = 1; // Default quantity to 1, you can get this from state if needed.
+    const price = productData.originalPrice
+
+    if(!price || price <= 0){
+      console.error("Price is missing or invalid, cannot add product to cart.");
+      return;
+    }
+    if(price > 0){
+      console.log("Price not null");
+    }
+
+    console.log("Sending data to API: ", { cartId, productId, quantity, price });
+    try {
+      const response = await buyerAPI.cart.addProductToCart(cartId, productId,  quantity);
+      console.log("Add to cart response:", response)
+      if (response.statusCode === 200) {
+        alert("Product added to cart successfully!");
+      } else {
+        console.error("Error adding product to cart:. Status:", response.status, "Message:", response.message);
+        
+        // console.error("Error adding product to cart:", response.message);
+        alert("Error adding product to cart. Please try again.");
       }
-    });
-    setSelectedAttributes(newSelectedAttributes);
-
-  }, [selectedAttributes, productData.variants]);
-
-  // Xử lý khi người dùng thay đổi thuộc tính
-  const handleAttributeChange = (attribute, value) => {
-    setSelectedAttributes((prev) => ({
-      ...prev,
-      [attribute]: value,
-    }));
+    } catch (error) {
+      if (error.response) {
+        // Lỗi từ phía server
+        console.error("Server response error:", error.response.data);
+      } else if (error.request) {
+        // Lỗi từ phía request (không nhận được phản hồi từ server)
+        console.error("No response from server:", error.request);
+      } else {
+        // Lỗi trong quá trình cấu hình request
+        console.error("Error setting up request:", error.message);
+      }
+    }
   };
 
   return (
@@ -107,8 +126,9 @@ function ProductInfo({ productData }) {
         <div className="flex gap-4 self-stretch mt-6 w-full font-medium">
           <QuantitySelector />
           <button
-            className="gap-2.5 self-stretch px-12 py-2.5 text-base bg-red-500 rounded text-neutral-50 max-md:px-5 hover:bg-red-600 hover:shadow-lg transition duration-300"
-            disabled={!filteredVariant}
+            aria-label="Add to favorites"
+            className="flex items-center justify-center w-[42px] h-[42px] rounded border border-black border-opacity-50"
+            onClick={handleAddToCart}
           >
             Buy Now
           </button>

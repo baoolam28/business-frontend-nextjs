@@ -63,6 +63,7 @@ import AddProductDialog from "../../components/component/addProduct"
 import formatVND from "../../utils/formatVND";
 import SellerAPI from "../../api/seller";
 import { useStore } from '../../context/StoreContext';
+import Navbar from "../component/navbar"
 export default function DashboardProduct() {
 
   const { storeId } = useStore();
@@ -225,7 +226,9 @@ export default function DashboardProduct() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <Menu />
-
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+        <Navbar/>
+      </div>
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <div className="flex items-center justify-between">

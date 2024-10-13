@@ -28,3 +28,14 @@ export const showErrorAlert = (title, message) => {
 export const showCustomAlert = (options) => {
   return showAlert(options);
 };
+
+export const showConfirmAlert = (title, message) => {
+  return showAlert({
+    title: <strong>{title}</strong>,
+    html: <i>{message}</i>,
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Có",
+    cancelButtonText: "Không",
+  });
+};

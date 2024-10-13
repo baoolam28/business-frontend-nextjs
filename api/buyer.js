@@ -12,6 +12,7 @@ const buyerAPI = {
     getProductByCategory : (id) => axiosClient.get(`${baseUrl}/products/category/${id}`),
     getAllSotre : () => axiosClient.get(`${baseUrl}/stores`)
   },
+<<<<<<< HEAD
   cart : {
     // Lấy thông tin giỏ hàng theo userId
     getCartByUserId: (userId) => axiosClient.get(`${baseUrl}/api/buyer/cart/get-by-user/${userId}`),
@@ -28,6 +29,21 @@ const buyerAPI = {
     })
   },
 
+=======
+  cart:{
+    getCartByUserId: (userId) => axiosClient.get(`${baseUrl}/cart/${userId}`),
+    updateCartItems: (cartId, productId, quantity) => axiosClient.put(`${baseUrl}/cart/${cartId}`, {
+      productId: productId,
+      quantity: quantity
+    }),
+    deleteCartItem: (cartId, productId) => axiosClient.delete(`${baseUrl}/cart/${cartId}/product/${productId}`),
+    addProductToCart: (cartId, productId, quantity, price) => axiosClient.post(`${baseUrl}/cart/${cartId}`,{
+      productId: productId,
+      quantity: quantity,
+      price: price
+    })
+  }
+>>>>>>> c5a041c936d2438ed743c3a1a9ea2a2f52c6d3cc
 };
 
 export default buyerAPI;

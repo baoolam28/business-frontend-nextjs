@@ -14,13 +14,15 @@ const sellerAPI = {
   supplier: {
     getAllSuppliers: (storeId) => axiosClient.get(`${baseUrl}/suppliers/${storeId}`),
     createSupplier: (supplierData) => axiosClient.post(`${baseUrl}/suppliers`, supplierData),
+    updateSupplier: (supplierId, supplierData) => axiosClient.put(`${baseUrl}/suppliers/${supplierId}`, supplierData),
+    deleteSupplier: (supplierId) => axiosClient.delete(`${baseUrl}/suppliers/${supplierId}`)
   },
   inventory: {
     getAllInventory: () => axiosClient.get(`${baseUrl}/inventories/${storeId}`),
   },
   store: {
     getStoreByUserId: (userId) =>
-      axiosClient.get(`${baseUrl}/store/by-user?userId=${userId}`),
+      axiosClient.get(`${baseUrl}/store/${userId}`),
   },
 };
 
