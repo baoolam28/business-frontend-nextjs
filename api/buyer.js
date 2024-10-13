@@ -13,8 +13,16 @@ const buyerAPI = {
   },
   cart:{
     getCartByUserId: (userId) => axiosClient.get(`${baseUrl}/cart/${userId}`),
-    updateCartItems: (cartId, productId, quantity) => axiosClient.put(`${baseUrl}/cart/${cartId}/product/${productId}`,{quantity}),
-    deleteCartItem: (cartId, productId) => axiosClient.delete(`${baseUrl}/cart/${cartId}/product/${productId}`)
+    updateCartItems: (cartId, productId, quantity) => axiosClient.put(`${baseUrl}/cart/${cartId}`, {
+      productId: productId,
+      quantity: quantity
+    }),
+    deleteCartItem: (cartId, productId) => axiosClient.delete(`${baseUrl}/cart/${cartId}/product/${productId}`),
+    addProductToCart: (cartId, productId, quantity, price) => axiosClient.post(`${baseUrl}/cart/${cartId}`,{
+      productId: productId,
+      quantity: quantity,
+      price: price
+    })
   }
 };
 

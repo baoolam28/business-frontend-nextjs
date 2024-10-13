@@ -33,6 +33,7 @@ import { DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogClos
 import Menu from "../component/menu"
 import customerAPI from "../../api/customer"
 import ReportAPI from "../../api/report"
+import Navbar from "../component/navbar";
 export default   function dashboardCustomer() {
   const [customers, setCustomers] = useState([])
   const [showModal, setShowModal] = useState(false)
@@ -125,7 +126,9 @@ export default   function dashboardCustomer() {
     
     (<div className="flex min-h-screen w-full flex-col bg-muted/40 ">
       <Menu/>
-      
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+        <Navbar/>
+      </div>
       <main className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14 ml-5">
         <header className="bg-primary text-primary-foreground py-4 px-8">
         <div className="flex items-center justify-between">
