@@ -25,7 +25,7 @@ function ProductPage() {
     console.log(id);
 
     const fetchProductById = async () => {
-      if (!id) return; // Trả về nếu id chưa có giá trị
+      if (!id) return; 
 
       try {
         const response = await ProductId.product.getByIdProduct(id);

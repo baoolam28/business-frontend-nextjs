@@ -16,6 +16,7 @@ export const StoreProvider = ({ children }) => {
     if (user && user.id) {
       console.log("Current userId:", user.id);      
       async function fetchStore() {
+        console.log("get storeID");
         try {
           const res = await sellerAPI.store.getStoreByUserId(user.id);
           setStoreId(res.data.storeId);

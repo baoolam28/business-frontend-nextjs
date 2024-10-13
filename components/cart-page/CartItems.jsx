@@ -29,13 +29,12 @@ function CartItems() {
             const items = response.data && Array.isArray(response.data.cartItems) ? response.data.cartItems : [];
             setCartItems(items) 
 
-            //lưu lại cartId
             setCartId(response.data.cartId)
 
             console.log("Cart items set:", items);
           }else {
             console.error("Error fetching cart items: ", response.message);
-            setCartItems([]); // Thiết lập mảng rỗng nếu không thành công
+            setCartItems([]); 
           }
          
         }catch(error){
