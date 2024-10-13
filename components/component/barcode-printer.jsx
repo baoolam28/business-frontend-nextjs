@@ -23,11 +23,13 @@ import { Input } from '../../components/ui/input';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem } from '../../components/ui/dropdown-menu';
 import { Button } from '../../components/ui/button';
 import { Checkbox } from '../../components/ui/checkbox';
-import productAPI from '../../api/product';
+import SellerAPI from '../../api/seller';
 import BarcodeRender from './barcodeRender';
 import BarcodePagePrinter from './BarcodePagePrinter';
 import PrintButton from './PrintButtonBarcode';
+import { useStore } from '../../context/StoreContext';
 export default function BarcodePrinter() {
+  const { storeId } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [selectedBarcode, setSelectedBarcode] = useState([]);
@@ -37,16 +39,18 @@ export default function BarcodePrinter() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await productAPI.getAllProduct();
-        setProducts(response);
-        console.log('Products fetched:', response);
+        const response = await SellerAPI.product.getAllProducts(storeId);
+        if (response.statusCode === 200) {
+          setProducts(response.data);
+        }
+        console.log('Products fetched:', response.data);
       } catch (error) {
         console.error('Error fetching products:', error);
       }
     };
 
     fetchProducts();
-  }, []);
+  }, [storeId]);
 
   const filteredBarcode = useMemo(() => {
     return products.filter(product => {

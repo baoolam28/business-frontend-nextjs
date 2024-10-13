@@ -60,8 +60,13 @@ import supplierAPI from "../../api/supplier";
 import originAPI from "../../api/origin";
 import categoryAPI from "../../api/category";
 import AddProductDialog from "../../components/component/addProduct"
-import formatVND from "../../utils/formatVND"
+import formatVND from "../../utils/formatVND";
+import SellerAPI from "../../api/seller";
+import { useStore } from '../../context/StoreContext';
 export default function DashboardProduct() {
+
+  const { storeId } = useStore();
+
   const [filters, setFilters] = useState({
     category: [],
     origin: [],
@@ -86,11 +91,14 @@ export default function DashboardProduct() {
   
   useEffect(() => {
     const fetchProducts = async () => {
+      console.log(storeId)
       try {
-        const response = await productAPI.getAllProduct();
-        setProducts(response);
+        const response = await SellerAPI.product.getAllProducts(storeId);
+        if(response.statusCode === 200) {
+          setProducts(response.data);
+        }
+        
       } catch (error) {
-        setError("Error fetching products. Please try again.");
         console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
@@ -99,17 +107,20 @@ export default function DashboardProduct() {
 
     const fetchOrigins = async () => {
       try {
-        const response = await originAPI.getAllOrigin();
-        setOrigins(response);
+        const response = await SellerAPI.origin.getAllOrigins();
+        if(response.statusCode === 200){
+          setOrigins(response.data);
+        }
       } catch (error) {
         console.error("Failed to fetch origins", error);
       }
     }
     const fetchCategories = async () => {
       try {
-        const response = await categoryAPI.getAllCategory();
-        
-        setCategories(response);
+        const response = await SellerAPI.category.getAllCategories();
+        if(response.statusCode === 200){
+          setCategories(response.data);
+        }
         
       } catch (error) {
         console.error("Failed to fetch categories", error);
@@ -118,8 +129,10 @@ export default function DashboardProduct() {
 
     const fetchSuppliers = async () => {
       try {
-        const response = await supplierAPI.getAllSupplier();
-        setSuppliers(response);
+        const response = await SellerAPI.supplier.getAllSuppliers(storeId);
+        if(response.statusCode === 200){
+          setSuppliers(response.data);
+        }
       } catch (error) {
         console.error("Failed to fetch suppliers", error);
       }
@@ -127,21 +140,24 @@ export default function DashboardProduct() {
 
     const fetchInventories = async () => {
       try {
-        const response = await inventoryAPI.getAllInventory();
-        setInventories(response);
-        
+        const response = await SellerAPI.inventory.getAllInventory(storeId);
+        if(response.statusCode === 200){
+          setInventories(response.data);
+        }       
       } catch (error) {
         console.error("Failed to fetch inventories", error);
       }
     }
 
-    fetchProducts();
-    fetchOrigins();
-    fetchCategories();
-    fetchSuppliers();
-    fetchInventories();
-
-  }, []);
+    if(storeId != null){
+      fetchProducts();
+      fetchOrigins();
+      fetchCategories();
+      fetchSuppliers();
+      fetchInventories();
+    }
+    
+  }, [storeId]);
 
   
 
@@ -238,6 +254,7 @@ export default function DashboardProduct() {
                     setCategories={setCategories}
                     setSuppliers={setSuppliers}
                     setOrigins={setOrigins}
+                    storeId={storeId}
                   />
                 
               </div>

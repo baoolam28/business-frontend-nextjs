@@ -11,6 +11,11 @@ const buyerAPI = {
     getProductByCategory : (id) => axiosClient.get(`${baseUrl}/products/category/${id}`),
     getAllSotre : () => axiosClient.get(`${baseUrl}/stores`)
   },
+  cart:{
+    getCartByUserId: (userId) => axiosClient.get(`${baseUrl}/cart/${userId}`),
+    updateCartItems: (cartId, productId, quantity) => axiosClient.put(`${baseUrl}/cart/${cartId}/product/${productId}`,{quantity}),
+    deleteCartItem: (cartId, productId) => axiosClient.delete(`${baseUrl}/cart/${cartId}/product/${productId}`)
+  }
 };
 
 export default buyerAPI;
