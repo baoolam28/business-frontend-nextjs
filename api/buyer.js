@@ -4,10 +4,13 @@ const buyerAPI = {
   product: {
     getAllProducts: () => axiosClient.get(`${baseUrl}/products`),
     getAllBestSeller: () => axiosClient.get(`${baseUrl}/products/bestseller`),
-    getByIdProduct:(id) => axiosClient.get(`${baseUrl}/products/${id}`)
+    getProductById:(id) => axiosClient.get(`${baseUrl}/products/${id}`),
+    getProductDetails: (id) => axiosClient.get(`${baseUrl}/products/product-detail/${id}`),
   },
   category:{
     getAllCategories: () => axiosClient.get(`${baseUrl}/categories`),
+    getProductByCategory : (id) => axiosClient.get(`${baseUrl}/products/category/${id}`),
+    getAllSotre : () => axiosClient.get(`${baseUrl}/stores`)
   },
   cart : {
     // Lấy thông tin giỏ hàng theo userId

@@ -26,7 +26,7 @@ const CategoryList = () => {
               className="flex gap-10 items-start self-stretch mt-4"
             >
               <a
-                href={`/category/${category
+                href={`/category/${category}
                   .toLowerCase()
                   .replace(/\s+/g, "-")}`}
               >
