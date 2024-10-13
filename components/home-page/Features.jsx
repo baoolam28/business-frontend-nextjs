@@ -21,7 +21,7 @@ const features = [
   },
 ];
 
-const Features = () => {
+const   Features = () => {
   return (
     <section className="flex flex-wrap gap-10 justify-center items-center self-center mt-36 text-black max-md:mt-10 max-md:max-w-full">
       {features.map((feature, index) => (
