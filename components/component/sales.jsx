@@ -27,18 +27,23 @@ import Link from "next/link"
 import { Separator } from "../../components/ui/separator"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "../../components/ui/dropdown-menu"
 import Menu from "../component/menu"
-import productAPI from "../../api/product"
-import customerAPI from "../../api/customer"
-import orderAPI from "../../api/order"
+import productAPI from "../../api/seller"
+import buyerAPI from "../../api/buyer"
+import sellerAPI from "../../api/seller"
+// import orderAPI from "../../api/seller"
 import inventoryAPI from "../../api/inventory";
 import BarcodeScanner from "./barcodeScanner"
 import AddCustomerDialog from "../../components/component/addCustomer"
 import inventory from "./inventory"
 import { useRouter } from 'next/navigation';
 import formatVND from "../../utils/formatVND"
+import { useStore } from "../../context/StoreContext"; 
+import {useUser} from "../../context/UserContext"
 
 export default function sales() {
 
+  const { storeId } = useStore();
+  const { userId} = useUser(); 
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
   const [inventories, setInventories] = useState([]);
@@ -51,71 +56,83 @@ export default function sales() {
   const handleCloseDialog = () => setDialogOpen(false);
 
   const router = useRouter();
-  
 
-  useEffect(() => {
-  const fetchProducts = async () => {
-    try {
-      const response = await productAPI.getAllProduct();
-      statusCode
-      message
-      data
-      date
-      setProducts(response);
-    } catch (error) {
-      console.error("Error fetching products:", error);
+useEffect(() => {
+
+  console.log("Store ID:", storeId);
+  console.log("User ID:", userId);
+
+    const fetchProducts = async () => {
+      if (!storeId) return; // Nếu storeId không có, không gọi API
+
+      try {
+        const response = await productAPI.product.getAllProductsByStoreId(storeId);
+        console.log("Response:", response);
+        if (response.statusCode === 200) {
+          setProducts(response.data); // Cập nhật danh sách sản phẩm
+        } else {
+          console.error("Failed to fetch products:", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+
+    if(storeId != null) {
+      fetchProducts(); 
     }
-  };
+    // Gọi hàm fetchProducts
 
-  const fetchCustomers = async () => {
-    try {
-      const response = await customerAPI.getAllCustomers();
-      console.log("Customers:", response); 
-      setCustomers(response);
-    } catch (error) {
-      console.error("Error fetching customers:", error);
+    const fetchCustomers = async () => {
+      if (!storeId) return; // Nếu storeId không có, không gọi API
+
+      // setLoadingCustomers(true);
+      // setError(null);
+
+      try {
+        const response = await sellerAPI.customer.getAllCustomerssByStoreId(storeId);
+        console.log("Customers Response:", response);
+
+        if (response.statusCode === 200) {
+          setCustomers(response.data); // Cập nhật danh sách khách hàng
+        } else {
+          console.error("Failed to fetch customers:", response.status);
+          setError("Không thể tải danh sách khách hàng.");
+        }
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+        setError("Đã xảy ra lỗi khi tải danh sách khách hàng.");
+      } finally {
+        setLoadingCustomers(false);
+      }
+    };
+
+    if (storeId != null) {
+      fetchCustomers();
     }
-  };
+  }, [storeId]);
 
-  const fetchInventories = async () => {
-    try {
-      const response = await inventoryAPI.getAllInventory();
-      setInventories(response);
-        
-    } catch (error) {
-      console.error("Failed to fetch inventories", error);
-    }
-  }
-
-  fetchProducts();
-  fetchCustomers();
-  fetchInventories();
-}, []);
-
-
+ // Filtered Products
   const filteredProducts = useMemo(() => {
-  return products.filter((product) => 
-    product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.barcode.includes(searchTerm) ||
-    product.price.toString().includes(searchTerm) ||
-    product.categoryName.toString().includes(searchTerm) ||
-    product.supplierName.toString().includes(searchTerm) ||
-    product.originName.toString().includes(searchTerm)
-  );
-}, [products, searchTerm]);
+    return products.filter(product => 
+      product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [products, searchTerm]);
 
+  // Handlers
   const handleSearch = (e) => {
-    setSearchTerm(e.target.value)
-  }
+    setSearchTerm(e.target.value);
+  };
+
   const handleAddToCart = (product) => {
-  if (cart.length === 0) {
-    setCart((prevCart) => {
-      const updatedCart = [...prevCart, { ...product, quantity: 1 }];
-      console.log("Cart after adding new product:", updatedCart);
-      return updatedCart;
-    });
-    return;
-  }
+    if (cart.length === 0) {
+      setCart((prevCart) => {
+        const updatedCart = [...prevCart, { ...product, quantity: 1 }];
+        console.log("Cart after adding new product:", updatedCart);
+        return updatedCart;
+      });
+      return;
+    }
 
   const existingProduct = cart.find((item) => item.barcode === product.barcode);
 
@@ -194,71 +211,97 @@ const handleIncreaseQuantity = (index) => {
   };
 
   const handleCheckout = async () => {
-      
-      if (cart.length === 0) {
-        alert("Giỏ hàng đang trống!");
-        return;
-      }
+  // Kiểm tra giỏ hàng không rỗng
+  if (cart.length === 0) {
+    alert("Giỏ hàng đang trống!");
+    return;
+  }
 
-      if (!selectedCustomer) {
-        alert("Vui lòng chọn khách hàng!");
-        return;
-      }
+  // Kiểm tra đã chọn khách hàng
+  if (!selectedCustomer) {
+    alert("Vui lòng chọn khách hàng!");
+    return;
+  }
 
-      const orderData = {
-        customerId: selectedCustomer.customerId, // Make sure customer ID is set correctly
-        orderDetails: cart.map(product => ({
-          quantity: product.quantity,
-          price: product.price,
-          barcode: product.barcode,
-        }))
-      };
+   const orderData = {
+  customerId: selectedCustomer.customerId, // Integer
+  storeId: storeId, // UUID (string)
+  orderDetails: cart.map(product => ({
+    storeId: storeId, // UUID (string)
+    barcode: product.barcode,
+    quantity: product.quantity,
+    price: product.price,
+  })),
+};
 
-      // Validate that all fields are filled
-      if (!orderData.customerId) {
-        alert("Vui lòng chọn khách hàng hợp lệ!");
-        return;
-      }
+  // Thêm các kiểm tra hợp lệ nếu cần
+  if (!orderData.customerId) {
+    alert("Vui lòng chọn khách hàng hợp lệ!");
+    return;
+  }
 
-      if (orderData.orderDetails.length === 0) {
-        alert("Không có sản phẩm nào trong đơn hàng!");
-        return;
-      }
+  if (orderData.orderDetails.length === 0) {
+    alert("Không có sản phẩm nào trong đơn hàng!");
+    return;
+  }
 
-      const invalidDetails = orderData.orderDetails.some(detail =>
-        !detail.quantity || !detail.price || !detail.barcode
-      );
+  const invalidDetails = orderData.orderDetails.some(detail =>
+    !detail.quantity || !detail.price || !detail.barcode || !detail.storeId
+  );
 
-      if (invalidDetails) {
-        alert("Đơn hàng có thông tin sản phẩm không hợp lệ!");
-        return;
-      }
+  if (invalidDetails) {
+    alert("Đơn hàng có thông tin sản phẩm không hợp lệ!");
+    return;
+  }
 
+  try {
+    // Gọi API tạo đơn hàng với dữ liệu đã chuẩn bị
+    const response = await sellerAPI.order.createOrder(orderData);
 
-      
-      try {
-        const order = await orderAPI.createOrder(orderData);
+      // Log toàn bộ phản hồi từ API
+    console.log("API Response:", response);
+    console.log("Response Data:", response.data);
+    
+    if (response && response.orderId) { // Kiểm tra tồn tại orderId thay vì response.data
+      const createdOrder = response;
 
-        if (order) {
-          setCart([]);
-          setSelectedCustomer(null);
-          // Use await to ensure the router.push is executed after the order is created
-          await router.push(`/payment?orderId=${order.orderId}`);
-        }
-      } catch (error) {
-        console.error("Error during checkout:", error);
-        alert("Đã xảy ra lỗi khi thực hiện thanh toán. Vui lòng thử lại.");
-      }
+      console.log("Created Order:", createdOrder);
+      console.log("Order ID:", createdOrder.orderId);
 
-  };
+      // Làm trống giỏ hàng và đặt lại khách hàng đã chọn
+      setCart([]);
+      setSelectedCustomer(null);
+
+      // Điều hướng đến trang thanh toán với orderId mới
+      router.push(`/payment?orderId=${createdOrder.orderId}`);
+    } else {
+      // Xử lý phản hồi không mong đợi từ API
+      console.error("Unexpected response from createOrder API:", response);
+      alert("Đã xảy ra lỗi khi tạo đơn hàng. Vui lòng thử lại.");
+    }
+  } catch (error) {
+    console.error("Error during checkout:", error);
+    alert("Đã xảy ra lỗi khi thực hiện thanh toán. Vui lòng thử lại.");
+  }
+};
 
   const handleSaveCustomer = async (customerData) => {
     try {
-      const response = customerAPI.createCustomer(customerData);
-      setCustomers((prev) => [prev, response]);
-      console.log(response);
+      // Thêm storeId vào customerData
+      const dataWithStoreId = { ...customerData, storeId };
+      console.log(dataWithStoreId)
+      const response = await sellerAPI.customer.createCustomer(dataWithStoreId);
+      // Giả sử response.data chứa khách hàng mới tạo
+      if (response && response.data) {
+        setCustomers((prev) => [...prev, response.data]);
+        console.log("Khách hàng mới được thêm:", response.data);
+      } else {
+        console.error("Không nhận được dữ liệu khách hàng từ phản hồi:", response);
+        alert("Đã xảy ra lỗi khi thêm khách hàng. Vui lòng thử lại.");
+      }
     } catch (error) {
-      console.log('create customer error: ', error);
+      console.error('Lỗi khi tạo khách hàng:', error);
+      alert("Đã xảy ra lỗi khi thêm khách hàng. Vui lòng thử lại.");
     }
   }
 
@@ -267,20 +310,16 @@ const handleIncreaseQuantity = (index) => {
     setSelectedCustomer(null);
   };
 
-
-
   return (
     (<div className="flex min-h-screen w-full bg-muted/40">
-      <Menu/>
+      <Menu />
       <BarcodeScanner 
-      onValidBarcode={handleValidBarcode}
-      onInvalidBarcode={handleInvalidBarcode} 
-    />
+        onValidBarcode={handleValidBarcode}
+        onInvalidBarcode={handleInvalidBarcode} 
+      />
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <div className="flex items-center gap-4 mb-6">
           <div className="relative flex-1">
-            <SearchIcon
-              className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
               placeholder="Search products..."
@@ -293,18 +332,14 @@ const handleIncreaseQuantity = (index) => {
             <span className="sr-only">Scan Barcode</span>
           </Button>
         </div>
-        <div
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {
             filteredProducts.map((product) => (
               <Card key={product.barcode} className="group">
-                {/* <Link href="#" className="absolute inset-0 z-10" prefetch={false}>
-                  <span className="sr-only">View product</span>
-                </Link> */}
                 <div className="relative">
                   <img
                     src="/placeholder.svg"
-                    alt={product.name}
+                    alt={product.productName}
                     width={200}
                     height={200}
                     className="rounded-lg object-cover w-full aspect-square group-hover:opacity-50 transition-opacity" />
@@ -320,10 +355,7 @@ const handleIncreaseQuantity = (index) => {
                 <div className="flex flex-col gap-1 p-4">
                   <div className="flex flex-row justify-between">
                     <h3 className="font-medium">{product.productName}</h3>
-                    <span className="font-medium">
-                      Tồn kho:  
-                      {inventories.map((inventory) => inventory.barcode === product.barcode ? inventory.quantityInStock : 0)}
-                    </span>
+                    <span className="font-medium">Tồn kho: {inventories.map((inventory) => inventory.barcode === product.barcode ? inventory.quantityInStock : 0)}</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-primary font-medium">{formatVND(product.price.toFixed(2))} </span>
@@ -471,7 +503,7 @@ const handleIncreaseQuantity = (index) => {
               </div>
             </div>
           )}
-        </div>
+      </div>
         <div className="mt-6 flex justify-end gap-2">
           <Button variant="outline" onClick={handleCancel}>Cancel</Button>
           <Button onClick={handleCheckout}>Checkout</Button>
@@ -479,6 +511,9 @@ const handleIncreaseQuantity = (index) => {
       </div>
     </div>)
   );
+
+  
+  
 }
 
 function BarcodeIcon(props) {

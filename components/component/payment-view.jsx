@@ -36,6 +36,7 @@ import Menu from "../component/menu"
 import { useSearchParams } from 'next/navigation'
 import orderAPI from '../../api/order'
 import formatVND from "../../utils/formatVND"
+import sellerAPI from "../../api/seller"
 export default function paymentView() {
 
   const [order, setOrder] = useState({});
@@ -44,23 +45,49 @@ export default function paymentView() {
 
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
+  console.log("orederId " + orderId)
 
   useEffect(() => {
-    const fetchOrder = async () =>{
-      try {
-        const response = await orderAPI.getOrder(orderId);
-        console.log(response);
-        if(response){
-          setOrder(response);
-          caculatePayAmount(response);
+    if (orderId) {
+      const fetchOrder = async () => {
+        try {
+          console.log("statucCode " + response.statusCode)
+          const response = await sellerAPI.order.getOrderById(orderId);
+          console.log("response " + response) // Bạn cần định nghĩa phương thức getOrderById trong API
+          if (response.statusCode === 200) {
+            setOrder(response.data);
+            console.log("response data " + response.data)
+          } else {
+            console.error("Không thể lấy đơn hàng:", response.status);
+            setError("Không thể lấy đơn hàng. Vui lòng thử lại.");
+          }
+        } catch (err) {
+          console.error("Lỗi khi lấy đơn hàng:", err);
+          setError("Đã xảy ra lỗi khi lấy đơn hàng. Vui lòng thử lại.");
+        } finally {
+          setLoading(false);
         }
-        
-      } catch (error) {
-        console.error("fetch order failed", error);
-      }
+      };
+
+      fetchOrder();
     }
-    fetchOrder();
-  },[orderId]);
+  }, [orderId]);
+
+   async function handlePayment(orderId) {
+    try {
+      const response = await sellerAPI.order.updateOrder(orderId);
+      if (response.statusCode === 200) {
+        alert("Thanh toán thành công!");
+        // Có thể chuyển hướng hoặc cập nhật trạng thái đơn hàng
+      } else {
+        console.error("Thanh toán thất bại:", response.status);
+        alert("Thanh toán thất bại. Vui lòng thử lại.");
+      }
+    } catch (err) {
+      console.error("Lỗi khi thanh toán:", err);
+      alert("Đã xảy ra lỗi khi thanh toán. Vui lòng thử lại.");
+    }
+  }
 
   const caculatePayAmount = (order) => {
     let payAmount = 0;
@@ -70,9 +97,17 @@ export default function paymentView() {
     setPaymentAmount(payAmount);
   }
 
-  if (!order) {
-    return <div>Loading...</div>;
-  }
+  //   if (loading) {
+  //   return <p>Đang tải...</p>;
+  // }
+
+  // if (error) {
+  //   return <p>{error}</p>;
+  // }
+
+  // if (!order) {
+  //   return <p>Không tìm thấy đơn hàng.</p>;
+  // }
 
   return (
     (<div className="flex min-h-screen flex-col bg-muted/40">
@@ -162,6 +197,7 @@ export default function paymentView() {
       </main>
     </div>)
   );
+
 }
 
 function BanknoteIcon(props) {
