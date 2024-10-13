@@ -37,8 +37,8 @@ import AddCustomerDialog from "../../components/component/addCustomer"
 import inventory from "./inventory"
 import { useRouter } from 'next/navigation';
 import formatVND from "../../utils/formatVND"
-import { useStore } from "../../context/StoreContext"; 
-import {useUser} from "../../context/UserContext"
+import {useStore} from "../../context/StoreContext"; 
+import {useUser} from "../../context/UserContext";
 
 export default function sales() {
 
@@ -66,7 +66,7 @@ useEffect(() => {
       if (!storeId) return; // Nếu storeId không có, không gọi API
 
       try {
-        const response = await productAPI.product.getAllProductsByStoreId(storeId);
+        const response = await sellerAPI.product.getAllProductsByStoreId(storeId);
         console.log("Response:", response);
         if (response.statusCode === 200) {
           setProducts(response.data); // Cập nhật danh sách sản phẩm
@@ -86,8 +86,8 @@ useEffect(() => {
     const fetchCustomers = async () => {
       if (!storeId) return; // Nếu storeId không có, không gọi API
 
-      // setLoadingCustomers(true);
-      // setError(null);
+      setLoadingCustomers(true);
+      setError(null);
 
       try {
         const response = await sellerAPI.customer.getAllCustomerssByStoreId(storeId);
@@ -259,14 +259,11 @@ const handleIncreaseQuantity = (index) => {
     const response = await sellerAPI.order.createOrder(orderData);
 
       // Log toàn bộ phản hồi từ API
-    console.log("API Response:", response);
-    console.log("Response Data:", response.data);
+    // console.log("API Response:", response);
+    // console.log("Response Data:", response.data);
     
     if (response && response.orderId) { // Kiểm tra tồn tại orderId thay vì response.data
       const createdOrder = response;
-
-      console.log("Created Order:", createdOrder);
-      console.log("Order ID:", createdOrder.orderId);
 
       // Làm trống giỏ hàng và đặt lại khách hàng đã chọn
       setCart([]);
