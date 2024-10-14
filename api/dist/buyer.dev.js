@@ -39,19 +39,19 @@ var buyerAPI = {
   cart: {
     // Lấy thông tin giỏ hàng theo userId
     getCartByUserId: function getCartByUserId(userId) {
-      return _axiosClient["default"].get("".concat(baseUrl, "/api/buyer/cart/get-by-user/").concat(userId));
+      return _axiosClient["default"].get("".concat(baseUrl, "/cart/get-by-user/").concat(userId));
     },
     // Thêm sản phẩm vào giỏ hàng
     addToCart: function addToCart(cartRequest) {
-      return _axiosClient["default"].post("".concat(baseUrl, "/api/buyer/cart/add-to-cart"), cartRequest);
+      return _axiosClient["default"].post("".concat(baseUrl, "/cart/add-to-cart"), cartRequest);
     },
     // Cập nhật sản phẩm trong giỏ hàng
     updateCart: function updateCart(cartRequest) {
-      return _axiosClient["default"].put("".concat(baseUrl, "/api/buyer/cart/update-cart"), cartRequest);
+      return _axiosClient["default"].put("".concat(baseUrl, "/cart/update-cart"), cartRequest);
     },
     // Xóa sản phẩm khỏi giỏ hàng
     deleteProductFromCart: function deleteProductFromCart(cartRequest) {
-      return _axiosClient["default"]["delete"]("".concat(baseUrl, "/api/buyer/cart/delete-product"), {
+      return _axiosClient["default"]["delete"]("".concat(baseUrl, "/cart/delete-product"), {
         data: cartRequest
       });
     }
@@ -62,6 +62,9 @@ var buyerAPI = {
     },
     createShippingAddressByUserId: function createShippingAddressByUserId(userId) {
       return _axiosClient["default"].post("".concat(baseUrl, "/shipping-addresses/").concat(userId));
+    },
+    deleteShippingAddressById: function deleteShippingAddressById(categoryId) {
+      return _axiosClient["default"]["delete"]("".concat(baseUrl, "/shipping-addresses/").concat(categoryId));
     }
   }
 };
