@@ -27,6 +27,10 @@ const buyerAPI = {
       data: cartRequest
     })
   },
+  shippingAddress : {
+    getShippingAddressByUserId : (userId) => axiosClient.get(`${baseUrl}/shipping-addresses/${userId}`),
+    createShippingAddressByUserId : (userId) => axiosClient.post(`${baseUrl}/shipping-addresses/${userId}`)
+  },
 
 };
 
