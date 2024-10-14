@@ -14,6 +14,7 @@ const LoginForm = () => {
     email: '',
     password: '',
   });
+  const [userId, setUserId] = useState(null);
 
   const router = useRouter();
 
@@ -23,9 +24,12 @@ const LoginForm = () => {
     const email = e.target.email.value;
     const password = e.target.password.value;
     const data = await signIn("credentials", {email, password, redirect: false});
+
     if (data.error) {
       showErrorAlert("Đăng nhập thất bại","sai tên tài khoản hoặc mật khẩu")
-    } else {
+    }
+     else {
+
       router.push("/home-page");
     }
   };

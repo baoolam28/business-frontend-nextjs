@@ -12,19 +12,24 @@ import { useSearchParams } from 'next/navigation'
 
 function ProductPage() {
   const [productData, setProductData] = useState(null);
-  const searchParams = useSearchParams()
- 
-  const id = searchParams.get('id')
-  const fallbackImage = "https://via.placeholder.com/150";
+  const [productId, setProductId] = useState(null);
+
+  const fallbackImage =
+  "https://via.placeholder.com/150";
 
   useEffect(() => {
+     // Lấy id từ URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get('id');
+    setProductId(id)
+    console.log(id);
+
     const fetchProductById = async () => {
-      if (!id) return; // Trả về nếu id chưa có giá trị
+      if (!id) return; 
 
       try {
-        const response = await ProductId.product.getByIdProduct(id); // Sử dụng id ở đây
-        console.log("Response Status Code:", response);
-        
+        const response = await ProductId.product.getByIdProduct(id);
+        console.log(response.statusCode);
         if (response.statusCode === 200) {
           const productData = {
             id: response.data.productId,
@@ -36,9 +41,10 @@ function ProductPage() {
             reviews: 65, // Lấy số reviews từ API hoặc gán mặc định
             image: fallbackImage, // Gán ảnh mặc định nếu không có ảnh từ API
           };
+          console.log("API response for product details: ", response.data);
 
-          setProductData(productData); // Gán dữ liệu sản phẩm vào state
-          console.log("Product data:", productData);
+          setProductData(productData);  // Gán dữ liệu sản phẩm vào state
+          console.log("Product data: ", productData);
         } else {
           console.error("Failed to fetch product details");
         }
@@ -46,10 +52,12 @@ function ProductPage() {
         console.error("Error fetching product details:", error);
       }
     };
-
-    fetchProductById(); // Gọi hàm fetchProductById
-  }, [id]); // Chỉ gọi khi id thay đổi
-
+  
+    if (id) {
+      fetchProductById();  // Chỉ fetch khi có productId
+    }
+  }, []);
+  
   if (!productData) {
     return <div>Loading...</div>; // Hiển thị loading khi chưa có dữ liệu
   }

@@ -3,9 +3,22 @@ const baseUrl = "/api/seller";
 const sellerAPI = {
   product: {
     getAllProductsByStoreId: (storeId) => axiosClient.get(`${baseUrl}/products/${storeId}`),
+    createProductOnline: (data) => axiosClient.post(`${baseUrl}/products/online`, data),
   },
   category: {
     getAllCategories: () => axiosClient.get(`${baseUrl}/categories`),
+  },
+  origin: {
+    getAllOrigins: () => axiosClient.get(`${baseUrl}/origins`),
+  },
+  supplier: {
+    getAllSuppliers: (storeId) => axiosClient.get(`${baseUrl}/suppliers/${storeId}`),
+    createSupplier: (supplierData) => axiosClient.post(`${baseUrl}/suppliers`, supplierData),
+    updateSupplier: (supplierId, supplierData) => axiosClient.put(`${baseUrl}/suppliers/${supplierId}`, supplierData),
+    deleteSupplier: (supplierId) => axiosClient.delete(`${baseUrl}/suppliers/${supplierId}`)
+  },
+  inventory: {
+    getAllInventory: () => axiosClient.get(`${baseUrl}/inventories/${storeId}`),
   },
   store: {
     getStoreByUserId: (userId) =>
@@ -23,6 +36,9 @@ const sellerAPI = {
     createCustomer: (customerData) => axiosClient.post(`${baseUrl}/customers`, customerData),
     updateCustomer: () => axiosClient.put(`${baseUrl}/customers/${customersId}`),
     deleteCustomer: () => axiosClient.delete(`${baseUrl}/customers/${customersId}`)
+  },
+  payment: {
+    createQrCode: (qrData) => axiosClient.post(`${baseUrl}/qr/create`)
   }
 };
 

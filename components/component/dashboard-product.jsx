@@ -63,6 +63,7 @@ import AddProductDialog from "../../components/component/addProduct"
 import formatVND from "../../utils/formatVND";
 import SellerAPI from "../../api/seller";
 import { useStore } from '../../context/StoreContext';
+import Navbar from "../component/navbar"
 export default function DashboardProduct() {
 
   const { storeId } = useStore();
@@ -95,7 +96,6 @@ export default function DashboardProduct() {
       try {
         const response = await SellerAPI.product.getAllProducts(storeId);
         if(response.statusCode === 200) {
-          console.log(response.data);
           setProducts(response.data);
         }
         
@@ -108,17 +108,20 @@ export default function DashboardProduct() {
 
     const fetchOrigins = async () => {
       try {
-        const response = await originAPI.getAllOrigin();
-        setOrigins(response);
+        const response = await SellerAPI.origin.getAllOrigins();
+        if(response.statusCode === 200){
+          setOrigins(response.data);
+        }
       } catch (error) {
         console.error("Failed to fetch origins", error);
       }
     }
     const fetchCategories = async () => {
       try {
-        const response = await categoryAPI.getAllCategory();
-        
-        setCategories(response);
+        const response = await SellerAPI.category.getAllCategories();
+        if(response.statusCode === 200){
+          setCategories(response.data);
+        }
         
       } catch (error) {
         console.error("Failed to fetch categories", error);
@@ -127,8 +130,10 @@ export default function DashboardProduct() {
 
     const fetchSuppliers = async () => {
       try {
-        const response = await supplierAPI.getAllSupplier();
-        setSuppliers(response);
+        const response = await SellerAPI.supplier.getAllSuppliers(storeId);
+        if(response.statusCode === 200){
+          setSuppliers(response.data);
+        }
       } catch (error) {
         console.error("Failed to fetch suppliers", error);
       }
@@ -136,19 +141,22 @@ export default function DashboardProduct() {
 
     const fetchInventories = async () => {
       try {
-        const response = await inventoryAPI.getAllInventory();
-        setInventories(response);
-        
+        const response = await SellerAPI.inventory.getAllInventory(storeId);
+        if(response.statusCode === 200){
+          setInventories(response.data);
+        }       
       } catch (error) {
         console.error("Failed to fetch inventories", error);
       }
     }
 
-    fetchProducts();
-    // fetchOrigins();
-    // fetchCategories();
-    // fetchSuppliers();
-    // fetchInventories();
+    if(storeId != null){
+      fetchProducts();
+      fetchOrigins();
+      fetchCategories();
+      fetchSuppliers();
+      fetchInventories();
+    }
     
   }, [storeId]);
 
@@ -218,7 +226,9 @@ export default function DashboardProduct() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <Menu />
-
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+        <Navbar/>
+      </div>
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <div className="flex items-center justify-between">
@@ -247,6 +257,7 @@ export default function DashboardProduct() {
                     setCategories={setCategories}
                     setSuppliers={setSuppliers}
                     setOrigins={setOrigins}
+                    storeId={storeId}
                   />
                 
               </div>

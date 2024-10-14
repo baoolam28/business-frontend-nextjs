@@ -38,12 +38,12 @@ import inventory from "./inventory"
 import { useRouter } from 'next/navigation';
 import formatVND from "../../utils/formatVND"
 import {useStore} from "../../context/StoreContext"; 
-import {useUser} from "../../context/UserContext";
-
+// import { Navbar } from "../../components/component/navbar"
 export default function sales() {
 
+  const [loadingCustomers, setLoadingCustomers] = useState(false);
+  const [error, setError] = useState(null)
   const { storeId } = useStore();
-  const { userId} = useUser(); 
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
   const [inventories, setInventories] = useState([]);
@@ -59,8 +59,8 @@ export default function sales() {
 
 useEffect(() => {
 
-  console.log("Store ID:", storeId);
-  console.log("User ID:", userId);
+  // console.log("Store ID:", storeId);
+  // console.log("User ID:", userId);
 
     const fetchProducts = async () => {
       if (!storeId) return; // Nếu storeId không có, không gọi API
@@ -309,7 +309,10 @@ const handleIncreaseQuantity = (index) => {
 
   return (
     (<div className="flex min-h-screen w-full bg-muted/40">
-      <Menu />
+      <Menu/>
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+      
+      </div>
       <BarcodeScanner 
         onValidBarcode={handleValidBarcode}
         onInvalidBarcode={handleInvalidBarcode} 

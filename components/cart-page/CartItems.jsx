@@ -2,35 +2,39 @@
 import React from "react";
 import buyerAPI from '../../api/buyer'
 import {useState, useEffect} from 'react'
-import {useUser} from "../../context/UserContext"
+import {useUser} from '../../context/UserContext'
+import formatAsVND from '../../utils/formatVND'
+
 
 function CartItems() {
 
   const [cartItems, setCartItems] = useState([]);
   const [cartId, setCartId] = useState(null);
-  const {user} = useUser();
-  
+  const [quantity, setQuantity] = useState(0);
+  const { user } = useUser();
+
+  const userId = user ? user.id : null; 
 
   // lấy cartItem theo userId
   useEffect(() =>{  
-    
-    if(user.id){
+    console.log("Current userId:", userId);
+    if(userId){
       const fetchCart = async () =>{
         try{
-          const response = await buyerAPI.cart.getCartByUserId(user.id)
-          console.log("Cart data from API:", response.data);
-
+          const response = await buyerAPI.cart.getCartByUserId(userId)
+          console.log("Full response from API:", response)
+          
           if(response.statusCode === 200){
+            console.log("Data structure:", response.data);
             const items = response.data && Array.isArray(response.data.cartItems) ? response.data.cartItems : [];
             setCartItems(items) 
 
-            //lưu lại cartId
             setCartId(response.data.cartId)
 
             console.log("Cart items set:", items);
           }else {
             console.error("Error fetching cart items: ", response.message);
-            setCartItems([]); // Thiết lập mảng rỗng nếu không thành công
+            setCartItems([]); 
           }
          
         }catch(error){
@@ -39,8 +43,10 @@ function CartItems() {
         }
     }
     fetchCart()
-    };
-  }, [user.id])
+    }else{
+      console.log("userId is null, cannot fetch cart.");
+    }
+  }, [userId])
 
   // delete product from cart
   const handleDeleteItem = async(index) => {
@@ -75,36 +81,48 @@ function CartItems() {
     }
   }
 
-  // update quantity
-  const handleQuantityChange = async (index, newQuantity) => {
-    const quantity = Number(newQuantity)
+  //update quantity
+  const handleQuantityChange  = async (index, newQuantity) => {
+    let quantity = Number(newQuantity)
 
-    //Kiểm tra giá trị số lượng có hợp lệ không
-    if (isNaN(quantity) ||quantity < 1) {
-      alert("Please enter a valid quantity");
+    if(isNaN(quantity) || quantity === null || newQuantity === ''){
+      quantity = 1
+    }
+
+    if(quantity === 0){
+      const confirmDelete = window.confirm("Are you sure you want to remove this item from your cart?");
+      if(confirmDelete){
+        handleDeleteItem(index)
+        return;
+      }else{
+       quantity = 1
+      }
       return;
     }
 
     const updatedCartItems = [...cartItems];
     const productId = updatedCartItems[index].productId;
-
-    if (!cartId) {
-      console.error("Cart ID is undefined or invalid for item at index:", index);
-      alert("Error: Cart ID is missing for this item. Please refresh the page.");
-      return;
-    }
-    updatedCartItems[index].quantity = quantity;  
+    updatedCartItems[index].quantity = quantity === '' ? '' : quantity  
     const price = updatedCartItems[index].price
+
     if(!isNaN(price)){
       updatedCartItems[index].totalPrice = (price * quantity).toFixed(2)
     }else{
       console.error("Invalid price format for item:", updatedCartItems[index]);
     }
     setCartItems(updatedCartItems)
+
+    if (!cartId) {
+      console.error("Cart ID is undefined or invalid for item at index:", index);
+      alert("Error: Cart ID is missing for this item. Please refresh the page.");
+      return;
+    }
+
     try {
       const response = await buyerAPI.cart.updateCartItems(cartId, productId, quantity)
       console.log("Cart data from API:", response.data);
-
+      console.log("Updating cart item:", { cartId, productId, quantity, totalPrice: updatedCartItems[index].totalPrice});
+      
       if(response.statusCode === 200){
         console.log("Quantity updated successfully");
       }else{
@@ -119,6 +137,7 @@ function CartItems() {
       alert("Error updating the cart. Please try again.");
     }
   };
+
 
   // Ghi log cartItems để xác minh dữ liệu nhận được
   console.log("Received cartItems:", cartItems);
@@ -159,24 +178,30 @@ function CartItems() {
       </div>
 
       {/* Price */}
-      <div className="w-1/5 text-center">{item.price}</div>
+      <div className="w-1/5 text-center">{formatAsVND(item.price)}</div>
 
       {/* Quantity */}
       <div className="w-1/5 flex justify-center">
-        <input
+        <button type="button" 
+                onClick={() => handleQuantityChange(index, item.quantity - 1)} disabled={item.quantity <= 0} 
+                className="border border-gray-300 rounded px-2 py-1 w-8">-</button>
+        <input 
           name="quantity"
-          type="number"
           value={item.quantity}
+          type="text"
           onChange={(e) => handleQuantityChange(index, e.target.value)}
+          disabled = {false}
           min="1"
-          className="border border-gray-300 rounded px-2 py-1 w-20 text-center"
-        />
+          className="border border-gray-300 rounded px-2 py-1 w-20 text-center"></input>
+        <button type="button"
+                onClick={() => handleQuantityChange(index, item.quantity + 1)}
+                className="border border-gray-300 rounded px-2 py-1 w-8">+</button>
       </div>
 
       {/* Subtotal */}
-      <div className="w-1/5 text-center">{item.totalPrice}</div>
+      <div className="w-1/5 text-center">{formatAsVND(item.totalPrice)}</div>
       <div className="w-1/5 text-right">
-        <button onClick={() => handleDeleteItem(index)} className="text-red-400 hover:text-red-600">Delete</button>
+        <button onClick={() => handleDeleteItem(index)} className="text-black hover:text-red-400">Delete</button>
       </div>
     </div>
   ))}

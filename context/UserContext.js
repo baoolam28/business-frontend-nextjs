@@ -1,17 +1,22 @@
 "use client"
-import { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
+
 
 // User Context
 const UserContext = createContext();
+
 export const UserProvider = ({ children }) => {
   const { data: session } = useSession();
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(session?.user || null); 
 
-  // Khi session đã sẵn sàng, gán giá trị vào state user
   useEffect(() => {
     if (session && session.user) {
-      setUser(session.user);
+      // Kiểm tra xem user đã khác chưa trước khi cập nhật
+      if (!user || user.username !== session.user.username) {
+        console.log("get session");
+        setUser(session.user);
+      }
     }
   }, [session]);
 
