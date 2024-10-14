@@ -14,7 +14,6 @@ export const UserProvider = ({ children }) => {
     if (session && session.user) {
       // Kiểm tra xem user đã khác chưa trước khi cập nhật
       if (!user || user.username !== session.user.username) {
-        console.log("get session");
         setUser(session.user);
       }
     }
