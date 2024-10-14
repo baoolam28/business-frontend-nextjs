@@ -22,29 +22,17 @@ function ProductPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const id = urlParams.get('id');
     setProductId(id)
-    console.log(id);
 
     const fetchProductById = async () => {
       if (!id) return; 
 
       try {
-        const response = await ProductId.product.getByIdProduct(id);
-        console.log(response.statusCode);
+        const response = await ProductId.product.getProductById(id); 
+        console.log("Response Status Code:", response);
+        
         if (response.statusCode === 200) {
-          const productData = {
-            id: response.data.productId,
-            name: response.data.productName,
-            discount: 0, // Lấy discount từ API hoặc gán giá trị mặc định
-            currentPrice: "", 
-            originalPrice: response.data.price, // Nếu có giá gốc
-            rating: 5, // Lấy rating từ API hoặc gán mặc định là 5
-            reviews: 65, // Lấy số reviews từ API hoặc gán mặc định
-            image: fallbackImage, // Gán ảnh mặc định nếu không có ảnh từ API
-          };
-          console.log("API response for product details: ", response.data);
-
-          setProductData(productData);  // Gán dữ liệu sản phẩm vào state
-          console.log("Product data: ", productData);
+          setProductData(response.data);
+          console.log("Product fetched:", response.data);
         } else {
           console.error("Failed to fetch product details");
         }

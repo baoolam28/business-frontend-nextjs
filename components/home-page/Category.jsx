@@ -194,13 +194,13 @@ const Category = () => {
                   </div>
                 </CardContent>
                 <CardFooter className="p-4">
-                  <Button className="w-full">Thêm vào giỏ hàng</Button>
+                  <Button className="w-full">Thêm vào hahahahahahahahahahagiỏ hàng</Button>
                 </CardFooter>
               </Card>
             ))}
           </div>
         </div>
-      </div>
+      </div>  
       <Footer />
     </div>
   );
