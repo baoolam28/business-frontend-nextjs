@@ -95,7 +95,7 @@ export default function CheckoutPageComponent() {
               setIsAddressDialogOpen={setIsAddressDialogOpen}
               setIsNewAddressDialogOpen={setIsNewAddressDialogOpen}
             />
-            <ProductSection />
+            <ProductSection data={data}/>
             <SellerNotesAndShipping />
           </div>
           <div className="space-y-8">
