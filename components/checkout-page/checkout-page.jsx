@@ -1,81 +1,105 @@
-'use client'
+  'use client'
 
-import { useState, useEffect } from 'react'
-import Image from 'next/image'
-import { ShoppingBag, MapPin, Heart, MessageCircle, Truck, AlertCircle } from 'lucide-react'
-import Header from "../../components/component/Header";
-import Footer from "../../components/home-page/Footer";
-import buyerAPI from "../../api/buyer";
-import { Button } from "../../components/ui/button"
-import { Checkbox } from "../../components/ui/checkbox"
-import { Input } from "../../components/ui/input"
-import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group"
-import { Label } from "../../components/ui/label"
-import { useSearchParams, useRouter } from 'next/navigation'
-import FormatVND from "../../utils/formatVND"
-import { useUser} from "../../context/UserContext"
-import { Trash2 } from 'lucide-react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "../../components/ui/dialog"
-export default function CheckoutPageComponent() {
-  const [paymentMethod, setPaymentMethod] = useState('cash')
-  const { user } = useUser() // Now this should work correctly
-  const [shippingAddresses, setShippingAddresses] = useState([])
-  const [selectedAddress, setSelectedAddress] = useState(null)
-  const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false)
-  const [isNewAddressDialogOpen, setIsNewAddressDialogOpen] = useState(false)
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const [data, setData] = useState([])
+  import { useState, useEffect } from 'react'
+  import Image from 'next/image'
+  import { ShoppingBag, MapPin, Heart, MessageCircle, Truck, AlertCircle } from 'lucide-react'
+  import Header from "../../components/component/Header";
+  import Footer from "../../components/home-page/Footer";
+  import buyerAPI from "../../api/buyer";
+  import { Button } from "../../components/ui/button"
+  import { Checkbox } from "../../components/ui/checkbox"
+  import { Input } from "../../components/ui/input"
+  import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group"
+  import { Label } from "../../components/ui/label"
+  import { useSearchParams, useRouter } from 'next/navigation'
+  import FormatVND from "../../utils/formatVND"
+  import { useUser} from "../../context/UserContext"
+  import { Trash2 } from 'lucide-react';
+  import {   
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue, } from '../../components/ui/select'
+  import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+  } from "../../components/ui/dialog"
+  import SelectAddress from "./SelectAddress"
 
-  useEffect(() => {
-    const rawData = searchParams.get('data')
-    if (rawData) {
-      try {
-        const decodedData = JSON.parse(decodeURIComponent(rawData))
-        setData(Array.isArray(decodedData) ? decodedData : [])
-      } catch (error) {
-        console.error('Failed to parse data from URL:', error)
-        router.push('/cart')
-        setData([]) 
+
+  export default function CheckoutPageComponent() {
+    const [paymentMethod, setPaymentMethod] = useState('cash')
+    const { user } = useUser() // Now this should work correctly
+    const [shippingAddresses, setShippingAddresses] = useState([])
+    const [selectedAddress, setSelectedAddress] = useState(null)
+    const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false)
+    const [isNewAddressDialogOpen, setIsNewAddressDialogOpen] = useState(false)
+    const searchParams = useSearchParams()
+    const router = useRouter()
+    const [data, setData] = useState([])
+
+    useEffect(() => {
+      const rawData = searchParams.get('data')
+      if (rawData) {
+        try {
+          const decodedData = JSON.parse(decodeURIComponent(rawData))
+          setData(Array.isArray(decodedData) ? decodedData : [])
+        } catch (error) {
+          console.error('Failed to parse data from URL:', error)
+          // router.push('/cart')
+          setData([]) 
+        }
+      }else{
+        // router.push('/cart')
       }
-    }else{
-      router.push('/cart')
-    }
-  }, [searchParams])
+    }, [searchParams])
 
-  useEffect(() => {
-    const fetchShippingAddress = async () => {
-      if (!user || !user.id) {
-        console.error("User is not logged in or user ID is missing");
-        return; // Dừng lại nếu user không tồn tại hoặc không có ID
-      }
-      
-      console.log("user Id: " + user.id);
-      try {
-        const response = await buyerAPI.shippingAddress.getShippingAddressByUserId(user.id);
-        console.log(response.statusCode);
-        console.log("Response data:", response.data);
+    useEffect(() => {
+      const fetchShippingAddress = async () => {
+        if (!user || !user.id) {
+          console.error("User is not logged in or user ID is missing");
+          return; // Dừng lại nếu user không tồn tại hoặc không có ID
+        }
         
-        if (response.statusCode === 200 && response.data) {
-          setShippingAddresses(response.data); // Cập nhật địa chỉ giao hàng
-          console.log("Shipping address set:", response.data);
+        console.log("user Id: " + user.id);
+        try {
+          const response = await buyerAPI.shippingAddress.getShippingAddressByUserId(user.id);
+          console.log(response.statusCode);
+          console.log("Response data:", response.data);
+          
+          if (response.statusCode === 200 && response.data) {
+            setShippingAddresses(response.data); // Cập nhật địa chỉ giao hàng
+            console.log("Shipping address set:", response.data);
+          } else {
+            console.error("Failed to fetch shipping address:", response.status);
+          }
+        } catch (error) {
+          console.error("Error fetching shipping address:", error);
+        }
+      };
+    
+      fetchShippingAddress();
+    }, [user]);
+
+    const handleDeleteAddress = async (addressId) => {
+      try {
+        const response = await buyerAPI.shippingAddress.deleteShippingAddressById(addressId);
+        console.log("Response:", response); // In phản hồi ra console
+        if (response.statusCode === 204) {
+          // Cập nhật lại danh sách địa chỉ sau khi xóa thành công
+          setShippingAddresses(prevAddresses => prevAddresses.filter(address => address.id !== addressId));
+          console.log("Address deleted successfully");
         } else {
-          console.error("Failed to fetch shipping address:", response.status);
+          console.error("Failed to delete address:", response.status);
         }
       } catch (error) {
-        console.error("Error fetching shipping address:", error);
+        console.error("Error deleting address:", error);
       }
     };
-  
-    fetchShippingAddress();
-  }, [user]);
-
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -95,7 +119,7 @@ export default function CheckoutPageComponent() {
               setIsAddressDialogOpen={setIsAddressDialogOpen}
               setIsNewAddressDialogOpen={setIsNewAddressDialogOpen}
             />
-            <ProductSection />
+            <ProductSection data={data}/>
             <SellerNotesAndShipping />
           </div>
           <div className="space-y-8">
@@ -110,6 +134,7 @@ export default function CheckoutPageComponent() {
         addresses={shippingAddresses}
         selectedAddress={selectedAddress}
         setSelectedAddress={setSelectedAddress}
+        handleDeleteAddress={handleDeleteAddress}
       />
       <NewAddressDialog
         isOpen={isNewAddressDialogOpen}
@@ -148,7 +173,7 @@ function ShippingAddressSection({ selectedAddress, setIsAddressDialogOpen, setIs
   )
 }
 
-function AddressSelectionDialog({ isOpen, setIsOpen, addresses, selectedAddress, setSelectedAddress, removeAddress }) {
+function AddressSelectionDialog({ isOpen, setIsOpen, addresses, selectedAddress, setSelectedAddress, removeAddress, handleDeleteAddress }) {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent>
@@ -158,9 +183,9 @@ function AddressSelectionDialog({ isOpen, setIsOpen, addresses, selectedAddress,
         <div className="space-y-4">
           {addresses.map((address) => (
             <div
-              key={address.id}
+              key={address.addressId}
               className={`p-4 border rounded-lg flex justify-between items-center cursor-pointer ${
-                selectedAddress?.id === address.id ? 'border-orange-500' : 'border-gray-200'
+                selectedAddress?.id === address.addressId ? 'border-orange-500' : 'border-gray-200'
               }`}
               onClick={() => setSelectedAddress(address)}
             >
@@ -169,7 +194,13 @@ function AddressSelectionDialog({ isOpen, setIsOpen, addresses, selectedAddress,
                 <p>{address.address}</p>
                 <p>Phone: {address.phoneNumber}</p>
               </div>
-              <button onClick={(e) => { e.stopPropagation(); removeAddress(address.id); }} className="text-red-500">
+              <button 
+                onClick={(e) => { 
+                  e.stopPropagation(); // Ngăn chặn sự kiện click từ button lan ra div
+                  handleDeleteAddress(address.addressId); // Sử dụng id của address để xóa
+                }} 
+                className="text-red-500"
+              >
                 <Trash2 className="h-5 w-5" />
               </button>
             </div>
@@ -193,43 +224,63 @@ function NewAddressDialog({ isOpen, setIsOpen, addNewAddress }) {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Thêm Địa Chỉ Mới</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Tên</Label>
+        <SelectAddress/>
+        {/* <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="city">Thành phố</Label>
+            <Select onValueChange={(value) => setNewAddress({ ...newAddress, city: value })}>
+              <SelectTrigger id="city">
+                <SelectValue placeholder="Chọn thành phố" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="hanoi">Hà Nội</SelectItem>
+                <SelectItem value="hochiminh">Hồ Chí Minh</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="state">Tỉnh thành</Label>
+            <Select onValueChange={(value) => setNewAddress({ ...newAddress, state: value })}>
+              <SelectTrigger id="state">
+                <SelectValue placeholder="Chọn tỉnh thành" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="dongNai">Đồng Nai</SelectItem>
+                <SelectItem value="binhDuong">Bình Dương</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="district">Quận huyện</Label>
+            <Select onValueChange={(value) => setNewAddress({ ...newAddress, district: value })}>
+              <SelectTrigger id="district">
+                <SelectValue placeholder="Chọn quận huyện" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="quan1">Quận 1</SelectItem>
+                <SelectItem value="quan2">Quận 2</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="street">Số nhà, đường</Label>
             <Input
-              id="name"
-              value={newAddress.name}
-              onChange={(e) => setNewAddress({ ...newAddress, name: e.target.value })}
-              required
+              id="street"
+              value={newAddress.street}
+              onChange={(e) => setNewAddress({ ...newAddress, street: e.target.value })}
+              placeholder="Nhập số nhà, tên đường"
             />
           </div>
-          <div>
-            <Label htmlFor="address">Địa chỉ</Label>
-            <Input
-              id="address"
-              value={newAddress.address}
-              onChange={(e) => setNewAddress({ ...newAddress, address: e.target.value })}
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="phone">Số điện thoại</Label>
-            <Input
-              id="phone"
-              value={newAddress.phone}
-              onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
-              required
-            />
-          </div>
-          <Button type="submit">Thêm địa chỉ</Button>
-        </form>
+          <Button type="submit" className="w-full">Thêm địa chỉ</Button>
+        </form> */}
       </DialogContent>
     </Dialog>
-  )
+  );
+  
 }
 
 function ProductSection({data}) {

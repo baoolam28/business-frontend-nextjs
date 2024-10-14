@@ -29,7 +29,8 @@ const buyerAPI = {
   },
   shippingAddress : {
     getShippingAddressByUserId : (userId) => axiosClient.get(`${baseUrl}/shipping-addresses/${userId}`),
-    createShippingAddressByUserId : (userId) => axiosClient.post(`${baseUrl}/shipping-addresses/${userId}`)
+    createShippingAddressByUserId : (userId) => axiosClient.post(`${baseUrl}/shipping-addresses/${userId}`),
+    deleteShippingAddressById : (categoryId) => axiosClient.delete(`${baseUrl}/shipping-addresses/${categoryId}`)
   },
 
 };
