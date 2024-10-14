@@ -8,6 +8,7 @@ import SearchBar from "./SearchBar";
 import IconButton from "./IconButton";
 import { useUser } from "../../context/UserContext";
 import AccountDropdown from "./account-dropdown";
+import { ShoppingBag } from 'lucide-react'
 function Header() {
 
   const { user } = useUser();
@@ -36,7 +37,8 @@ function Header() {
 
       <nav className="flex justify-between items-center px-16 py-6 max-md:flex-col max-md:px-5 max-md:items-start">
         <div className="flex items-center gap-10">
-          <h1 className="text-2xl font-bold tracking-wider">Shop VN</h1>
+          <ShoppingBag className="h-8 w-8 text-black-500 mr-2" />
+            <h1 className="text-3xl font-bold text-black-500">Shop VN</h1>
           <ul className="flex gap-8 text-base">
             <li>
               <a href="/home-page" className="hover:underline">

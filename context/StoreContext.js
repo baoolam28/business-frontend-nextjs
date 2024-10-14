@@ -17,7 +17,10 @@ export const StoreProvider = ({ children }) => {
         console.log("get storeID");
         try {
           const res = await sellerAPI.store.getStoreByUserId(user.id);
-          setStoreId(res.data.storeId);
+          if(res.statusCode === 200) {
+            setStoreId(res.data.storeId);
+          }
+          
         } catch (error) {
           console.error("Error fetching store:", error);
         }

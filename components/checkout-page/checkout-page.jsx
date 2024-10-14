@@ -11,6 +11,8 @@ import { Checkbox } from "../../components/ui/checkbox"
 import { Input } from "../../components/ui/input"
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group"
 import { Label } from "../../components/ui/label"
+import { useSearchParams, useRouter } from 'next/navigation'
+import FormatVND from "../../utils/formatVND"
 import { useUser} from "../../context/UserContext"
 import { Trash2 } from 'lucide-react';
 import {
@@ -27,6 +29,25 @@ export default function CheckoutPageComponent() {
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false)
   const [isNewAddressDialogOpen, setIsNewAddressDialogOpen] = useState(false)
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const [data, setData] = useState([])
+
+  useEffect(() => {
+    const rawData = searchParams.get('data')
+    if (rawData) {
+      try {
+        const decodedData = JSON.parse(decodeURIComponent(rawData))
+        setData(Array.isArray(decodedData) ? decodedData : [])
+      } catch (error) {
+        console.error('Failed to parse data from URL:', error)
+        router.push('/cart')
+        setData([]) 
+      }
+    }else{
+      router.push('/cart')
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const fetchShippingAddress = async () => {
@@ -55,6 +76,7 @@ export default function CheckoutPageComponent() {
     fetchShippingAddress();
   }, [user]);
 
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -67,6 +89,7 @@ export default function CheckoutPageComponent() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
+
             <ShippingAddressSection
               selectedAddress={selectedAddress}
               setIsAddressDialogOpen={setIsAddressDialogOpen}
@@ -209,11 +232,14 @@ function NewAddressDialog({ isOpen, setIsOpen, addNewAddress }) {
   )
 }
 
-function ProductSection() {
+function ProductSection({data}) {
   return (
-    <section className="bg-white p-6 rounded-lg shadow">
+    (<section className="bg-white p-6 rounded-lg shadow">
+      {data.map((item, index) => {
+  return (
+    <div key={index} className="bg-white border rounded-lg shadow-md p-4 mb-4">
+      <h2 className="text-lg font-bold mb-2">Sản Phẩm</h2>
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold">Sản Phẩm</h2>
         <div className="flex space-x-2">
           <Button variant="outline" size="sm">
             <Heart className="h-4 w-4 mr-2" />
@@ -226,30 +252,36 @@ function ProductSection() {
         </div>
       </div>
       <div className="flex items-center space-x-4">
-        <Image
-          src="/placeholder.svg"
+        <img
+          src={item && item.image ? item.image : "https://via.placeholder.com/80"}
           alt="Product"
           width={80}
           height={80}
-          className="rounded-md" />
+          className="rounded-md"
+        />
         <div className="flex-grow">
-          <h3 className="font-semibold">Product Name</h3>
-          <p className="text-sm text-gray-500">Product Description</p>
-          <p className="font-semibold mt-2">$99.99</p>
+          <h3 className="font-semibold">{item.productName}</h3>
+          <p className="text-sm text-gray-500">
+            {Object.entries(item.attributes).map(([key, value]) => (
+              <div key={key} className="inline-block mr-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs">
+                <strong className="font-semibold text-gray-800">{key}:</strong>
+                <span className="ml-1 text-gray-600">{value}</span>
+              </div>        
+            ))}
+          </p>
+          <p className="font-semibold mt-2">{FormatVND(item.price)}</p>
         </div>
         <div className="text-right">
-          <p className="font-semibold">Qty: 1</p>
-          <p className="text-sm text-gray-500">Total: $99.99</p>
+          <p className="font-semibold">SL: {item.quantity}</p>
+          <p className="text-sm text-gray-500">Tổng: {FormatVND(item.price * item.quantity)}</p>
         </div>
       </div>
-      <div className="mt-4 flex items-center">
-        <Checkbox id="consumer-protection" />
-        <Label htmlFor="consumer-protection" className="ml-2 text-sm">
-          Bảo hiểm bảo vệ người tiêu dùng
-        </Label>
-      </div>
-    </section>
-  )
+    </div>
+  );
+})}
+
+    </section>)
+  );
 }
 
 function SellerNotesAndShipping() {
