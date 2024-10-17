@@ -41,7 +41,6 @@ import { showConfirmAlert, showSuccessAlert, showErrorAlert } from "../../utils/
 
 export default function Supplier() {
   const [suppliers, setSuppliers] = useState([]);
-  // const [storeId, setStoreId] = useState([]);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({

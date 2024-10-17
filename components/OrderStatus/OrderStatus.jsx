@@ -7,14 +7,14 @@ import ActionButtons from "./ActionButtons";
 
 function OrderStatus() {
   return (
-    <div className="flex flex-col pb-12 bg-white">
-      <Header />
+
+
       <main className="flex flex-col px-6">
 
-        <nav className="flex gap-3 items-center mt-10 text-sm text-black whitespace-nowrap">
+        {/* <nav className="flex gap-3 items-center mt-10 text-sm text-black whitespace-nowrap">
           <span className="opacity-50">Home</span>
           <span>Order Status</span>
-        </nav>
+        </nav> */}
         
         {/* Search Section */}
         <section className="flex items-center gap-4 my-5 p-3 bg-stone-50 border border-black rounded-lg">
@@ -69,8 +69,8 @@ function OrderStatus() {
           <ActionButtons />
         </section>
       </main>
-      <Footer />
-    </div>
+
+
   );
 }
 

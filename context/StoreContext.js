@@ -1,5 +1,5 @@
 "use client"
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import sellerAPI from "../api/seller";
 import { useUser } from "./UserContext"; // Sử dụng UserContext để lấy userId
 
@@ -19,6 +19,7 @@ export const StoreProvider = ({ children }) => {
         console.log("get storeID");
         try {
           const res = await sellerAPI.store.getStoreByUserId(user.id);
+          if(res.statusCode === 200){}
           setStoreId(res.data.storeId);
           console.log("Store ID: ", res.data.storeId)
         } catch (error) {

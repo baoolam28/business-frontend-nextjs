@@ -5,7 +5,7 @@ import React from "react";
 
 const AccountNavigation = () => {
   return (
-    <nav className="flex flex-col w-[19%] max-md:ml-0 max-md:w-full p-6 bg-gray-100 rounded-lg shadow-lg">
+    <nav className="flex flex-col w-full md:w-[20%] p-6 bg-gray-100 rounded-lg shadow-lg">
       <div className="flex flex-col items-start text-base font-medium text-black">
         <h2 className="text-lg font-bold mb-4">Manage My Account</h2>
         <div className="flex flex-col mt-4">
@@ -21,8 +21,8 @@ const AccountNavigation = () => {
         </div>
         <h2 className="mt-6 text-lg font-bold">My Orders</h2>
         <div className="flex flex-col mt-4">
-          <a href="#" className="opacity-50 hover:opacity-100 transition duration-200">
-            My Returns
+          <a href="/orderstatus" className="opacity-50 hover:opacity-100 transition duration-200">
+            My Orders
           </a>
           <a href="#" className="mt-2 opacity-50 hover:opacity-100 transition duration-200">
             My Cancellations
