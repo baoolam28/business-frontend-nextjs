@@ -28,7 +28,7 @@ const sellerAPI = {
     getAllOdersByStoreId: (storeId) => axiosClient.get(`${baseUrl}/orders/store/${storeId}`),
     getOrderById: (orderId) => axiosClient.get(`${baseUrl}/orders/${orderId}`),
     createOrder: (orderData) => axiosClient.post(`${baseUrl}/orders`, orderData),
-    updateOrder: () => axiosClient.put(`${baseUrl}/orders/${orderId}/payment`),
+    updateOrder: (PaymentData) => axiosClient.put(`${baseUrl}/orders/${orderId}/payment`),
     deleteOrder: () => axiosClient.delete(`${baseUrl}/orders/${orderId}`)
   },
   customer: {

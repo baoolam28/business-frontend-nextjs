@@ -7,7 +7,6 @@ import { Button } from "../../components/ui/button"
 import { Banknote, CreditCard, QrCode } from 'lucide-react'
 import { useSearchParams } from 'next/navigation'
 import { useRouter } from 'next/navigation';
-import orderAPI from '../../api/order'
 import formatVND from "../../utils/formatVND"
 import QrCodeCard  from "../../components/component/qrCodeCard"
 import sellerAPI from "../../api/seller"
