@@ -22,7 +22,7 @@ const sellerAPI = {
   },
   store: {
     getStoreByUserId: (userId) =>
-      axiosClient.get(`${baseUrl}/store/by-user/${userId}`),
+      axiosClient.get(`${baseUrl}/store/by-user?userId=${userId}`),
   },
 };
 

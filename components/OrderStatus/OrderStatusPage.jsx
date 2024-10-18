@@ -1,5 +1,6 @@
 import React from 'react';
 import OrderStatus from './order-page';
+// import OrderStatus from '../../@/components/order-cancellation'
 import Layout from '../../components/home-page/Layout'
 import AccountNavigation from "../../components/account-page/AccountNavigation";
 const OrderStatusPage = () => {

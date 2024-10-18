@@ -14,21 +14,28 @@ const buyerAPI = {
   },
   cart : {
     // Lấy thông tin giỏ hàng theo userId
-    getCartByUserId: (userId) => axiosClient.get(`${baseUrl}/api/buyer/cart/get-by-user/${userId}`),
+    getCartByUserId: (userId) => axiosClient.get(`${baseUrl}/cart/get-by-user/${userId}`),
 
     // Thêm sản phẩm vào giỏ hàng
-    addToCart: (cartRequest) => axiosClient.post(`${baseUrl}/api/buyer/cart/add-to-cart`, cartRequest),
+    addToCart: (cartRequest) => axiosClient.post(`${baseUrl}/cart/add-to-cart`, cartRequest),
 
     // Cập nhật sản phẩm trong giỏ hàng
-    updateCart: (cartRequest) => axiosClient.put(`${baseUrl}/api/buyer/cart/update-cart`, cartRequest),
+    updateCart: (cartRequest) => axiosClient.put(`${baseUrl}/cart/update-cart`, cartRequest),
 
     // Xóa sản phẩm khỏi giỏ hàng
-    deleteProductFromCart: (cartRequest) => axiosClient.delete(`${baseUrl}/api/buyer/cart/delete-product`, {
+    deleteProductFromCart: (cartRequest) => axiosClient.delete(`${baseUrl}/cart/delete-product`, {
       data: cartRequest
     })
   },
+
   orderStatus : {
     getAllOrderStatus: (userId) => axiosClient.get(`${baseUrl}/ordersOnlineDetails/${userId}`)
+  },
+  
+  shippingAddress : {
+    getShippingAddressByUserId : (userId) => axiosClient.get(`${baseUrl}/shipping-addresses/${userId}`),
+    createShippingAddressByUserId : (userId) => axiosClient.post(`${baseUrl}/shipping-addresses/${userId}`),
+    deleteShippingAddressById : (categoryId) => axiosClient.delete(`${baseUrl}/shipping-addresses/${categoryId}`)
   },
 
 };

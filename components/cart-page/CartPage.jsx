@@ -4,7 +4,7 @@
 import React from "react";
 import Header from "../../components/component/Header";
 import CartItems from "./CartItems"
-import CartSummary from "./CartSummary";
+import ShoppingCart from "./shopping-cart"
 import Footer from "./Footer";
 
 function CartPage() {
@@ -13,7 +13,7 @@ function CartPage() {
     <main className="flex overflow-hidden flex-col bg-white">
       <Header />
       <div className="" />
-      <section className="flex flex-col self-center mt-20 w-full max-w-[1170px] max-md:mt-10 max-md:max-w-full">
+      {/* <section className="flex flex-col self-center mt-20 w-full max-w-[1170px] max-md:mt-10 max-md:max-w-full">
         <nav
           className="flex gap-3 items-center self-start text-sm text-black whitespace-nowrap"
           aria-label="Breadcrumb"
@@ -24,10 +24,11 @@ function CartPage() {
           <span className="self-stretch my-auto">Cart</span>
         </nav>
         <div className="flex flex-col mt-20 w-full max-md:mt-10 max-md:max-w-full">
-          <CartItems/>
-          <CartSummary />
+
+          
         </div>
-      </section>
+      </section> */}
+      <ShoppingCart/>
       <Footer />
     </main>
   );

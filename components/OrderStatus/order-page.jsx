@@ -7,13 +7,13 @@ import { Search, MessageCircle, Store } from "lucide-react";
 import Image from "next/image";
 import { useUser } from '../../context/UserContext'
 import buyerAPI from '../../api/buyer'
+import formatAsVND from '../../utils/formatVND'
 
 export default function OrderPage() {
 
   const { user } = useUser();
   const [orderDetails, setOrderDetails] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('Tất cả');
-
   
   useEffect(() =>{  
     if(user && user.id){
@@ -38,7 +38,7 @@ export default function OrderPage() {
     }
   }, [ user])
 
-  
+
 
   const handleStatusClick = (status) => {
     setSelectedStatus(status);
@@ -51,6 +51,24 @@ export default function OrderPage() {
     'Đang giao': 'DANG_GIAO_HANG',
     'Hoàn thành': 'GIAO_HANG_THANH_CONG',
     'Đã hủy': 'HUY'
+  };
+
+   // Hàm chuyển đổi trạng thái thành tiếng Việt
+   const getStatusInVietnamese = (status) => {
+    switch (status) {
+      case 'CHO_XAC_NHAN':
+        return 'Chờ thanh toán';
+      case 'DANG_VAN_CHUYEN':
+        return 'Vận chuyển';
+      case 'DANG_GIAO_HANG':
+        return 'Đang giao';
+      case 'GIAO_HANG_THANH_CONG':
+        return 'Hoàn thành';
+      case 'HUY':
+        return 'Đã hủy';
+      default:
+        return 'Không xác định'; // Phòng trường hợp giá trị không khớp
+    }
   };
 
   const filteredOrders = selectedStatus === 'Tất cả' 
@@ -77,7 +95,7 @@ export default function OrderPage() {
         </nav>
         <div className="bg-gray-200 py-4">
           <div className="container mx-auto px-4">
-            <div className="relative max-w-md mx-auto">
+            <div className="relative max-w-3xl mx-auto">
               <Input
                 type="text"
                 placeholder="Tìm kiếm theo Tên Shop, ID đơn hàng hoặc Tên Sản phẩm"
@@ -93,7 +111,7 @@ export default function OrderPage() {
         {filteredOrders.length > 0 ?(
           filteredOrders.map((order, index) => (
           <Card key={index} className="w-full mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
-            <CardHeader className="flex justify-between items-left border-b pb-4">
+            <CardHeader className="flex justify-between items-start border-b pb-4 relative">
               <div className="flex items-center space-x-4">
                 <Image
                   src="/placeholder.svg"
@@ -121,7 +139,11 @@ export default function OrderPage() {
                   Xem Shop
                 </Button>
               </div>
+              <div className="absolute top-8 right-4">
+                <span className={`font-medium ${order.status === 'HUY' ? 'text-red-600' : 'text-green-600'}`}>{getStatusInVietnamese(order.status)}</span>
+              </div>
             </CardHeader>
+           
             <CardContent className="py-6">
             {order.orderDetails.map((detail, detailIndex) =>(
               <div key={detailIndex} className="flex justify-between items-start mb-4">
@@ -136,21 +158,22 @@ export default function OrderPage() {
                     <h3 className="font-medium text-sm mb-1">{detail.productName}</h3>
                     <p className="text-sm text-gray-500">Phân loại: {detail.attributes.color}, {detail.attributes.size}</p>
                     <p className="text-sm text-gray-500">x{detail.quantity}</p>
+                    
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-red-600 font-semibold">{detail.price} ₫</p>
-                  <p className="text-black-600 font-semibold">{detail.totalPrice} ₫</p>
+                  <p className="text-red-600 text-sm">{formatAsVND(detail.price)}</p>
+                  <p className="text-black-600">Thành tiền: 
+                      <span className="text-red-600 text-lg"> {formatAsVND(detail.totalPrice)}</span> 
+                    </p>
                 </div>
               </div>
-        ))}
-              
+            
+            ))}
             </CardContent>
-            <CardFooter className="flex justify-between items-center border-t pt-4">
-              <div>
-                <span className={`font-medium ${order.status === 'HUY' ? 'text-red-600' : 'text-green-600'}`}>{order.status}</span>
-              </div>
-              <div className="flex space-x-2">
+            <CardFooter className="flex justify-between items-center border-t pt-4 bg-amber-50">
+              
+              <div className="flex ml-auto space-x-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -158,22 +181,26 @@ export default function OrderPage() {
                   onClick={() => alert('Reordering the product!')}>
                   Mua Lại
                 </Button>
+                {order.status === 'HUY' &&(
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-gray-100"
+                    >
+                    Xem Chi Tiết Hủy Đơn
+                    </Button>
+                )}
+                
                 <Button
                   variant="outline"
                   size="sm"
                   className="hover:bg-gray-100"
-                  onClick={() => alert('Viewing cancellation details!')}>
-                  Xem Chi Tiết Hủy Đơn
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="hover:bg-gray-100"
-                  onClick={() => alert('Contacting the seller!')}>
+                  onClick={() => alert('Contacting the seller!')}>  
                   Liên Hệ Người Bán
                 </Button>
               </div>
             </CardFooter>
+        
           </Card>
         ))
         ) : (
