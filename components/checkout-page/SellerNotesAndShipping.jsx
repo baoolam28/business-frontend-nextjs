@@ -6,7 +6,7 @@ import { Input } from "../../components/ui/input";
 import FormatVND from "../../utils/formatVND"
 import axios from "axios";
 
-export default function SellerNotesAndShipping({ orderData, selectedAddress }) {
+export default function SellerNotesAndShipping({ orderData, selectedAddress, onShippingData }) {
   const [selectedShipping, setSelectedShipping] = useState(null);
   const [productParameters, setProductParameters] = useState([]);
   const [serviceFee, setServiceFee] = useState(0);
@@ -76,6 +76,7 @@ export default function SellerNotesAndShipping({ orderData, selectedAddress }) {
           if (deliveryTime) {
             setEstimatedDelivery(deliveryTime)
             setEstimatedDeliveryDate(convertTimestampToDate(deliveryTime));
+            onShippingData(fee, deliveryTime, selectedShippingMethod)
           }
         }
       })
@@ -227,9 +228,15 @@ export default function SellerNotesAndShipping({ orderData, selectedAddress }) {
   useEffect(() => {
     if (selectedShippingMethod === "economical") {
       const deliveryTime = estimatedDelivery + 5 * 24 * 60 * 60
+      setEstimatedDelivery(deliveryTime);
       setEstimatedDeliveryDate(convertTimestampToDate(deliveryTime));
+
+      // export fee and delivery time
+      onShippingData(serviceFee * 0.8, deliveryTime, selectedShippingMethod)
     }else{
       setEstimatedDeliveryDate(convertTimestampToDate(estimatedDelivery));
+      // export fee and delivery time
+      onShippingData(serviceFee, estimatedDelivery, selectedShippingMethod)
     }
 
   },[selectedShippingMethod])
