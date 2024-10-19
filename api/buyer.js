@@ -29,9 +29,12 @@ const buyerAPI = {
   },
   shippingAddress : {
     getShippingAddressByUserId : (userId) => axiosClient.get(`${baseUrl}/shipping-addresses/${userId}`),
-    createShippingAddressByUserId : (userId) => axiosClient.post(`${baseUrl}/shipping-addresses/${userId}`),
+    createShippingAddressByUserId : (data) => axiosClient.post(`${baseUrl}/shipping-addresses`,data),
     deleteShippingAddressById : (categoryId) => axiosClient.delete(`${baseUrl}/shipping-addresses/${categoryId}`)
   },
+  order: {
+    createOrderOnline : (data) => axiosClient.post(`${baseUrl}/ordersOnline`,data),
+  }
 
 };
 
