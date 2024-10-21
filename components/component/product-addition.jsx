@@ -288,7 +288,9 @@ export default function ProductAdditionComponent() {
                       type="file"
                       accept="image/*"
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                      onChange={(e) => handleImageUpload(e, 0)} />
+                      onChange={(e) => handleImageUpload(e, 0)} 
+                      required
+                    />
                     {mainImage ? (
                       <div className="relative w-full h-full">
                         <img src={mainImage} alt="Main" className="w-full h-full object-cover" />
@@ -377,6 +379,7 @@ export default function ProductAdditionComponent() {
                   value={productName}
                   onChange={(e) => setProductName(e.target.value)}
                   maxLength={255}
+                  required
                   placeholder="[Thương hiệu] + [Nội dung] + [Phạm vi áp dụng] + [Loại sản phẩm] + [Chức năng / Tính năng chính]"
                   className="w-full" />
                 <p className="text-sm text-gray-500 mt-1 text-right">
@@ -399,7 +402,7 @@ export default function ProductAdditionComponent() {
                     </Tooltip>
                   </TooltipProvider>
                 </div>
-                <Select value={category} onValueChange={setCategory}>
+                <Select value={category} onValueChange={setCategory} required>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Chọn hạng mục" />
                   </SelectTrigger>

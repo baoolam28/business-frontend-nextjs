@@ -2,10 +2,11 @@ import { ShoppingCart } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import BuyerAPI from "../../api/buyer"
 import { useUser } from "../../context/UserContext"
+import { useRouter } from "next/navigation"
 export default function AddToCartButton({ id, quantity }) {
 
   const {user} = useUser();  
-
+  const router = useRouter();
   const onAddToCart = () => {
     
     if(!user){
@@ -31,6 +32,8 @@ export default function AddToCartButton({ id, quantity }) {
       const res = await BuyerAPI.cart.addToCart(data);
       if(res.statusCode === 200) {
         console.log("Product added to cart successfully")
+        router.push("/cart")
+        
       }
     } catch (error) {
       console.error("Error adding product to cart:", error)

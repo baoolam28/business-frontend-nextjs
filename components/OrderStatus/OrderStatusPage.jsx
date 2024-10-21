@@ -1,15 +1,14 @@
 import React from 'react';
 import OrderStatus from './order-page';
-// import OrderStatus from '../../@/components/order-cancellation'
 import Layout from '../../components/home-page/Layout'
 import AccountNavigation from "../../components/account-page/AccountNavigation";
 const OrderStatusPage = () => {
     return (
         <Layout>
-            <main className="flex justify-center mt-20 w-full max-w-[1170px] max-md:mt-10 max-md:max-w-full">
-                <div className="flex w-full ml-20">
+            <main className="flex justify-center items-start mx-auto mt-20 w-full max-w-6xl max-md:mt-10">
+                <div className="flex w-full space-x-10">
                     <AccountNavigation />
-                    <div className="flex flex-col w-full ml-20 max-md:ml-0">
+                    <div className="flex flex-col w-full flex-grow ml-10">
                         <OrderStatus/>
                     </div>
                 </div>

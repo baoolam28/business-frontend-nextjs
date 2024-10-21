@@ -8,11 +8,13 @@ import Image from "next/image";
 import { useUser } from '../../context/UserContext'
 import buyerAPI from '../../api/buyer'
 import formatAsVND from '../../utils/formatVND'
+import Link from 'next/link'
+
 
 export default function OrderPage() {
 
   const { user } = useUser();
-  const [orderDetails, setOrderDetails] = useState([]);
+  const [shipments, setShipments] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('Tất cả');
   
   useEffect(() =>{  
@@ -24,14 +26,14 @@ export default function OrderPage() {
           console.log("Full response from API:", response)
           
           if(response.statusCode === 200){
-            setOrderDetails(response.data);
+            setShipments(response.data);
             console.log("Data structure:", response.data);
           }else {
-            console.error("Error fetching cart items: ", response.message);
+            console.error("Error fetching order: ", response.message);
           }
          
         }catch(error){
-          console.log("Error fetching Cart: ", error);
+          console.log("Error fetching order: ", error);
         }
     }
     fetchOrder()
@@ -40,52 +42,56 @@ export default function OrderPage() {
 
 
 
-  const handleStatusClick = (status) => {
-    setSelectedStatus(status);
+  const handleStatusClick = (shippingStatus) => {
+    setSelectedStatus(shippingStatus);
   };
 
   const statusMapping = {
     'Tất cả': null,
-    'Chờ thanh toán': 'CHO_XAC_NHAN',
-    'Vận chuyển': 'DANG_VAN_CHUYEN',
-    'Đang giao': 'DANG_GIAO_HANG',
+    'Chờ xác nhận': 'CHO_XAC_NHAN',
+    'Đã xác nhận': 'DA_XAC_NHAN',
+    'Đang giao': 'DANG_GIAO',
     'Hoàn thành': 'GIAO_HANG_THANH_CONG',
-    'Đã hủy': 'HUY'
+    'Đã hủy': 'DA_HUY_DON',
+    'Trả hàng/Hoàn tiền': 'GIAO_HANG_THAT_BAI'
   };
 
+  const filteredShipments = selectedStatus === 'Tất cả' 
+    ? shipments 
+    : shipments.filter(shipment => shipment.shippingStatus === statusMapping[selectedStatus]);
+
    // Hàm chuyển đổi trạng thái thành tiếng Việt
-   const getStatusInVietnamese = (status) => {
-    switch (status) {
+   const getStatusInVietnamese = (shippingStatus) => {
+    switch (shippingStatus) {
       case 'CHO_XAC_NHAN':
-        return 'Chờ thanh toán';
-      case 'DANG_VAN_CHUYEN':
-        return 'Vận chuyển';
-      case 'DANG_GIAO_HANG':
-        return 'Đang giao';
+        return 'CHỜ XÁC NHẬN';
+      case 'DA_XAC_NHAN':
+        return 'ĐÃ XÁC NHẬN';
+      case 'DANG_GIAO':
+        return 'ĐANG GIAO';
       case 'GIAO_HANG_THANH_CONG':
-        return 'Hoàn thành';
-      case 'HUY':
-        return 'Đã hủy';
+        return 'HOÀN THÀNH';
+      case 'DA_HUY_DON':
+        return 'ĐÃ HỦY';
+      case 'GIAO_HANG_THAT_BAI':
+        return 'GIAO HÀNG THẤT BẠI';
       default:
-        return 'Không xác định'; // Phòng trường hợp giá trị không khớp
+        return 'KHÔNG XÁC ĐỊNH'; // Phòng trường hợp giá trị không khớp
     }
   };
 
-  const filteredOrders = selectedStatus === 'Tất cả' 
-    ? orderDetails 
-    : orderDetails.filter(order => order.status === statusMapping[selectedStatus]);
 
   return (
-    <div className="min-h-screen flex justify-center items-start">
-      <div className="bg-white shadow-lg rounded-lg max-w-5xl w-full">
+    <div className="min-h-screen flex justify-center items-start w-full">
+      <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg">
         <nav className="bg-white shadow sticky top-0 z-10">
           <div className="container mx-auto px-4">
-            <ul className="flex items-center justify-start space-x-6 h-14">
-              {['Tất cả', 'Chờ thanh toán', 'Vận chuyển', 'Đang giao', 'Hoàn thành', 'Đã hủy'].map((item, index) => (
+            <ul className="flex items-center justify-start h-14">
+              {['Tất cả', 'Chờ xác nhận', 'Đã xác nhận', 'Đang giao', 'Hoàn thành', 'Đã hủy', 'Trả hàng/Hoàn tiền'].map((item, index) => (
                 <li key={index}>
                   <button
-                     onClick={() => handleStatusClick(item)}
-                    className={`px-4 py-2 rounded ${selectedStatus === item ? 'text-red-600 font-medium' : 'text-gray-600 hover:text-gray-600 hover:bg-gray-100'}`}>
+                    onClick={() => handleStatusClick(item)}
+                    className={`px-4 py-2 rounded ${selectedStatus === item ? 'text-red-400 font-medium underline' : 'text-gray-600 hover:text-red-600'}`}>
                     {item}
                   </button>
                 </li>
@@ -108,8 +114,8 @@ export default function OrderPage() {
         </div>
         <main className="container mx-auto px-4 py-8 space-y-4">
 
-        {filteredOrders.length > 0 ?(
-          filteredOrders.map((order, index) => (
+        {filteredShipments.length > 0 ?(
+          filteredShipments.map((shipment, index) => (
           <Card key={index} className="w-full mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardHeader className="flex justify-between items-start border-b pb-4 relative">
               <div className="flex items-center space-x-4">
@@ -119,7 +125,7 @@ export default function OrderPage() {
                   width={40}
                   height={40}
                   className="rounded-full" />
-                <h2 className="text-lg font-semibold">{order.storeName}</h2>
+                <h2 className="text-lg font-semibold">{shipment.storeName}</h2>
               </div>
               <div className="flex items-center space-x-2">
                 <Button
@@ -140,12 +146,16 @@ export default function OrderPage() {
                 </Button>
               </div>
               <div className="absolute top-8 right-4">
-                <span className={`font-medium ${order.status === 'HUY' ? 'text-red-600' : 'text-green-600'}`}>{getStatusInVietnamese(order.status)}</span>
+                <span className="font-medium text-red-600">{getStatusInVietnamese(shipment.shippingStatus)}</span>
+
+                <Link href = {`/shipmentSuccessfully?shipmentId=${shipment.shipmentId}`}>
+                  <span className="text-green-600 text-sm mt-2.5 block">Giao hàng thành công</span>
+                </Link>
               </div>
             </CardHeader>
            
             <CardContent className="py-6">
-            {order.orderDetails.map((detail, detailIndex) =>(
+            {shipment.orderOnlineDetails.map((detail, detailIndex) =>(
               <div key={detailIndex} className="flex justify-between items-start mb-4">
                 <div className="flex space-x-4">
                   <Image
@@ -181,14 +191,16 @@ export default function OrderPage() {
                   onClick={() => alert('Reordering the product!')}>
                   Mua Lại
                 </Button>
-                {order.status === 'HUY' &&(
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="hover:bg-gray-100"
-                    >
-                    Xem Chi Tiết Hủy Đơn
+                {shipment.shippingStatus === 4 &&(
+                  <Link href="/orderCancellation">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-gray-100"
+                      >
+                      Xem Chi Tiết Hủy Đơn
                     </Button>
+                  </Link>
                 )}
                 
                 <Button

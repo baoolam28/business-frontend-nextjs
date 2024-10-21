@@ -29,14 +29,19 @@ const buyerAPI = {
   },
 
   orderStatus : {
-    getAllOrderStatus: (userId) => axiosClient.get(`${baseUrl}/ordersOnlineDetails/${userId}`)
+    getAllOrderStatus: (userId) => axiosClient.get(`${baseUrl}/purchase/orderOnline/${userId}`),
+    getShipment: (shipmentId) => axiosClient.get(`${baseUrl}/purchase/${shipmentId}`)
   },
   
   shippingAddress : {
     getShippingAddressByUserId : (userId) => axiosClient.get(`${baseUrl}/shipping-addresses/${userId}`),
-    createShippingAddressByUserId : (userId) => axiosClient.post(`${baseUrl}/shipping-addresses/${userId}`),
+    getAddressById : (addressId) => axiosClient.get(`${baseUrl}/shipping-addresses/address/${addressId}`),
+    createShippingAddressByUserId : (data) => axiosClient.post(`${baseUrl}/shipping-addresses`,data),
     deleteShippingAddressById : (categoryId) => axiosClient.delete(`${baseUrl}/shipping-addresses/${categoryId}`)
   },
+  order: {
+    createOrderOnline : (data) => axiosClient.post(`${baseUrl}/ordersOnline`,data),
+  }
 
 };
 
