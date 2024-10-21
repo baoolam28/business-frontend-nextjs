@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react'
 import { Upload, Eye, Edit, Trash2, Info } from 'lucide-react';
-
+import { ChevronLeft, HelpCircle, Save, Send } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
 import { Textarea } from "../../components/ui/textarea"
@@ -255,7 +255,29 @@ export default function ProductAdditionComponent() {
   return (
     (<div className="min-h-screen bg-gray-100 p-4">
       <Menu/>
-      <Card className="max-w-6xl mx-auto">
+      <div className="header fixed top-0 left-14 right-0 bg-white shadow transition-all duration-300 ease-in-out z-10" id="header">
+        <div className="flex items-center justify-between p-4">
+          <a href="#" className="text-gray-600 text-sm flex items-center hover:text-blue-500 transition">
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Quản lý Sản phẩm
+          </a>
+          <h1 className="text-2xl font-bold text-gray-800">Thêm sản phẩm mới</h1>
+          <div className="flex items-center space-x-4 ml-auto">
+            <Button variant="outline" size="icon" className="hover:bg-gray-200 transition">
+              <HelpCircle className="h-4 w-4 text-gray-600" />
+            </Button>
+            <Button variant="secondary" className="bg-blue-500 text-white hover:bg-blue-600 transition">
+              <Save className="mr-2 h-4 w-4" />
+              Lưu làm nháp
+            </Button>
+            <Button className="bg-green-500 text-white hover:bg-green-600 transition">
+              Gửi để xét duyệt
+              <Send className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
+      <Card className="max-w-6xl mx-auto ">
         <CardContent className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h1 className="text-2xl font-bold">Thông tin cơ bản</h1>
