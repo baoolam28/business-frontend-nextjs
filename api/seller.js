@@ -28,8 +28,10 @@ const sellerAPI = {
     getAllOdersByStoreId: (storeId) => axiosClient.get(`${baseUrl}/orders/store/${storeId}`),
     getOrderById: (orderId) => axiosClient.get(`${baseUrl}/orders/${orderId}`),
     createOrder: (orderData) => axiosClient.post(`${baseUrl}/orders`, orderData),
-    updateOrder: (PaymentData) => axiosClient.put(`${baseUrl}/orders/${orderId}/payment`),
-    deleteOrder: () => axiosClient.delete(`${baseUrl}/orders/${orderId}`)
+    updateOrder: (orderId, PaymentData) => axiosClient.put(`${baseUrl}/orders/${orderId}/payment`, PaymentData),
+    deleteOrder: () => axiosClient.delete(`${baseUrl}/orders/${orderId}`),
+    getAllProductByOrderId: (orderId) => axiosClient.get(`${baseUrl}/orders/${storeId}/products`),
+    updateOrderDetail: (orderData, orderId) => axiosClient.put(`${baseUrl}/orders/update/${orderId}`, orderData)
   },
   customer: {
     getAllCustomerssByStoreId: (storeId) => axiosClient.get(`${baseUrl}/customers/store/${storeId}`),
@@ -38,7 +40,7 @@ const sellerAPI = {
     deleteCustomer: () => axiosClient.delete(`${baseUrl}/customers/${customersId}`)
   },
   payment: {
-    createQrCode: (qrData) => axiosClient.post(`${baseUrl}/qr/create`)
+    createQrCode: (qrData) => axiosClient.post(`${baseUrl}/qr/create`, qrData)
   }
 };
 

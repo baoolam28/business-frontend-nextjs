@@ -18,6 +18,7 @@ export default function Component() {
     const [paymentAmount, setPaymentAmount] = useState(0);
     const router = useRouter();
     const [selectedMethod, setSelectedMethod] = useState('cash');
+    const [selecteStatus, setSelecteStatus] = useState(true)
     const [subtotal, setSubtotal] = useState(0);
     const searchParams = useSearchParams();
     const orderId = searchParams.get('orderId');
@@ -35,8 +36,16 @@ export default function Component() {
           console.log("response: ", response);
 
           if (response.statusCode === 200) {
+
+            if(response && response.paymentStatus){
+              setIsPayment(true);
+              return;
+            }
+
             setOrder(response.data);
+            generateDataFromInvoice(response.data);
             console.log("Order data: ", response.data);
+
           } else {
             console.error("Không thể lấy đơn hàng:", response.status);
             setError("Không thể lấy đơn hàng. Vui lòng thử lại.");
@@ -67,39 +76,46 @@ export default function Component() {
   }, [order]);
 
   useEffect(() => {
-      console.log(selectedMethod)
-      if(!isPayment && selectedMethod === 'qr'){
-        GenerateQrCode();
-      }
+    console.log("isPayment: ", isPayment);
+    console.log("selectedMethod: ", selectedMethod);
+    console.log("qrData: ", qrData);
+    
+    if (!isPayment && selectedMethod === 'qr') {
+        if (qrData.accountNo && qrData.amount) {
+            GenerateQrCode();
+        }
+    }
+}, [selectedMethod, qrData]);
 
-  },[selectedMethod]);
-
-  const GenerateQrCode = useCallback(
+const GenerateQrCode = useCallback(
     async () => {
-      try {
-        const qrCode = await paymentAPI.createQrCode(qrData);
-        setQrCode(qrCode.data);
-        console.log("QR Code: " + qrCode.data)
-      } catch (error) {
-        console.error("Failed to generate QR code: " + error.message);
-      }
+        console.log("Generating QR Code with data: ", qrData);
+        try {
+            const qrCode = await sellerAPI.payment.createQrCode(qrData);
+            setQrCode(qrCode.data);
+            console.log("QR Code data: ", qrCode.data);
+            console.log("QR Code: " + qrCode.data);
+        } catch (error) {
+            console.error("Failed to generate QR code: " + error.message);
+        }
     },
-    [order] // Recreate only when order changes
-  );
+    [qrData] // Include qrData to recreate when it changes
+);
 
-  const GeneratePaymentData = (amount, addInfo) => {
-    const paymentData = {
-      accountNo: process.env.NEXT_PUBLIC_ACCOUNT_NO,
-      accountName: process.env.NEXT_PUBLIC_ACCOUNT_NAME,
-      acqId: process.env.NEXT_PUBLIC_ACQ_ID,
-      amount: amount,
-      addInfo: addInfo,
-      format: "text",
-      template: process.env.NEXT_PUBLIC_TEMPLATE
+const GeneratePaymentData = (amount, addInfo) => {
+    const qrData = {
+        accountNo: process.env.NEXT_PUBLIC_ACCOUNT_NO,
+        accountName: process.env.NEXT_PUBLIC_ACCOUNT_NAME,
+        acqId: process.env.NEXT_PUBLIC_ACQ_ID,
+        amount: amount,
+        addInfo: addInfo,
+        format: "text",
+        template: process.env.NEXT_PUBLIC_TEMPLATE
     };
+    console.log("qr data: " + qrData)
 
-    return paymentData; // Chuyển đối tượng thành chuỗi JSON
-  };
+    return qrData; // Return the data object
+};
 
 
   const generateDataFromInvoice = (invoice) => {
@@ -114,16 +130,16 @@ export default function Component() {
   const paymentByCash = async () => {
     try {
         const PaymentData = {
-            orderId: orderId,
             paymentMethod: selectedMethod,
+            paymentStatus: selecteStatus
         }
         console.log(PaymentData)
-        const response = await orderAPI.paymentByCash(PaymentData);
+        const response = await sellerAPI.order.updateOrder(orderId, PaymentData);
 
-        if(response.paymentStatus){
+        if(response.statusCode === 200){
             alert("Thanh toán thành công");
             router.push('/store/sale');
-            return 
+            return
         }
 
         alert("Thanh toán thất bại")
@@ -138,7 +154,7 @@ export default function Component() {
     <div className="flex min-h-screen w-full flex-col bg-muted/40 ">
       <Card className="w-full ">
         <CardHeader>
-          <CardTitle className="text-2xl font-bold">Payment Dashboard</CardTitle>
+          <CardTitle className="text-2xl font-bold">Trang thanh toán</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col lg:flex-row gap-6">
           <div className="w-full lg:w-1/2">
@@ -146,7 +162,7 @@ export default function Component() {
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="cash" className="flex items-center justify-center">
                   <Banknote className="w-4 h-4 mr-2" />
-                  Cash
+                  Tiền mặt
                 </TabsTrigger>
                 <TabsTrigger value="qr" className="flex items-center justify-center">
                   <QrCode className="w-4 h-4 mr-2" />
@@ -154,7 +170,7 @@ export default function Component() {
                 </TabsTrigger>
               </TabsList>
               <TabsContent value="cash" className="mt-4">
-                <p className="text-center text-gray-600">Please prepare the exact amount for cash payment.</p>
+                <p className="text-center text-gray-600">Vui lòng chuẩn bị số tiền chính xác để thanh toán bằng tiền mặt</p>
               </TabsContent>
               
               <TabsContent value="qr" className="mt-4">
@@ -162,7 +178,7 @@ export default function Component() {
                   <QrCodeCard 
                     accountName={qrData.accountName} 
                     accountNumber={qrData.accountNo}
-                    qrCode={qrCode.qrDataURL}
+                    qrCode={qrCode && qrCode.qrDataURL ? qrCode.qrDataURL : ''}
                   />
                 </div> 
               </TabsContent>
@@ -172,24 +188,24 @@ export default function Component() {
           <div className="w-full lg:w-1/2">
             <Card>
               <CardHeader>
-                <CardTitle>Invoice Summary</CardTitle>
+                <CardTitle>Hóa đơn</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                     <div className="flex justify-between">
-                        <span>customer</span>
+                        <span>Khách hàng</span>
                         <span>{order.customerName || 'khong co du lieu'}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span>phone</span>
+                        <span>Số điện thoại</span>
                         <span>{order.customerPhone || 'Khong co du lieu'}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span>email</span>
+                        <span>Email</span>
                         <span>{order.customerEmail || 'Khong co du lieu'}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span>address</span>
+                        <span>Địa chỉ</span>
                         <span>{order.customerAddress || 'Khong co du lieu'}</span>
                     </div>
                 </div>
@@ -212,7 +228,7 @@ export default function Component() {
               </CardContent>
               <CardFooter>
                 <div className="w-full flex justify-between items-center">
-                  <span className="text-lg font-semibold">Total</span>
+                  <span className="text-lg font-semibold">Tổng cộng</span>
                   <span className="text-2xl font-bold">{formatVND(paymentAmount)}</span>
                 </div>
               </CardFooter>
@@ -225,7 +241,7 @@ export default function Component() {
             onClick={paymentByCash}
             disabled={selectedMethod !== 'cash' ? true : false  }
           >
-            Pay Now
+            Thanh toán
           </Button>
         </CardFooter>
       </Card>

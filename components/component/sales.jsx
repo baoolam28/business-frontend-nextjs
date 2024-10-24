@@ -30,7 +30,6 @@ import Menu from "../component/menu"
 import productAPI from "../../api/seller"
 import buyerAPI from "../../api/buyer"
 import sellerAPI from "../../api/seller"
-// import orderAPI from "../../api/seller"
 import inventoryAPI from "../../api/inventory";
 import BarcodeScanner from "./barcodeScanner"
 import AddCustomerDialog from "../../components/component/addCustomer"
@@ -38,14 +37,27 @@ import inventory from "./inventory"
 import { useRouter } from 'next/navigation';
 import formatVND from "../../utils/formatVND"
 import {useStore} from "../../context/StoreContext"; 
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select"
+import order from "../../api/order"
 // import { Navbar } from "../../components/component/navbar"
 export default function sales() {
 
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [error, setError] = useState(null)
+  const [loadingOrders, setLoadingOrders] = useState(false);
   const { storeId } = useStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
+  const [unpaidOrders, setUnpaidOrders] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [inventories, setInventories] = useState([]);
   const [cart, setCart] = useState([]);
   const [splitOrder, setSplitOrder] = useState(false);
@@ -54,6 +66,9 @@ export default function sales() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
+  const [unpaidOrderProducts, setUnpaidOrderProducts] = useState([]);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+ const [selectedOrder, setSelectedOrder] = useState("");
 
   const router = useRouter();
 
@@ -80,6 +95,27 @@ useEffect(() => {
 
     if(storeId != null) {
       fetchProducts(); 
+    }
+
+    const fetchOrders = async () => {
+  if (!storeId) return;
+  
+    try {
+      const response = await sellerAPI.order.getAllOdersByStoreId(storeId);
+        if (response.statusCode === 200) {
+      // Only set orders where paymentStatus is false
+          setOrders(response.data.filter(order => order.paymentStatus === false));
+          console.log("sdhfkhsdjkahf " + JSON.stringify(response.data))
+        } else {
+          console.error("Failed to fetch orders: ", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching orders: " + error);
+    }
+  };
+
+    if (storeId != null) {
+      fetchOrders();
     }
     // Gọi hàm fetchProducts
 
@@ -111,6 +147,25 @@ useEffect(() => {
       fetchCustomers();
     }
   }, [storeId]);
+
+useEffect(() => {
+    const fetchProductsByOrderId = async (orderId) => {
+      try {
+        const response = await sellerAPI.order.getAllProductByOrderId(orderId); 
+        if (response.statusCode === 200) {
+          setProducts(response.data); // Lưu trữ sản phẩm
+        } else {
+          console.error("Failed to fetch products: ", response.status);
+        }
+      } catch (error) {
+        console.error("Error fetching products: " + error);
+      }
+    };
+
+    if (selectedOrderId) {
+      fetchProductsByOrderId(selectedOrderId);
+    }
+  }, [selectedOrderId]); // Chạy khi selectedOrderId thay đổi
 
  // Filtered Products
   const filteredProducts = useMemo(() => {
@@ -223,16 +278,17 @@ const handleIncreaseQuantity = (index) => {
     return;
   }
 
-   const orderData = {
-  customerId: selectedCustomer.customerId, // Integer
-  storeId: storeId, // UUID (string)
-  orderDetails: cart.map(product => ({
+  const orderData = {
+    customerId: selectedCustomer.customerId, // Integer
+    storeId: storeId, // UUID (string)
+    orderDetails: cart.map(product => ({
+    productId : product.productId,
     storeId: storeId, // UUID (string)
     barcode: product.barcode,
     quantity: product.quantity,
     price: product.price,
   })),
-};
+  };
 
   // Thêm các kiểm tra hợp lệ nếu cần
   if (!orderData.customerId) {
@@ -254,18 +310,21 @@ const handleIncreaseQuantity = (index) => {
     return;
   }
 
-  try {
-    // Gọi API tạo đơn hàng với dữ liệu đã chuẩn bị
-    const response = await sellerAPI.order.createOrder(orderData);
+  if(!selectedOrder) {
+    createOrder(orderData);
+  } else {
+    updateOrder(orderData, selectedOrder);
+  }
+};
 
-      // Log toàn bộ phản hồi từ API
-    // console.log("API Response:", response);
-    // console.log("Response Data:", response.data);
+const createOrder = async (orderData) => {
+
+  try {
+    const response = await sellerAPI.order.createOrder(orderData);
     
-    if (response && response.orderId) { // Kiểm tra tồn tại orderId thay vì response.data
+    if (response && response.orderId) { 
       const createdOrder = response;
 
-      // Làm trống giỏ hàng và đặt lại khách hàng đã chọn
       setCart([]);
       setSelectedCustomer(null);
 
@@ -278,9 +337,27 @@ const handleIncreaseQuantity = (index) => {
     }
   } catch (error) {
     console.error("Error during checkout:", error);
-    alert("Đã xảy ra lỗi khi thực hiện thanh toán. Vui lòng thử lại.");
+    alert("Đã xảy ra lỗi khi thực hiện tạo đơn hàng. Vui lòng thử lại.");
   }
-};
+}
+
+const updateOrder = async (orderData, orderId) => {
+
+  console.log("orderId: " + orderId)
+  try {
+     const response = await sellerAPI.order.updateOrderDetail(orderData, orderId);
+
+     if(response.statusCode === 200) {
+         router.push(`/payment?orderId=${response.data.orderId}`);
+     } else {
+      console.error("Unexpected response from createOrder API:", response);
+      alert("Đã xảy ra lỗi khi cập nhập. Vui lòng thử lại.");
+     }
+  } catch (error) {
+     console.error("Error during checkout:", error);
+    alert("Đã xảy ra lỗi khi thực hiện. Vui lòng thử lại.");
+  }
+}
 
   const handleSaveCustomer = async (customerData) => {
     try {
@@ -307,6 +384,23 @@ const handleIncreaseQuantity = (index) => {
     setSelectedCustomer(null);
   };
 
+const handleChange = (event) => {
+    const selectedOrderId = event.target.value;
+    const selectedOrderObj = orders.find(order => order.orderId === selectedOrderId);
+    setSelectedOrder(selectedOrderId); // Cập nhật đơn hàng đã chọn
+    handleSelectOrder(selectedOrderObj); // Gọi hàm khi chọn đơn hàng
+  };
+const handleSelectOrder = (selectedOrderObj) => {
+
+  setCart(selectedOrderObj.orderDetails)
+  setSelectedCustomer(customers.find(c => c.customerId === selectedOrderObj.customerId ? c : null))
+    console.log("select order ", selectedOrderObj)
+  }
+
+   
+
+
+
   return (
     (<div className="flex min-h-screen w-full bg-muted/40">
       <Menu/>
@@ -326,6 +420,26 @@ const handleIncreaseQuantity = (index) => {
               value={searchTerm}
               onChange={handleSearch}
               className="pl-10 w-full" />
+            <select
+              id="unpaidOrders"
+              value={selectedOrder}
+              onChange={handleChange}
+              className="pl-10 w-full mt-1.5"
+            >
+              <option value="" disabled>
+                Order chưa thanh toán
+              </option>
+              {orders
+                .filter((order) => order.paymentStatus === false) // Lọc đơn hàng chưa thanh toán
+                .map((unpaidOrder) => (
+                  <option
+                   key={unpaidOrder.orderId} value={unpaidOrder.orderId}>
+                    {`Order - ${unpaidOrder.customerName} - ${unpaidOrder.orderDetails.map(
+                      (detail) => detail.name
+                    ).join(", ")}`}
+                  </option>
+                ))}
+              </select>
           </div>
           <Button variant="outline" size="icon" className="rounded-full">
             <BarcodeIcon className="h-6 w-6" />
@@ -471,7 +585,7 @@ const handleIncreaseQuantity = (index) => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  {selectedCustomer ? selectedCustomer.name : "Select customer"}
+                  {selectedCustomer ? selectedCustomer.name : "Chọn khách hàng"}
                   <ChevronDownIcon className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -491,22 +605,22 @@ const handleIncreaseQuantity = (index) => {
             </DropdownMenu>
             
           </div>
-          {selectedCustomer && (
-            <div className="grid gap-2">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Email:</span>
-                <span>{selectedCustomer.email}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">Phone:</span>
-                <span>{selectedCustomer.phone}</span>
-              </div>
-            </div>
-          )}
+         {selectedCustomer && (
+        <div className="grid gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Email:</span>
+            <span>{selectedCustomer.email}</span>
+          </div>
+          <div className="flex items-center justify-between">
+            <span className="text-muted-foreground">Số điện thoại:</span>
+            <span>{selectedCustomer.phone}</span>
+          </div>
+        </div>
+        )}
       </div>
         <div className="mt-6 flex justify-end gap-2">
-          <Button variant="outline" onClick={handleCancel}>Cancel</Button>
-          <Button onClick={handleCheckout}>Checkout</Button>
+          <Button variant="outline" onClick={handleCancel}>Huỷ</Button>
+          <Button onClick={handleCheckout}>Thanh Toán</Button>
         </div>
       </div>
     </div>)
