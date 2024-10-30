@@ -147,10 +147,11 @@ export default function OrderPage() {
               </div>
               <div className="absolute top-8 right-4">
                 <span className="font-medium text-red-600">{getStatusInVietnamese(shipment.shippingStatus)}</span>
-
-                <Link href = {`/shipmentSuccessfully?shipmentId=${shipment.shipmentId}`}>
+                {shipment.shippingStatus === 'GIAO_HANG_THANH_CONG'&&(
+                  <Link href = {`/shipmentSuccessfully?shipmentId=${shipment.shipmentId}`}>
                   <span className="text-green-600 text-sm mt-2.5 block">Giao hàng thành công</span>
                 </Link>
+                )}
               </div>
             </CardHeader>
            
@@ -168,7 +169,6 @@ export default function OrderPage() {
                     <h3 className="font-medium text-sm mb-1">{detail.productName}</h3>
                     <p className="text-sm text-gray-500">Phân loại: {detail.attributes.color}, {detail.attributes.size}</p>
                     <p className="text-sm text-gray-500">x{detail.quantity}</p>
-                    
                   </div>
                 </div>
                 <div className="text-right">
@@ -191,8 +191,8 @@ export default function OrderPage() {
                   onClick={() => alert('Reordering the product!')}>
                   Mua Lại
                 </Button>
-                {shipment.shippingStatus === 4 &&(
-                  <Link href="/orderCancellation">
+                {shipment.shippingStatus === 'DA_HUY_DON' &&(
+                  <Link href={`/orderCancellation?shipmentId=${shipment.shipmentId}`}>
                     <Button
                       variant="outline"
                       size="sm"

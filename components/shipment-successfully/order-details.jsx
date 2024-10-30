@@ -4,12 +4,12 @@ import React, {useState, useEffect} from "react";
 import { useRouter, useSearchParams } from 'next/navigation';
 import Image from "next/image";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ArrowLeft, Store } from "lucide-react"
 import { faArrowLeft, faCheck, faTruck, faBox, faHome, faRedo, faComments } from '@fortawesome/free-solid-svg-icons';
 import Link from 'next/link'
 import { Button } from "../ui/button"; 
 import buyerAPI from '../../api/buyer'
 import formatAsVND from '../../utils/formatVND'
-import axios from "axios";
 
 export default function OrderDetailsComponent() {
 
@@ -124,9 +124,9 @@ export default function OrderDetailsComponent() {
       {shipment && (
         <div className="flex justify-between items-center mb-6">
           <Link href="/orderstatus">
-            <Button>
-              <FontAwesomeIcon icon={faArrowLeft} className="mr-2" />
-              Quay lại
+            <Button variant="ghost" className="mb-6 text-gray-400 transition-colors">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+                TRỞ LẠI
             </Button>
           </Link>
           <div>
@@ -156,6 +156,7 @@ export default function OrderDetailsComponent() {
             ))}
           </div>
         </div>
+
       {/* Action Buttons */}
       <div className="flex gap-4 mb-6">
         <button
@@ -175,7 +176,7 @@ export default function OrderDetailsComponent() {
           <h2 className="text-xl font-semibold mb-4">Địa chỉ nhận hàng</h2>
           <p className="font-semibold">{address.fullName}</p>
           <p>Số điện thoại: {address.phoneNumber}</p>
-          <p>{address.address}</p>
+          <p>{(address.address) + ", " + (address.district) + ", " + (address.province)}</p>
         </div>
       )}
       
@@ -212,25 +213,31 @@ export default function OrderDetailsComponent() {
               </div>
             </div>
         )))}
+
+          {shipment &&(
+            shipment.orderOnlineDetails.map((detail, detailIndex) => (
+              <div key={detailIndex} className="border-t pt-4">
+            <div className="flex justify-between mb-2">
+              <span>Tổng tiền hàng:</span>
+              <span>{formatAsVND(detail.totalPrice)}</span>
+            </div>
+            <div className="flex justify-between mb-2">
+              <span>Phí vận chuyển:</span>
+              <span>{formatAsVND(shipment.shippingFee)}</span>
+            </div>
+            {/* <div className="flex justify-between mb-2">
+              <span>Giảm giá:</span>
+              <span>-50,000đ</span>
+            </div> */}
+            <div className="flex justify-between font-semibold text-lg">
+              <span>Thành tiền:</span>
+              <span>{formatAsVND((detail.totalPrice) + (shipment.shippingFee))}</span>
+            </div>
+          </div>
+          )))}
+           
           
-        <div className="border-t pt-4">
-          <div className="flex justify-between mb-2">
-            <span>Tổng tiền hàng:</span>
-            <span>1,000,000đ</span>
-          </div>
-          <div className="flex justify-between mb-2">
-            <span>Phí vận chuyển:</span>
-            <span>30,000đ</span>
-          </div>
-          <div className="flex justify-between mb-2">
-            <span>Giảm giá:</span>
-            <span>-50,000đ</span>
-          </div>
-          <div className="flex justify-between font-semibold text-lg">
-            <span>Thành tiền:</span>
-            <span>980,000đ</span>
-          </div>
-        </div>
+        
       </div>
       
       <div className="flex justify-between items-center shadow-md rounded-lg p-6 bg-amber-50">

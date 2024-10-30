@@ -17,7 +17,7 @@ export default function StoreRegistration() {
     address: '',
     phone: '',
     description: '',
-    category: '',
+    category: '', 
     ownerName: '',
     email: '',
     bankAccount: '',
