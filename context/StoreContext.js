@@ -14,7 +14,7 @@ export const StoreProvider = ({ children }) => {
   useEffect(() => {
     if (user && user.id) {
       async function fetchStore() {
-        console.log("get storeID");
+        console.log("get storeID" );
         try {
           const res = await sellerAPI.store.getStoreByUserId(user.id);
           if(res.statusCode === 200) {

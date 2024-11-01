@@ -21,9 +21,14 @@ const sellerAPI = {
     getAllInventory: () => axiosClient.get(`${baseUrl}/inventories/${storeId}`),
   },
   store: {
-    getStoreByUserId: (userId) =>
-      axiosClient.get(`${baseUrl}/store/by-user?userId=${userId}`),
+    getStoreByUserId: (userId) => axiosClient.get(`${baseUrl}/store/by-user?userId=${userId}`),
+    getAllOrderByStoreId : (storeId) => axiosClient.get(`${baseUrl}/orders-online/stores/${storeId}`)
+    
   },
+  order: { 
+    updateOrderById: (orderId ,newStatus ) => axiosClient.put(`${baseUrl}/orders-online/${orderId}/status`,  { status: newStatus }),
+    udateOrderByStoreID: (storeId ,newStatus ) => axiosClient.put(`${baseUrl}/orders-online/stores/${storeId}/status`, { status: newStatus })
+  }
 };
 
 export default sellerAPI;

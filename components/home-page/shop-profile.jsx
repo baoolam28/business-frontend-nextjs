@@ -140,6 +140,6 @@ const ShopProfile = () => {
   );
 }
 
-export default ShopProfile;
+export default ShopProfile; 
 
 
