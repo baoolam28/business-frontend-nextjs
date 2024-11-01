@@ -8,6 +8,7 @@ import { Input } from "../../components/ui/input";
 import { useUser } from '../../context/UserContext';
 import BuyerAPI from "../../api/buyer";
 import { useRouter } from 'next/navigation'
+import ChatButton from "../../components/component/chat-button"
 export default function ShoppingCartComponent() {
   const router = useRouter();
   const { user } = useUser();
@@ -111,15 +112,28 @@ export default function ShoppingCartComponent() {
                   <h2 className="text-lg font-semibold text-gray-900">{item.productName}</h2>
                 </div>
                 <div className="flex flex-col text-center">
-                  <div className="mt-2 text-sm text-gray-700">
-                    {Object.entries(item.attributes).map(([key, value]) => (
-                      <div key={key} className="inline-block mr-2 mb-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs">
-                        <strong className="font-semibold text-gray-800">{key}:</strong>
-                        <span className="ml-1 text-gray-600">{value}</span>
-                      </div>
-                    ))}
+              <div className="mt-2 text-sm text-gray-700">
+                {Object.entries(item.attributes).map(([key, value]) => (
+                  <div
+                    key={key}
+                    className="inline-block mr-2 mb-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs"
+                  >
+                    <strong className="font-semibold text-gray-800">{key}:</strong>
+                    <span className="ml-1 text-gray-600">{value}</span>
                   </div>
-                </div>
+                ))}
+              </div>
+              <div className="flex justify-center"> {/* Thêm flex và justify-center */}
+                <ChatButton
+                  buttonText={"Chat ngay"}
+                  customClass={
+                    "bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white hover:from-pink-500 hover:via-red-500 hover:to-yellow-500 shadow-lg shadow-purple-500/50"
+                  }
+                  storeId={item.storeId}
+                />
+              </div>
+              </div>
+
                 <div className="flex flex-col text-center">
                   <div className="flex items-center justify-center space-x-2">
                     <span className="text-lg font-semibold text-red-600">
@@ -213,13 +227,6 @@ export default function ShoppingCartComponent() {
           </div>
         </div>
       </div>
-
-      <button
-        className="fixed bottom-20 right-4 bg-blue-600 text-white p-3 rounded-full shadow-md hover:bg-blue-700"
-        onClick={() => alert('Help is on the way!')}
-      >
-        <MessageCircle className="h-6 w-6" />
-      </button>
     </div>
   );
 }

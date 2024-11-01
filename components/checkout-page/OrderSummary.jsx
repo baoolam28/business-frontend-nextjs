@@ -4,8 +4,8 @@ import { Button } from "../../components/ui/button"
 import BuyerAPI from "../../api/buyer"
 import {showSuccessAlert, showErrorAlert} from "../../utils/reactSweetAlert"
 import { useRouter } from  "next/navigation"
-
-export default function OrderSummary({orderData}) {
+import FormatVND from "../../utils/formatVND"
+export default function OrderSummary({orderData, totalPrice, fee}) {
 
 const router = useRouter();
 
@@ -33,15 +33,15 @@ const router = useRouter();
       <div className="space-y-2 mb-4">
         <div className="flex justify-between">
           <span>Tổng tiền hàng</span>
-          <span>$99.99</span>
+          <span>{FormatVND(totalPrice)}</span>
         </div>
         <div className="flex justify-between">
           <span>Phí vận chuyển</span>
-          <span>$5.00</span>
+          <span>{FormatVND(fee)}</span>
         </div>
         <div className="flex justify-between font-semibold">
           <span>Tổng thanh toán</span>
-          <span>$104.99</span>
+          <span>{FormatVND(fee + totalPrice)}</span>
         </div>
       </div>
       <Button 

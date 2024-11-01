@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "server": "node chatServer.js",
+    "dev-with-server": "concurrently \"npm run dev\" \"npm run server\""
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
@@ -21,6 +23,7 @@
     "@radix-ui/react-popover": "^1.1.1",
     "@radix-ui/react-progress": "^1.1.0",
     "@radix-ui/react-radio-group": "^1.2.1",
+    "@radix-ui/react-scroll-area": "^1.2.0",
     "@radix-ui/react-select": "^2.1.2",
     "@radix-ui/react-separator": "^1.1.0",
     "@radix-ui/react-slider": "^1.2.1",
@@ -32,7 +35,9 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
+    "firebase": "^11.0.1",
     "formidable": "^3.5.1",
+    "framer-motion": "^11.11.9",
     "js-cookie": "^3.0.5",
     "jsbarcode": "^3.11.6",
     "lucide-react": "^0.414.0",
@@ -44,17 +49,21 @@
     "react-router-dom": "^6.26.2",
     "react-to-print": "^2.15.1",
     "recharts": "^2.12.7",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "sweetalert2": "^11.14.2",
     "sweetalert2-react-content": "^5.0.7",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "ui_business_nextjs": "file:",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "ws": "^8.18.0"
   },
   "devDependencies": {
     "@types/node": "22.7.4",
     "@types/react": "18.3.11",
     "axios": "^1.7.7",
+    "concurrently": "^9.0.1",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "typescript": "5.6.2"

@@ -2,6 +2,7 @@
 import { MapPin} from 'lucide-react'
 import { Button } from "../../components/ui/button"
 export default function ShippingAddressSection({ selectedAddress, setIsAddressDialogOpen, setIsNewAddressDialogOpen }) {
+
   return (
     <section className="bg-white p-6 rounded-lg shadow">
       <div className="flex items-center mb-4">

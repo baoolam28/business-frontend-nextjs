@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react'
-import { Upload, Eye, Edit, Trash2, Info } from 'lucide-react';
+import { Upload, Eye, Edit, Trash2, Info, InfoIcon } from 'lucide-react';
 import { ChevronLeft, HelpCircle, Save, Send } from 'lucide-react'
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
@@ -13,9 +13,11 @@ import { Alert, AlertDescription, AlertTitle } from "../../components/ui/alert"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table"
 import {useStore} from "../../context/StoreContext"
 import sellerAPI from '../../api/seller';
+import { Label } from "../../components/ui/label"
 import Menu from "./menu"
 export default function ProductAdditionComponent() {
   const {storeId} = useStore();
+  const [mounted, setMounted] = useState(false);
   const [categories, setCategories] = useState([])
   const [mainImage, setMainImage] = useState(null)
   const [additionalImages, setAdditionalImages] = useState([])
@@ -30,6 +32,9 @@ export default function ProductAdditionComponent() {
   const [showVariantForm, setShowVariantForm] = useState(false)
   const [editingVariantIndex, setEditingVariantIndex] = useState(null)
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false)
+  const [weight, setWeight] = useState('');
+  const [dimensions, setDimensions] = useState({ height: '', width: '', length: '' });
+  const [errors, setErrors] = useState({ weight: '', height: '', width: '', length: '' });
 
   const [images, setImages] = useState([])
   const variantSuggestions = [
@@ -49,6 +54,11 @@ export default function ProductAdditionComponent() {
     "Công dụng",
     "Đối tượng sử dụng"
   ];
+
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
 
@@ -84,19 +94,24 @@ export default function ProductAdditionComponent() {
 
   const generateVariantCombinations = () => {
     const combinations = []
+    
     const generateCombination = (current, depth) => {
       if (depth === variantOptions.length) {
         combinations.push({ ...current, price: '', quantity: '', sku: '' })
         return
       }
+
       const currentOption = variantOptions[depth]
-      for (const value of currentOption.values) {
-        generateCombination({ ...current, [currentOption.name]: value }, depth + 1)
+      for (const attribute of currentOption.attributes) {
+        const [name, value] = Object.entries(attribute)[0] // Lấy tên và giá trị từ attributes
+        generateCombination({ ...current, [name]: value }, depth + 1)
       }
     }
+
     generateCombination({}, 0)
     setVariantCombinations(combinations)
   }
+
 
   const handleImageUpload = (event, index) => {
     const file = event.target.files?.[0]
@@ -211,11 +226,18 @@ export default function ProductAdditionComponent() {
   }
 
   const handleEditVariant = (index) => {
-    setEditingVariantIndex(index)
-    setNewVariantOption({ name: variantOptions[index].name, value: '' })
-    setShowVariantForm(true)
-    setShowDuplicateWarning(false)
-  }
+  setEditingVariantIndex(index)
+  
+  // Giả sử chỉ sửa giá trị của thuộc tính đầu tiên trong mảng attributes
+  const firstAttribute = variantOptions[index].attributes[0] || {}
+  const attributeName = Object.keys(firstAttribute)[0] || ''
+  const attributeValue = firstAttribute[attributeName] || ''
+
+  setNewVariantOption({ name: attributeName, value: attributeValue })
+  setShowVariantForm(true)
+  setShowDuplicateWarning(false)
+}
+
 
   const handleDeleteVariant = (index) => {
     setVariantOptions(prev => prev.filter((_, i) => i !== index))
@@ -225,21 +247,87 @@ export default function ProductAdditionComponent() {
   }
 
   const handleVariantFormSubmit = () => {
-    if (editingVariantIndex !== null) {
-      setVariantOptions(prev => prev.map((opt, index) => 
-        index === editingVariantIndex
-          ? { ...opt, values: [...opt.values, newVariantOption.value] }
-          : opt))
-    } else {
-      setVariantOptions(
-        prev => [...prev, { name: newVariantOption.name, values: [newVariantOption.value] }]
-      )
-    }
-    setNewVariantOption({ name: '', value: '' })
-    setShowVariantForm(false)
-    setEditingVariantIndex(null)
-    setShowDuplicateWarning(false)
+  if (editingVariantIndex !== null) {
+    setVariantOptions(prev => 
+      prev.map((opt, index) => {
+        if (index === editingVariantIndex) {
+          const updatedAttributes = opt.attributes.map(attribute => {
+            const attributeName = Object.keys(attribute)[0];
+            const attributeValue = attribute[attributeName];
+
+            // Tên mới trùng với tên cũ nhưng giá trị cũ khác giá trị mới
+            if (newVariantOption.name === attributeName && newVariantOption.value !== attributeValue) {
+              alert('moi')
+              // Thêm thuộc tính mới với giá trị mới
+              return {...attribute, [attributeName]: newVariantOption.value };
+            }
+
+            // Tên mới trùng với tên cũ và giá trị mới trùng với giá trị cũ
+            if (newVariantOption.name === attributeName && newVariantOption.value === attributeValue) {
+              // Không làm gì
+              return attribute;
+            }
+
+            // Tên mới khác tên cũ
+            if (newVariantOption.name !== attributeName) {
+              return { [newVariantOption.name]: newVariantOption.value }; // Cập nhật tất cả thành tên mới
+            }
+
+            return attribute;
+          });
+
+          // Thêm thuộc tính mới nếu tên mới không có trong updatedAttributes
+          if (!updatedAttributes.some(attr => Object.keys(attr)[0] === newVariantOption.name)) {
+            updatedAttributes.push({ [newVariantOption.name]: newVariantOption.value });
+          }
+
+          return { ...opt, attributes: updatedAttributes };
+        }
+        return opt;
+      })
+    );
+  } else {
+    // Thêm một variant mới
+    setVariantOptions(prev => [
+      ...prev, 
+      { 
+        attributes: [
+          { [newVariantOption.name]: newVariantOption.value }
+        ]
+      }
+    ]);
   }
+
+  // Đặt lại trạng thái sau khi thêm hoặc cập nhật
+  setNewVariantOption({ name: '', value: '' });
+  setShowVariantForm(false);
+  setEditingVariantIndex(null);
+  setShowDuplicateWarning(false);
+};
+
+
+
+  const handleImageChange = (e, indexImage) => {
+  const file = e.target.files?.[0];
+
+  if (file) {
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const imageUrl = reader.result;
+
+      // Cập nhật state của variantCombinations sau khi có imageUrl
+      setVariantCombinations(prevCombinations =>
+        prevCombinations.map((combination, index) =>
+          index === indexImage
+            ? { ...combination, imageUrl, image: file }
+            : combination
+        )
+      );
+    };
+    reader.readAsDataURL(file); // Đọc file để lấy URL
+  }
+};
+
 
   const showData = () => {
     console.log("Product Name: ", productName)
@@ -250,6 +338,34 @@ export default function ProductAdditionComponent() {
     console.log("Images: ", images)
     console.log("Variant Options: ", variantOptions)
     console.log("Variant Combinations: ", variantCombinations)
+  }
+
+  const validateAndRoundNumber = (value) => {
+    let num = parseFloat(value);
+    if (num < 0) return 1; // Nếu nhỏ hơn 0, trả về 1
+    return Math.round(num); // Làm tròn đến số nguyên gần nhất
+  };
+
+  const handleWeightChange = (e) => {
+    const value = e.target.value;
+    const roundedValue = validateAndRoundNumber(value);
+    setWeight(roundedValue);
+    setErrors({ ...errors, weight: roundedValue > 0 ? '' : 'Trọng lượng phải lớn hơn 0' });
+  };
+
+  const handleDimensionChange = (e, dimension) => {
+    const value = e.target.value;
+    const roundedValue = validateAndRoundNumber(value);
+    setDimensions({ ...dimensions, [dimension]: roundedValue });
+    setErrors({
+      ...errors,
+      [dimension]: roundedValue > 0 ? '' : 'Kích thước phải lớn hơn 0',
+    });
+  };
+
+  if (!mounted) {
+    // Tránh render nội dung trước khi component đã mounted
+    return null;
   }
 
   return (
@@ -472,7 +588,7 @@ export default function ProductAdditionComponent() {
 
               {/* Variant Management */}
               <div className="mb-6">
-                <h2 className="text-2xl font-bold mb-4">Thông tin Biến thể</h2>
+                <h2 className="text-2xl font-bold mb-4">Thông tin bán hàng</h2>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
                     <h3 className="text-lg font-semibold mr-2">Kích hoạt biến thể</h3>
@@ -512,12 +628,12 @@ export default function ProductAdditionComponent() {
                             </Button>
                           </div>
                         </div>
-                        {variant.values.map((value, valueIndex) => (
+                        {variant.attributes.map((attribute, valueIndex) => (
                           <p 
                             key={valueIndex} 
                             className="inline-block mr-2 px-2 py-1 border border-gray-300 rounded-full text-sm font-medium"
                           >
-                            {value}
+                            {Object.keys(attribute)[0]}: {Object.values(attribute)[0]}
                           </p>
                         ))}
 
@@ -639,29 +755,29 @@ export default function ProductAdditionComponent() {
                     )}
 
 
-                                        <div className="mt-4">
-                                          <h4 className="text-lg font-semibold mb-2">Danh sách Biến thể</h4>
-                                          <Table>
-                                            <TableHeader>
-                                              {variantOptions.map((option, index) => (
-                                                <TableHead key={index}>{option.name}</TableHead>
-                                              ))}
-                                              <TableHead>Giá bán lẻ</TableHead>
-                                              <TableHead>Số lượng</TableHead>
-                                              <TableHead>SKU Người bán</TableHead>
-                                              <TableHead></TableHead>
-                                            </TableHeader>
-                                            <TableBody>
-                                              {variantCombinations.map((combination, index) => (
-                                                <TableRow key={index}>
-                                                  {variantOptions.map((option, optionIndex) => (
-                                                    <TableCell key={optionIndex}>{combination[option.name]}</TableCell>
-                                                  ))}
+                    <div className="mt-4">
+                      <h4 className="text-lg font-semibold mb-2">Danh sách Biến thể</h4>
+                      <Table>
+                        <TableHeader>
+                          {variantOptions.map((option, index) => (
+                            <TableHead key={index}>{option.name}</TableHead>
+                          ))}
+                          <TableHead>Giá bán lẻ</TableHead>
+                          <TableHead>Số lượng</TableHead>
+                          <TableHead>SKU Người bán</TableHead>
+                          <TableHead></TableHead>
+                        </TableHeader>
+                        <TableBody>
+                          {variantCombinations.map((combination, index) => (
+                            <TableRow key={index}>
+                              {variantOptions.map((option, optionIndex) => (
+                                <TableCell key={optionIndex}>{combination[option.name]}</TableCell>
+                              ))}
                               <TableCell>
                                 <Input
                                   type="number"
                                   value={combination.price}
-                                  onChange={(e) =>  (index, 'price', e.target.value)}
+                                  onChange={(e) =>  handleVariantCombinationChange(index, 'price', e.target.value)}
                                   placeholder="Giá" />
                               </TableCell>
                               <TableCell>
@@ -692,6 +808,138 @@ export default function ProductAdditionComponent() {
                     </div>
                   </>
                 )}
+                {activateVariants && (
+                  <Table>
+                  <TableHeader>
+                    <TableHead>Giá bán lẻ</TableHead>
+                    <TableHead>Số lượng</TableHead>
+                    <TableHead>SKU Người bán</TableHead>
+                    <TableHead></TableHead>
+                  </TableHeader>
+                  <TableBody>
+                      <TableRow>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            value=""
+                            onChange={() => {}}
+                            placeholder="Giá" />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            type="number"
+                            value=""
+                            onChange={() => {}}
+                            placeholder="Số lượng" />
+                        </TableCell>
+                        <TableCell>
+                          <Input
+                            value=""
+                            onChange={() => {}}
+                            placeholder="SKU" />
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteVariantCombination(index)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                  </TableBody>
+                </Table>
+                )}
+                <div className="p-6">
+                  <h1 className="text-xl font-semibold mb-4 mt-10">Vận chuyển</h1>
+                  <div className="mb-6">
+                    <Label htmlFor="weight" className="block text-sm font-medium text-gray-700 mb-1">
+                      <span className="text-red-500">*</span> Trọng lượng Sản phẩm <InfoIcon className="inline-block w-4 h-4" />
+                    </Label>
+                    <div className="flex items-center">
+                      <Select>
+                        <option>Gram (g)</option>
+                      </Select>
+                      <Input
+                        type="number"
+                        id="weight"
+                        value={weight}
+                        onChange={handleWeightChange}
+                        placeholder="Nhập trọng lượng sản phẩm"
+                        className={`rounded-l-none flex-1 ${errors.weight ? 'border-red-500' : ''}`}
+                      />
+                    </div>
+                    {errors.weight && (
+                      <p className="text-red-500 text-xs mt-1 ml-1">
+                        {errors.weight}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <Label htmlFor="dimensions" className="block text-sm font-medium text-gray-700 mb-1">
+                      Kích thước Sản phẩm <InfoIcon className="inline-block w-4 h-4" />
+                    </Label>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Đảm bảo trọng lượng và kích thước hộp chính xác vì chúng sẽ được sử dụng để tính phí vận chuyển và phương thức vận chuyển.{' '}
+                      <a href="#" className="text-blue-500">
+                        Ví dụ
+                      </a>
+                    </p>
+                    <div className="grid grid-cols-4 gap-4">
+                      <div className="flex flex-col">
+                        <div className="flex items-center">
+                          <Input
+                            type="number"
+                            value={dimensions.height}
+                            onChange={(e) => handleDimensionChange(e, 'height')}
+                            placeholder="Chiều cao"
+                            className={`flex-1 ${errors.height ? 'border-red-500' : ''}`}
+                          />
+                          <span className="ml-2">cm</span>
+                        </div>
+                        {errors.height && (
+                          <p className="text-red-500 text-xs mt-1 ml-1">
+                            {errors.height}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex items-center">
+                          <Input
+                            type="number"
+                            value={dimensions.width}
+                            onChange={(e) => handleDimensionChange(e, 'width')}
+                            placeholder="Chiều rộng"
+                            className={`flex-1 ${errors.width ? 'border-red-500' : ''}`}
+                          />
+                          <span className="ml-2">cm</span>
+                        </div>
+                        {errors.width && (
+                          <p className="text-red-500 text-xs mt-1 ml-1">
+                            {errors.width}
+                          </p>
+                        )}
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex items-center">
+                          <Input
+                            type="number"
+                            value={dimensions.length}
+                            onChange={(e) => handleDimensionChange(e, 'length')}
+                            placeholder="Chiều dài"
+                            className={`flex-1 ${errors.length ? 'border-red-500' : ''}`}
+                          />
+                          <span className="ml-2">cm</span>
+                        </div>
+                        {errors.length && (
+                          <p className="text-red-500 text-xs mt-1 ml-1">
+                            {errors.length}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </main>
           </div>

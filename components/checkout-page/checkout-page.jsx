@@ -31,6 +31,7 @@ export default function CheckoutPageComponent() {
   const [deliveryTime, setDeliveryTime] = useState(null)
   const [shippingMethod, setShippingMethod] = useState(null)
   const [data, setData] = useState([])
+  const [totalPrice, setTotalPrice] = useState(0)
   const [orderData, setOrderData] = useState(null)
 
   // Fetch data from search params
@@ -82,6 +83,10 @@ export default function CheckoutPageComponent() {
 
   useEffect(() => {
     
+    const totalPrice = data?.reduce((sum, item) => {
+      return sum + (item.price * item.quantity);
+    }, 0) || 0;
+
     const orderOnlineDetailRequests = data?.map((item) => ({
       storeId: item.storeId,
       productDetailId: item.productDetailId,
@@ -100,6 +105,7 @@ export default function CheckoutPageComponent() {
 
     console.log("request order :"+JSON.stringify(request))
     setOrderData(request)
+    setTotalPrice(totalPrice);
   },[selectedAddress, paymentMethod, fee, deliveryTime, user, data])
 
   const handleNewAddress = (address) => {
@@ -112,6 +118,7 @@ export default function CheckoutPageComponent() {
     setDeliveryTime(deliveryTime)
     setShippingMethod(shippingMethod)
   }
+
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -134,7 +141,7 @@ export default function CheckoutPageComponent() {
         </div>
         <div className="space-y-8">
           <PaymentOptionsSection paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} />
-          <OrderSummary orderData={orderData}/>
+          <OrderSummary orderData={orderData} fee={fee} totalPrice={totalPrice} />
         </div>
       </main>
       <AddressSelectionDialog
