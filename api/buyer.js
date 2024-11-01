@@ -1,3 +1,4 @@
+import { create } from "domain";
 import axiosClient from "./axiosClient";
 const baseUrl = "/api/buyer";
 const buyerAPI = {
@@ -34,8 +35,12 @@ const buyerAPI = {
   },
   order: {
     createOrderOnline : (data) => axiosClient.post(`${baseUrl}/ordersOnline`,data),
+  },
+  store:{
+    createStore : (dataStore) => axiosClient.post(`${baseUrl}/stores`,dataStore),
+    
   }
-
+  
 };
 
 export default buyerAPI;

@@ -4,6 +4,7 @@ const sellerAPI = {
   product: {
     getAllProducts: (storeId) => axiosClient.get(`${baseUrl}/products/${storeId}`),
     createProductOnline: (data) => axiosClient.post(`${baseUrl}/products/online`, data),
+    createProductOffline: (data) => axiosClient.post(`${baseUrl}/products/offline`,data),
   },
   category: {
     getAllCategories: () => axiosClient.get(`${baseUrl}/categories`),
