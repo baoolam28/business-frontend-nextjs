@@ -5,6 +5,8 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _domain = require("domain");
+
 var _axiosClient = _interopRequireDefault(require("./axiosClient"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -60,11 +62,21 @@ var buyerAPI = {
     getShippingAddressByUserId: function getShippingAddressByUserId(userId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/shipping-addresses/").concat(userId));
     },
-    createShippingAddressByUserId: function createShippingAddressByUserId(userId) {
-      return _axiosClient["default"].post("".concat(baseUrl, "/shipping-addresses/").concat(userId));
+    createShippingAddressByUserId: function createShippingAddressByUserId(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/shipping-addresses"), data);
     },
     deleteShippingAddressById: function deleteShippingAddressById(categoryId) {
       return _axiosClient["default"]["delete"]("".concat(baseUrl, "/shipping-addresses/").concat(categoryId));
+    }
+  },
+  order: {
+    createOrderOnline: function createOrderOnline(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/ordersOnline"), data);
+    }
+  },
+  store: {
+    createStore: function createStore(dataStore) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/stores"), dataStore);
     }
   }
 };

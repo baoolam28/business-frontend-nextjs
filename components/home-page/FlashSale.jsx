@@ -1,103 +1,36 @@
-"use client"
-import React , { useEffect, useState } from "react";
-import ProductCard from "./ProductCard";
-import BuyerAPI from "../../api/buyer"
+'use client';
 
-// Giả sử đây là dữ liệu từ API, theo cấu trúc ProductResponse
-// const flashSaleProducts = [
-//   {
-//     productId: 1,
-//     barcode: "1234567890123",
-//     productName: "HAVIT HV-G92 Gamepad",
-//     categoryId: 1,
-//     categoryName: "Electronics",
-//     abbreviations: "HV-G92",
-//     unit: "piece",
-//     price: 120.0,
-//     supplierId: 1,
-//     supplierName: "HAVIT",
-//     originId: 1,
-//     originName: "China",
-//     createdBy: "8a7e8f6d-9f42-4f7b-bf0e-c8b91e781c93",
-//     createdDate: new Date(),
-//     disabled: false,
-//   },
-//   {
-//     productId: 2,
-//     barcode: "9876543210987",
-//     productName: "AK-900 Wired Keyboard",
-//     categoryId: 1,
-//     categoryName: "Electronics",
-//     abbreviations: "AK-900",
-//     unit: "piece",
-//     price: 960.0,
-//     supplierId: 2,
-//     supplierName: "Logitech",
-//     originId: 2,
-//     originName: "Japan",
-//     createdBy: "8a7e8f6d-9f42-4f7b-bf0e-c8b91e781c94",
-//     createdDate: new Date(),
-//     disabled: false,
-//   },
-//   {
-//     productId: 3,
-//     barcode: "4561237890456",
-//     productName: "IPS LCD Gaming Monitor",
-//     categoryId: 1,
-//     categoryName: "Electronics",
-//     abbreviations: "IPS-LCD",
-//     unit: "piece",
-//     price: 370.0,
-//     supplierId: 3,
-//     supplierName: "Samsung",
-//     originId: 3,
-//     originName: "South Korea",
-//     createdBy: "8a7e8f6d-9f42-4f7b-bf0e-c8b91e781c95",
-//     createdDate: new Date(),
-//     disabled: false,
-//   },
-//   {
-//     productId: 4,
-//     barcode: "7890123456789",
-//     productName: "S-Series Comfort Chair",
-//     categoryId: 2,
-//     categoryName: "Furniture",
-//     abbreviations: "S-Series",
-//     unit: "piece",
-//     price: 375.0,
-//     supplierId: 4,
-//     supplierName: "IKEA",
-//     originId: 4,
-//     originName: "Sweden",
-//     createdBy: "8a7e8f6d-9f42-4f7b-bf0e-c8b91e781c96",
-//     createdDate: new Date(),
-//     disabled: false,
-//   },
-// ];
+import React, { useEffect, useState, useRef } from "react";
+import ProductCard from "./ProductCard";
+import BuyerAPI from "../../api/buyer";
+import { motion, AnimatePresence } from "framer-motion";
 
 const FlashSale = () => {
   const [flashSaleProducts, setFlashSaleProducts] = useState([]);
-  // Gọi API khi component được mount
-  const fallbackImage =
-  "https://via.placeholder.com/150";
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const itemsPerPage = 4;
+  const fallbackImage = "https://via.placeholder.com/150";
+  const [direction, setDirection] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const autoSlideInterval = useRef(null);
+
+  // Fetch products on mount
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await BuyerAPI.product.getAllProducts();
-        console.log("API Res ponse:", response);
         if (response.statusCode === 200) {
           const filteredProducts = response.data.map((product) => ({
             id: product.productId,
             name: product.productName,
-            discount:0,
-            currentPrice: product.price, 
-            originalPrice: "100", 
-            rating: 4.5,  
-            reviews: 65, 
-            image: fallbackImage, 
+            discount: 0,
+            currentPrice: product.price,
+            originalPrice: "100",
+            rating: 4.5,
+            reviews: 65,
+            image: fallbackImage,
           }));
           setFlashSaleProducts(filteredProducts);
-          console.log("filteredProducts: " + filteredProducts);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -105,6 +38,77 @@ const FlashSale = () => {
     };
     fetchProducts();
   }, []);
+
+  // Auto-slide every 3 seconds
+  useEffect(() => {
+    if (flashSaleProducts.length > 0) {
+      startAutoSlide(); // Start auto-slide on mount
+      return () => stopAutoSlide(); // Cleanup on unmount
+    }
+  }, [flashSaleProducts.length]);
+
+  // Start the auto-slide interval
+  const startAutoSlide = () => {
+    if (autoSlideInterval.current) return; // Prevent creating multiple intervals
+    autoSlideInterval.current = setInterval(() => {
+      handleManualNavigation(1); // Move to the next slide
+    }, 3000); // 3000ms = 3 seconds
+  };
+
+  // Stop the auto-slide interval
+  const stopAutoSlide = () => {
+    if (autoSlideInterval.current) {
+      clearInterval(autoSlideInterval.current);
+      autoSlideInterval.current = null;
+    }
+  };
+
+  // Manual slide navigation
+  const handleManualNavigation = (dir) => {
+    if (isAnimating) return; // Prevent multiple animations
+    setDirection(dir);
+    setIsAnimating(true); // Disable navigation while animating
+
+    setCurrentIndex((prevIndex) => {
+      if (dir === 1) {
+        return prevIndex + itemsPerPage >= flashSaleProducts.length
+          ? 0
+          : prevIndex + itemsPerPage;
+      }
+      return prevIndex - itemsPerPage < 0
+        ? Math.max(flashSaleProducts.length - itemsPerPage, 0)
+        : prevIndex - itemsPerPage;
+    });
+  };
+
+  const displayedProducts = flashSaleProducts.slice(
+    currentIndex,
+    currentIndex + itemsPerPage
+  );
+
+  const slideVariants = {
+    enter: (direction) => ({
+      x: direction > 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.8,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        duration: 0.5, // Smoother and controlled transition
+      },
+    },
+    exit: (direction) => ({
+      x: direction < 0 ? 300 : -300,
+      opacity: 0,
+      scale: 0.8,
+      transition: {
+        duration: 0.3, // Exit faster
+      },
+    }),
+  };
 
   return (
     <section className="flex flex-col items-center self-center mt-10 w-full max-w-[1305px] max-md:max-w-full">
@@ -123,59 +127,63 @@ const FlashSale = () => {
               Flash Sales
             </h2>
           </div>
-          <div className="flex gap-4 text-black whitespace-nowrap min-w-[240px] w-[302px]">
-            <div className="flex flex-col min-h-[50px]">
-              <span className="text-xs font-medium">Days</span>
-              <span className="mt-1 text-3xl font-bold tracking-widest leading-none">
-                03
-              </span>
-            </div>
-            <div className="flex self-end mt-7 min-h-[16px]" />
-            <div className="flex flex-col h-[50px]">
-              <span className="text-xs font-medium">Hours</span>
-              <span className="mt-1 text-3xl font-bold tracking-widest leading-none">
-                23
-              </span>
-            </div>
-            <div className="flex self-end mt-7 min-h-[16px]" />
-            <div className="flex flex-col min-h-[50px]">
-              <span className="text-xs font-medium">Minutes</span>
-              <span className="mt-1 text-3xl font-bold tracking-widest leading-none">
-                19
-              </span>
-            </div>
-            <div className="flex self-end mt-7 min-h-[16px]" />
-            <div className="flex flex-col h-[50px]">
-              <span className="text-xs font-medium">Seconds</span>
-              <span className="mt-1 text-3xl font-bold tracking-widest leading-none">
-                56
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="flex gap-2 items-start">
-          <button aria-label="Previous" className="focus:outline-none">
-            <img
-              loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/6d46c131187bfff9eb633481579a064341b51d7196040ee40dd3f9577e445a5e?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb"
-              alt="Previous"
-              className="object-contain shrink-0 aspect-square w-[46px]"
-            />
-          </button>
-          <button aria-label="Next" className="focus:outline-none">
-            <img
-              loading="lazy"
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/e88e31fcac886e936832d43b7fb2b7a3e219274da66d8e9d07a08a6cc7094c1b?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb"
-              alt="Next"
-              className="object-contain shrink-0 aspect-square w-[46px]"
-            />
-          </button>
         </div>
       </div>
-      <div className="flex gap-8 items-start mt-10 max-md:max-w-full">
-      {flashSaleProducts.map((product, index) => (
-          <ProductCard key={index} {...product} />
-        ))}
+
+      <AnimatePresence
+        initial={false}
+        custom={direction}
+        onExitComplete={() => setIsAnimating(false)} // Enable navigation after animation
+      >
+        <motion.div
+          key={currentIndex}
+          custom={direction}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
+          className="flex gap-8 items-start mt-10 max-md:max-w-full"
+        >
+          {displayedProducts.map((product, index) => (
+            <motion.div
+              key={product.id}
+              initial={{ opacity: 0, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <ProductCard {...product} />
+            </motion.div>
+          ))}
+        </motion.div>
+      </AnimatePresence>
+
+      <div className="flex gap-2 items-start mt-5">
+        <button
+          aria-label="Previous"
+          className="focus:outline-none transform transition-transform duration-300 hover:scale-110"
+          onClick={() => handleManualNavigation(-1)}
+          disabled={isAnimating} // Disable button during animation
+        >
+          <img
+            loading="lazy"
+            src="https://cdn.builder.io/api/v1/image/assets/TEMP/6d46c131187bfff9eb633481579a064341b51d7196040ee40dd3f9577e445a5e?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb"
+            alt="Previous"
+            className="object-contain shrink-0 aspect-square w-[46px]"
+          />
+        </button>
+        <button
+          aria-label="Next"
+          className="focus:outline-none transform transition-transform duration-300 hover:scale-110"
+          onClick={() => handleManualNavigation(1)}
+          disabled={isAnimating} // Disable button during animation
+        >
+          <img
+            loading="lazy"
+            src="https://cdn.builder.io/api/v1/image/assets/TEMP/e88e31fcac886e936832d43b7fb2b7a3e219274da66d8e9d07a08a6cc7094c1b?placeholderIfAbsent=true&apiKey=a7423420d6024871abbabbd8b3aee7fb"
+            alt="Next"
+            className="object-contain shrink-0 aspect-square w-[46px]"
+          />
+        </button>
       </div>
     </section>
   );

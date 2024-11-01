@@ -33,6 +33,7 @@
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "formidable": "^3.5.1",
+    "framer-motion": "^11.11.9",
     "js-cookie": "^3.0.5",
     "jsbarcode": "^3.11.6",
     "lucide-react": "^0.414.0",
