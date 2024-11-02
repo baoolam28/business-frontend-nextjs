@@ -22,8 +22,8 @@ const sellerAPI = {
     getAllInventory: () => axiosClient.get(`${baseUrl}/inventories/${storeId}`),
   },
   store: {
-    getStoreByUserId: (userId) => axiosClient.get(`${baseUrl}/store/by-user?userId=${userId}`),
-    getAllOrderByStoreId : (storeId) => axiosClient.get(`${baseUrl}/orders-online/stores/${storeId}`)
+    getStoreByUserId: (userId) => axiosClient.get(`${baseUrl}/store/by-user/${userId}`),
+    getAllOrderByStoreId : (storeId) => axiosClient.get(`${baseUrl}/orders/stores/${storeId}`)
     
   },
 
@@ -34,7 +34,13 @@ const sellerAPI = {
     updateOrder: (orderId, PaymentData) => axiosClient.put(`${baseUrl}/orders/${orderId}/payment`, PaymentData),
     deleteOrder: () => axiosClient.delete(`${baseUrl}/orders/${orderId}`),
     getAllProductByOrderId: (orderId) => axiosClient.get(`${baseUrl}/orders/${storeId}/products`),
-    updateOrderDetail: (orderData, orderId) => axiosClient.put(`${baseUrl}/orders/update/${orderId}`, orderData)
+    updateOrderDetail: (orderData, orderId) => axiosClient.put(`${baseUrl}/orders/update/${orderId}`, orderData),
+    updateOrderById: (orderId, newStatus) => 
+      axiosClient.put(`${baseUrl}/orders/${orderId}/status`, { status: newStatus }),
+
+  // Cập nhật phương thức udateOrderByStoreID để nhận thêm tham số status
+  udateOrderByStoreID: (storeId, newStatus) => 
+      axiosClient.put(`${baseUrl}/orders/stores/${storeId}/status`, { status: newStatus })
   },
   customer: {
     getAllCustomerssByStoreId: (storeId) => axiosClient.get(`${baseUrl}/customers/store/${storeId}`),

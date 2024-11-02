@@ -17,11 +17,7 @@ export const StoreProvider = ({ children }) => {
     if (user && user.id) {
       console.log("Current userId:", user.id);      
       async function fetchStore() {
-<<<<<<< HEAD
-        
-=======
         console.log("get storeID" );
->>>>>>> a9f3161a88c8c5b3e41a84810d1a016479d7ad1f
         try {
           const res = await sellerAPI.store.getStoreByUserId(user.id);
           if(res.statusCode === 200) {
