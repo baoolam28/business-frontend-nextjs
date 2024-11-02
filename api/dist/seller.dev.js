@@ -17,9 +17,11 @@ var sellerAPI = {
     },
     createProductOnline: function createProductOnline(data) {
       return _axiosClient["default"].post("".concat(baseUrl, "/products/online"), data);
+
     },
     createProductOffline: function createProductOffline(data) {
       return _axiosClient["default"].post("".concat(baseUrl, "/products/offline"), data);
+
     }
   },
   category: {
@@ -54,6 +56,22 @@ var sellerAPI = {
   store: {
     getStoreByUserId: function getStoreByUserId(userId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/store/by-user?userId=").concat(userId));
+    },
+    getAllOrderByStoreId: function getAllOrderByStoreId(storeId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/orders-online/stores/").concat(storeId));
+    }
+  },
+  order: {
+    updateOrderById: function updateOrderById(orderId, newStatus) {
+      return _axiosClient["default"].put("".concat(baseUrl, "/orders-online/").concat(orderId, "/status"), {
+        status: newStatus
+      });
+    },
+    udateOrderByStoreID: function udateOrderByStoreID(storeId, newStatus) {
+      return _axiosClient["default"].put("".concat(baseUrl, "/orders-online/stores/").concat(storeId, "/status"), {
+        status: newStatus
+      });
+
     }
   }
 };

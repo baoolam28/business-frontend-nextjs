@@ -22,9 +22,11 @@ const sellerAPI = {
     getAllInventory: () => axiosClient.get(`${baseUrl}/inventories/${storeId}`),
   },
   store: {
-    getStoreByUserId: (userId) =>
-      axiosClient.get(`${baseUrl}/store/by-user?userId=${userId}`),
+    getStoreByUserId: (userId) => axiosClient.get(`${baseUrl}/store/by-user?userId=${userId}`),
+    getAllOrderByStoreId : (storeId) => axiosClient.get(`${baseUrl}/orders-online/stores/${storeId}`)
+    
   },
+
   order: {
     getAllOdersByStoreId: (storeId) => axiosClient.get(`${baseUrl}/orders/store/${storeId}`),
     getOrderById: (orderId) => axiosClient.get(`${baseUrl}/orders/${orderId}`),
@@ -42,6 +44,7 @@ const sellerAPI = {
   },
   payment: {
     createQrCode: (qrData) => axiosClient.post(`${baseUrl}/qr/create`, qrData)
+
   }
 };
 

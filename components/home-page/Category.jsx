@@ -189,12 +189,12 @@ const Category = () => {
                     <span className="ml-2 text-sm">{product.pickupAddress || "Địa chỉ không xác định"}</span>
                   </div>
                   <div className="flex items-center text-sm text-muted-foreground">
-                    <Store className="w-4 h-4 mr-1" /> 
+                    <Store className="w-4 h-4 mr-1" />  
                     <span className="font-semibold text-gray-800">{product.storeName}</span> {/* Tên cửa hàng */}
                   </div>
                 </CardContent>
                 <CardFooter className="p-4">
-                  <Button className="w-full">Thêm vào hahahahahahahahahahagiỏ hàng</Button>
+                  <Button className="w-full">Thêm vào giỏ hàng</Button>
                 </CardFooter>
               </Card>
             ))}
