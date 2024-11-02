@@ -75,7 +75,7 @@ const LoginForm = () => {
               type="password"
               id="password"
               className="mt-2 border-b border-black"
-              required
+              
             />
           </div>
           <div className="flex gap-10 items-center mt-10 text-base">

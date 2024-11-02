@@ -2,8 +2,9 @@ import axiosClient from "./axiosClient";
 const baseUrl = "/api/seller";
 const sellerAPI = {
   product: {
-    getAllProducts: (storeId) => axiosClient.get(`${baseUrl}/products/${storeId}`),
+    getAllProductsByStoreId: (storeId) => axiosClient.get(`${baseUrl}/products/${storeId}`),
     createProductOnline: (data) => axiosClient.post(`${baseUrl}/products/online`, data),
+    createProductOffline: (data) => axiosClient.post(`${baseUrl}/products/offline`,data),
   },
   category: {
     getAllCategories: () => axiosClient.get(`${baseUrl}/categories`),
@@ -25,9 +26,25 @@ const sellerAPI = {
     getAllOrderByStoreId : (storeId) => axiosClient.get(`${baseUrl}/orders-online/stores/${storeId}`)
     
   },
-  order: { 
-    updateOrderById: (orderId ,newStatus ) => axiosClient.put(`${baseUrl}/orders-online/${orderId}/status`,  { status: newStatus }),
-    udateOrderByStoreID: (storeId ,newStatus ) => axiosClient.put(`${baseUrl}/orders-online/stores/${storeId}/status`, { status: newStatus })
+
+  order: {
+    getAllOdersByStoreId: (storeId) => axiosClient.get(`${baseUrl}/orders/store/${storeId}`),
+    getOrderById: (orderId) => axiosClient.get(`${baseUrl}/orders/${orderId}`),
+    createOrder: (orderData) => axiosClient.post(`${baseUrl}/orders`, orderData),
+    updateOrder: (orderId, PaymentData) => axiosClient.put(`${baseUrl}/orders/${orderId}/payment`, PaymentData),
+    deleteOrder: () => axiosClient.delete(`${baseUrl}/orders/${orderId}`),
+    getAllProductByOrderId: (orderId) => axiosClient.get(`${baseUrl}/orders/${storeId}/products`),
+    updateOrderDetail: (orderData, orderId) => axiosClient.put(`${baseUrl}/orders/update/${orderId}`, orderData)
+  },
+  customer: {
+    getAllCustomerssByStoreId: (storeId) => axiosClient.get(`${baseUrl}/customers/store/${storeId}`),
+    createCustomer: (customerData) => axiosClient.post(`${baseUrl}/customers`, customerData),
+    updateCustomer: () => axiosClient.put(`${baseUrl}/customers/${customersId}`),
+    deleteCustomer: () => axiosClient.delete(`${baseUrl}/customers/${customersId}`)
+  },
+  payment: {
+    createQrCode: (qrData) => axiosClient.post(`${baseUrl}/qr/create`, qrData)
+
   }
 };
 

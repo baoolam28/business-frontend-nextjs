@@ -17,6 +17,11 @@ var sellerAPI = {
     },
     createProductOnline: function createProductOnline(data) {
       return _axiosClient["default"].post("".concat(baseUrl, "/products/online"), data);
+
+    },
+    createProductOffline: function createProductOffline(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/products/offline"), data);
+
     }
   },
   category: {
@@ -66,6 +71,7 @@ var sellerAPI = {
       return _axiosClient["default"].put("".concat(baseUrl, "/orders-online/stores/").concat(storeId, "/status"), {
         status: newStatus
       });
+
     }
   }
 };
