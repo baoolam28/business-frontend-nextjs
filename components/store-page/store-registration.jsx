@@ -19,6 +19,7 @@ export default function StoreRegistration() {
   const {user} = useUser()
   const [currentStep, setCurrentStep] = useState(1)
   const [formData, setFormData] = useState({
+
     storeName: '',
     storeAvatar: '',
     storeLocation: '',
@@ -32,7 +33,7 @@ export default function StoreRegistration() {
     storeTaxCode: '',
     userId: '',
     managerName: ''
-    
+
   })
   const [error, setError] = useState(null)
   const totalSteps = 5
