@@ -11,7 +11,7 @@ export default function StoreInfo( {storeInfo}) {
             <div className="w-32 h-32 rounded-full bg-white p-2 shadow-xl">
               <Image
                 src={storeInfo ? storeInfo.logoUrl : null}
-                alt={`${storeInfo.name} logo`}
+                alt={`${storeInfo.storeName} logo`}
                 width={128}
                 height={128}
                 className="rounded-full object-cover"
@@ -26,31 +26,27 @@ export default function StoreInfo( {storeInfo}) {
           <div className="grid gap-4 text-gray-600">
             <div className="flex items-center gap-3 bg-gray-100 p-3 rounded-lg">
               <User className="w-5 h-5 text-orange-500" />
-              <p>Owner: {storeInfo.ownerName ? storeInfo.ownerName : ''}</p>
+              <p>Owner: {storeInfo.managerName ? storeInfo.managerName : ''}</p>
             </div>
             <div className="flex items-center gap-3 bg-gray-100 p-3 rounded-lg">
               <Mail className="w-5 h-5 text-teal-500" />
-              <p>Email: {storeInfo.email ? storeInfo.email : ''}</p>
+              <p>Email: {storeInfo.storeEmail ? storeInfo.storeEmail : ''}</p>
             </div>
             <div className="flex items-center gap-3 bg-gray-100 p-3 rounded-lg">
               <MapPin className="w-5 h-5 text-red-500" />
-              <p>{storeInfo.address ? storeInfo.address : ''}</p>
+              <p>{storeInfo.storeLocation ? storeInfo.storeLocation : ''}</p>
             </div>
             <div className="flex items-center gap-3 bg-gray-100 p-3 rounded-lg">
               <Phone className="w-5 h-5 text-green-500" />
-              <p>{storeInfo.phone ? storeInfo.phone : ''}</p>
+              <p>{storeInfo.storeTaxCode ? storeInfo.storeTaxCode : ''}</p>
             </div>
             <div className="flex items-start gap-3 bg-gray-100 p-3 rounded-lg">
               <FileText className="w-5 h-5 text-blue-500 mt-1" />
-              <p>{storeInfo.description ? storeInfo.description : ''}</p>
-            </div>
-            <div className="flex items-center gap-3 bg-gray-100 p-3 rounded-lg">
-              <Tag className="w-5 h-5 text-purple-500" />
-              <p>{storeInfo.category ? storeInfo.category : ''}</p>
+              <p>{storeInfo.storeDescription ? storeInfo.storeDescription : ''}</p>
             </div>
             <div className="flex items-center gap-3 bg-gray-100 p-3 rounded-lg">
               <CreditCard className="w-5 h-5 text-indigo-500" />
-              <p>Bank Account: {storeInfo.bankAccount ? storeInfo.bankAccount : ''}</p>
+              <p>Bank Account: {storeInfo.storeBankAccount ? storeInfo.storeBankAccount : ''}</p>
             </div>
           </div>
         </div>

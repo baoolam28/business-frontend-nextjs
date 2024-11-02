@@ -1,20 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import axios from "axios"; // Đảm bảo bạn đã cài đặt axios hoặc import BuyerAPI nếu bạn đã cấu hình sẵn
-import buyerAPI from "../../api/buyer";
-function CategoryBrowse({ categoryId }) {
-  const [categoryData, setCategoryData] = useState(null); // State để lưu dữ liệu danh mục
-  const [categories, setCategories] = useState([]); // State để lưu danh sách danh mục
-  const fallbackImage = "https://via.placeholder.com/150"; // Đường dẫn ảnh mặc định nếu không có từ API
+import buyerAPI from "../../api/buyer"; // Ensure the API is properly configured
 
-  // Hàm gọi API để lấy danh mục
+function CategoryBrowse({ categoryId }) {
+  const [categories, setCategories] = useState([]); // State to hold the list of categories
+  const fallbackImage = "https://via.placeholder.com/150"; // Default image URL if none from API
+
+  // Function to fetch categories from API
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await buyerAPI.category.getAllCategories()// Đường dẫn API của bạn để lấy tất cả danh mục
+        const response = await buyerAPI.category.getAllCategories(); // API endpoint to get all categories
         if (response.statusCode === 200) {
-          setCategories(response.data); // Giả sử API trả về danh sách danh mục
-          console.log("Categories: ", response.data);
+          setCategories(response.data); // Assuming the API returns a list of categories
         } else {
           console.error("Failed to fetch categories");
         }
@@ -23,9 +21,8 @@ function CategoryBrowse({ categoryId }) {
       }
     };
 
-    fetchCategories(); // Fetch danh mục ngay khi component mount
+    fetchCategories(); // Fetch categories on component mount
   }, []);
-
 
   return (
     <section className="flex flex-col mt-20 max-md:mt-10 max-md:max-w-full">
@@ -36,7 +33,7 @@ function CategoryBrowse({ categoryId }) {
               <div className="flex shrink-0 h-10 bg-red-500 rounded" />
             </div>
             <span className="self-stretch my-auto text-base font-semibold leading-none text-red-500">
-              Categories
+              Today's
             </span>
           </div>
           <h2 className="mt-5 text-4xl font-semibold tracking-widest leading-none text-black">
@@ -44,21 +41,25 @@ function CategoryBrowse({ categoryId }) {
           </h2>
         </div>
       </div>
-      <div className="flex flex-wrap gap-8 items-start mt-16 text-base text-black whitespace-nowrap max-md:mt-10 max-md:max-w-full">
+      <div className="grid grid-cols-5 gap-8 items-start mt-16 text-base text-black whitespace-nowrap max-md:mt-10 max-md:max-w-full">
         {categories.length > 0 ? (
           categories.map((category) => (
             <a
               key={category.categoryId}
               onClick={() => {
-                window.location.href = `/category?id=${category.categoryId}`; // Duy chuyển đến trang Category kèm theo id
-              }} // Thay bằng handleCategoryClick nếu bạn có hàm đó
-              className="flex overflow-hidden flex-col items-center px-9 py-6 rounded border border-solid border-black border-opacity-30 w-[170px] max-md:px-5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                window.location.href = `/category?id=${category.categoryId}`; // Navigate to Category page with id
+              }}
+              className="flex flex-col items-center px-9 py-6 rounded border border-solid border-black border-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              style={{
+                width: '200px', // Set a fixed width
+                height: '250px', // Set a fixed height
+              }}
             >
               <img
                 loading="lazy"
-                src={category.icon || fallbackImage} // Lấy hình ảnh từ danh mục hoặc dùng hình mặc định
+                src={category.icon || fallbackImage} // Use category icon or default image
                 alt={category.categoryName}
-                className="object-contain w-14 aspect-square"
+                className="object-contain w-full h-full" // Ensure image fits container
               />
               <span className="mt-4">{category.categoryName}</span>
             </a>
