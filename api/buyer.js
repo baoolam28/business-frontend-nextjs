@@ -50,7 +50,7 @@ const buyerAPI = {
   otp : {
     sendOtp : (phoneNumber) => axiosClient.post(`${baseUrl}/send-otp`, {phoneNumber}),
     verifyOtp : (data) => axiosClient.post(`${baseUrl}/verify-otp`, data)
-
+  },
   store:{
     createStore : (dataStore) => axiosClient.post(`${baseUrl}/stores`,dataStore),
 
@@ -58,4 +58,3 @@ const buyerAPI = {
   
 };
 
-export default buyerAPI;

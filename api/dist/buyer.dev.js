@@ -1,10 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
 var _domain = require("domain");
 
 var _axiosClient = _interopRequireDefault(require("./axiosClient"));
@@ -58,9 +53,20 @@ var buyerAPI = {
       });
     }
   },
+  orderStatus: {
+    getAllOrderStatus: function getAllOrderStatus(userId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/purchase/orderOnline/").concat(userId));
+    },
+    getShipment: function getShipment(shipmentId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/purchase/").concat(shipmentId));
+    }
+  },
   shippingAddress: {
     getShippingAddressByUserId: function getShippingAddressByUserId(userId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/shipping-addresses/").concat(userId));
+    },
+    getAddressById: function getAddressById(addressId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/shipping-addresses/address/").concat(addressId));
     },
     createShippingAddressByUserId: function createShippingAddressByUserId(data) {
       return _axiosClient["default"].post("".concat(baseUrl, "/shipping-addresses"), data);
@@ -74,11 +80,24 @@ var buyerAPI = {
       return _axiosClient["default"].post("".concat(baseUrl, "/ordersOnline"), data);
     }
   },
+  register: {
+    createNewUser: function createNewUser(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/register"), data);
+    }
+  },
+  otp: {
+    sendOtp: function sendOtp(phoneNumber) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/send-otp"), {
+        phoneNumber: phoneNumber
+      });
+    },
+    verifyOtp: function verifyOtp(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/verify-otp"), data);
+    }
+  },
   store: {
     createStore: function createStore(dataStore) {
       return _axiosClient["default"].post("".concat(baseUrl, "/stores"), dataStore);
     }
   }
 };
-var _default = buyerAPI;
-exports["default"] = _default;
