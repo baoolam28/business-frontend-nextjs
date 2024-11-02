@@ -15,7 +15,12 @@ import {useStore} from "../../context/StoreContext"
 import sellerAPI from '../../api/seller';
 import { Label } from "../../components/ui/label"
 import Menu from "./menu"
+import SellerAPI from "../../api/seller"
+import { showErrorAlert, showSuccessAlert } from "../../utils/reactSweetAlert"
+import Loading from "../../components/component/loading-lottie"
+import Animation from "../../utils/lottie-animations/rocket.json"
 export default function ProductAdditionComponent() {
+  const [loading, setLoading] = useState(true)
   const {storeId} = useStore();
   const [mounted, setMounted] = useState(false);
   const [categories, setCategories] = useState([])
@@ -24,6 +29,7 @@ export default function ProductAdditionComponent() {
   const [productName, setProductName] = useState('')
   const [productDescription, setProductDescription] = useState('')
   const [category, setCategory] = useState('')
+  const [saleInformation, setSaleInformation] = useState({price: 0, quantity: 0, sku: ''})
   const [activateVariants, setActivateVariants] = useState(false)
   const [variantOptions, setVariantOptions] = useState([])
   const [variantCombinations, setVariantCombinations] = useState([])
@@ -35,7 +41,7 @@ export default function ProductAdditionComponent() {
   const [weight, setWeight] = useState('');
   const [dimensions, setDimensions] = useState({ height: '', width: '', length: '' });
   const [errors, setErrors] = useState({ weight: '', height: '', width: '', length: '' });
-
+  const [messageError, setMessageError] = useState('');
   const [images, setImages] = useState([])
   const variantSuggestions = [
     "Màu sắc",
@@ -54,33 +60,28 @@ export default function ProductAdditionComponent() {
     "Công dụng",
     "Đối tượng sử dụng"
   ];
-
+  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-
-  const productFrom = () => {
-    const formData = new FormData();
-        formData.append('productName', productName);
-        formData.append('description', productDescription);
-        formData.append('categoryId', category);
-        formData.append('price', price);
-        formData.append('storeId', storeId);
-        
-        for (let i = 0; i < images.length; i++) {
-            formData.append('images', images[i]);
-        }
-    return formData;
+  
+  useEffect(() => {
+  if (variantCombinations.length > 0) {
+    const { price, quantity, sku } = variantCombinations[0]; 
+    setSaleInformation({ price, quantity, sku }); 
   }
+}, [variantCombinations]);
+  
 
   useEffect(() => {
+
     const fetchCategories = async () => {
       const res = await sellerAPI.category.getAllCategories();
       if (res.statusCode === 200) {
         setCategories(res.data);
+        setLoading(false);
       }
     };
     fetchCategories();
@@ -89,6 +90,9 @@ export default function ProductAdditionComponent() {
   useEffect(() => {
     if (activateVariants) {
       generateVariantCombinations()
+    }else{
+      setVariantCombinations([])
+      setSaleInformation({price: 0, quantity: 0, sku: ''})
     }
   }, [variantOptions, activateVariants])
 
@@ -221,6 +225,21 @@ export default function ProductAdditionComponent() {
     setVariantCombinations(updatedCombinations)
   }
 
+  const handleNotVariantCombinationChange = (field, value) => {
+      if (!activateVariants) {
+          setVariantCombinations((prev) => {
+              // Giả sử bạn muốn cập nhật đối tượng đầu tiên trong mảng
+              const updatedCombinations = [...prev];
+              updatedCombinations[0] = {
+                  ...updatedCombinations[0],
+                  [field]: value,
+              };
+              return updatedCombinations;
+          });
+      }
+  };
+
+
   const handleDeleteVariantCombination = (index) => {
     setVariantCombinations(prev => prev.filter((_, i) => i !== index))
   }
@@ -246,7 +265,9 @@ export default function ProductAdditionComponent() {
     setShowDuplicateWarning(false)
   }
 
-  const handleVariantFormSubmit = () => {
+
+
+const handleVariantFormSubmit = () => {
   if (editingVariantIndex !== null) {
     setVariantOptions(prev => 
       prev.map((opt, index) => {
@@ -255,28 +276,25 @@ export default function ProductAdditionComponent() {
             const attributeName = Object.keys(attribute)[0];
             const attributeValue = attribute[attributeName];
 
-            // Tên mới trùng với tên cũ nhưng giá trị cũ khác giá trị mới
+            // If the new name matches the existing name but with a different value
             if (newVariantOption.name === attributeName && newVariantOption.value !== attributeValue) {
-              alert('moi')
-              // Thêm thuộc tính mới với giá trị mới
-              return {...attribute, [attributeName]: newVariantOption.value };
+              return { ...attribute, [attributeName]: newVariantOption.value };
             }
 
-            // Tên mới trùng với tên cũ và giá trị mới trùng với giá trị cũ
+            // If both the name and value are the same as existing
             if (newVariantOption.name === attributeName && newVariantOption.value === attributeValue) {
-              // Không làm gì
               return attribute;
             }
 
-            // Tên mới khác tên cũ
+            // If the new name is different from the existing name
             if (newVariantOption.name !== attributeName) {
-              return { [newVariantOption.name]: newVariantOption.value }; // Cập nhật tất cả thành tên mới
+              return { [newVariantOption.name]: newVariantOption.value };
             }
 
             return attribute;
           });
 
-          // Thêm thuộc tính mới nếu tên mới không có trong updatedAttributes
+          // Add new attribute if it doesn't exist in updatedAttributes
           if (!updatedAttributes.some(attr => Object.keys(attr)[0] === newVariantOption.name)) {
             updatedAttributes.push({ [newVariantOption.name]: newVariantOption.value });
           }
@@ -287,18 +305,38 @@ export default function ProductAdditionComponent() {
       })
     );
   } else {
-    // Thêm một variant mới
-    setVariantOptions(prev => [
-      ...prev, 
-      { 
-        attributes: [
-          { [newVariantOption.name]: newVariantOption.value }
-        ]
+    // Check if a variant with the same name already exists
+    setVariantOptions(prev => {
+      const existingVariantIndex = prev.findIndex(opt => 
+        opt.attributes.some(attribute => Object.keys(attribute)[0] === newVariantOption.name)
+      );
+
+      if (existingVariantIndex !== -1) {
+        // Update the existing variant's attributes if name matches
+        return prev.map((opt, index) => {
+          if (index === existingVariantIndex) {
+            const updatedAttributes = [
+              ...opt.attributes,
+              { [newVariantOption.name]: newVariantOption.value }
+            ];
+            return { ...opt, attributes: updatedAttributes };
+          }
+          return opt;
+        });
+      } else {
+        // Add a new variant entry if name doesn't exist
+        return [
+          ...prev, 
+          { 
+            attributes: [
+              { [newVariantOption.name]: newVariantOption.value }
+            ]
+          }
+        ];
       }
-    ]);
+    });
   }
 
-  // Đặt lại trạng thái sau khi thêm hoặc cập nhật
   setNewVariantOption({ name: '', value: '' });
   setShowVariantForm(false);
   setEditingVariantIndex(null);
@@ -308,25 +346,25 @@ export default function ProductAdditionComponent() {
 
 
   const handleImageChange = (e, indexImage) => {
-  const file = e.target.files?.[0];
+    const file = e.target.files?.[0];
 
-  if (file) {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const imageUrl = reader.result;
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const imageUrl = reader.result;
 
-      // Cập nhật state của variantCombinations sau khi có imageUrl
-      setVariantCombinations(prevCombinations =>
-        prevCombinations.map((combination, index) =>
-          index === indexImage
-            ? { ...combination, imageUrl, image: file }
-            : combination
-        )
-      );
-    };
-    reader.readAsDataURL(file); // Đọc file để lấy URL
-  }
-};
+        // Cập nhật state của variantCombinations sau khi có imageUrl
+        setVariantCombinations(prevCombinations =>
+          prevCombinations.map((combination, index) =>
+            index === indexImage
+              ? { ...combination, imageUrl, image: file }
+              : combination
+          )
+        );
+      };
+      reader.readAsDataURL(file); // Đọc file để lấy URL
+    }
+  };
 
 
   const showData = () => {
@@ -363,9 +401,194 @@ export default function ProductAdditionComponent() {
     });
   };
 
+  const handleSaveProduct = () => {
+    if(validateData()){
+      const productData = productFrom();
+      fetchCreateProductOnline(productData);
+      showSuccessAlert("Thêm sản phẩm mới","gửi thành công đang chờ xét duyệt!")
+
+    }else{
+      showErrorAlert("Thêm sản phẩm mới",`${messageError}`);
+      return;
+    }
+  }
+
+  const productFrom = () => {
+    const formData = new FormData();
+
+    // Thêm các thông tin cơ bản của sản phẩm
+    formData.append('productName', productName);
+    formData.append('description', productDescription);
+    formData.append('categoryId', category);
+    formData.append('price', saleInformation.price); // Sử dụng giá từ saleInformation
+    formData.append('storeId', storeId);
+    
+    // Thêm hình ảnh vào FormData
+    for (let i = 0; i < images.length; i++) {
+        formData.append('images', images[i]);
+    }
+
+    const productDetail = [];
+
+    // Duyệt qua các biến thể để xây dựng productDetail
+    for (let detail of variantCombinations) {
+        const width = dimensions?.width || 1;
+        const height = dimensions?.height || 1;
+        const length = dimensions?.length || 1;
+        const price = detail?.price || saleInformation.price; // Lấy giá từ saleInformation nếu không có
+        const sku = detail?.sku || '';
+        const quantity = detail?.quantity || 0;
+        const image = detail?.image || ''; // Sử dụng URL hình ảnh nếu có
+
+        const attributes = new Map();
+
+        // Duyệt qua các tùy chọn biến thể để thiết lập thuộc tính
+        variantOptions.forEach(variant => {
+            if (variant) {
+                variant.attributes.forEach(attribute => {
+                    const [key, value] = Object.entries(attribute)[0];
+                    const options = Object.values(detail);
+
+                    if (options.includes(value)) {
+                        attributes.set(key, value);
+                    }
+                });
+            }
+        });
+
+        // Chuyển đổi Map thành một đối tượng
+        const attributesObject = Object.fromEntries(attributes);
+        
+        // Thêm thông tin chi tiết sản phẩm vào mảng productDetail
+        productDetail.push({
+            width,
+            height,
+            length,
+            price,
+            sku,
+            quantity,
+            image,
+            attributes: attributesObject,
+        });
+    }
+
+    // Thêm thông tin chi tiết sản phẩm vào formData
+    productDetail.forEach((detail, index) => {
+        formData.append(`productDetail[${index}].width`, detail.width);
+        formData.append(`productDetail[${index}].height`, detail.height);
+        formData.append(`productDetail[${index}].length`, detail.length);
+        formData.append(`productDetail[${index}].weight`, weight);
+        formData.append(`productDetail[${index}].price`, detail.price);
+        formData.append(`productDetail[${index}].sku`, detail.sku);
+        formData.append(`productDetail[${index}].quantity`, detail.quantity);
+        
+        if (detail.image) {
+            formData.append(`productDetail[${index}].image`, detail.image); // Xử lý file hình ảnh
+        }
+
+        // Thêm thuộc tính
+        Object.entries(detail.attributes).forEach(([key, value]) => {
+            formData.append(`productDetail[${index}].attributes[${key}]`, value);
+        });
+    });
+
+    return formData; // Trả về formData đã hoàn thành
+};
+
+
+
+
+
+  const validateData = () => {
+
+    if(!productName){
+      setMessageError('Tên sản phẩm không được để trống');
+      return false;
+    }
+
+    if(!productDescription){
+      setMessageError('Mô tả sản phẩm không được để trống');
+      return false;
+    }
+
+    if(!category){
+      setMessageError('Chọn danh mục sản phẩm');
+      return false;
+    }
+
+    // Kiểm tra trường price trong saleInformation
+    if (saleInformation.price <= 0) {
+        setMessageError('Giá sản phẩm phải lớn hơn 0');
+        return false;
+    }
+
+    // Kiểm tra trường quantity trong saleInformation
+    if (saleInformation.quantity <= 0) {
+        setMessageError('Số lượng sản phẩm phải lớn hơn 0');
+        return false;
+    }
+
+    // Kiểm tra trường sku trong saleInformation
+    if (!saleInformation.sku) {
+        setMessageError('SKU không được để trống');
+        return false;
+    }
+
+    if(!storeId){
+      setMessageError('Bạn chưa đăng nhập');
+      return false;
+    }
+
+    if(images.length < 1){
+      setMessageError('Chưa chọn ảnh cho sản phẩm');
+      return false;
+    }
+
+    for (let key in dimensions) {
+      if (dimensions[key] === '') {
+        setMessageError('Vui lòng nhập kích thước');
+        return false;
+      }
+    } 
+
+    if(!weight){
+      setMessageError('Trọng lượng sản phẩm không được để trống');
+      return false;
+    }
+
+    if(variantCombinations.length < 1){
+      setMessageError('Vui lòng thêm nhập thông tin bán hàng cho sản phẩm');
+      return false;
+    }
+  
+    return true;
+  };
+
+  const fetchCreateProductOnline = async (data) => {
+    try {
+      setLoading(true); // Start loading
+      const response = await SellerAPI.product.createProductOnline(data);
+      // Check response status
+      if (response.statusCode === 200) {
+        showSuccessAlert("Thêm sản phẩm mới", "Gửi thành công, đang chờ xét duyệt!");
+      } else {
+        showErrorAlert("Thêm sản phẩm mới", "Đã xảy ra lỗi khi tạo sản phẩm.");
+      }
+    } catch (error) {
+      console.log("Failed to fetch create product online", error);
+      showErrorAlert("Thêm sản phẩm mới", "Đã xảy ra lỗi khi gửi yêu cầu.");
+    } finally {
+      setLoading(false); 
+    }
+  };
+
   if (!mounted) {
     // Tránh render nội dung trước khi component đã mounted
     return null;
+  }
+
+  if(loading){
+    return <Loading animation={Animation}/>;
   }
 
   return (
@@ -386,7 +609,9 @@ export default function ProductAdditionComponent() {
               <Save className="mr-2 h-4 w-4" />
               Lưu làm nháp
             </Button>
-            <Button className="bg-green-500 text-white hover:bg-green-600 transition">
+            <Button 
+            onClick={handleSaveProduct}
+            className="bg-green-500 text-white hover:bg-green-600 transition">
               Gửi để xét duyệt
               <Send className="ml-2 h-4 w-4" />
             </Button>
@@ -727,14 +952,27 @@ export default function ProductAdditionComponent() {
                               />
                             </div>
                             <div className="text-center mb-2">
-                              {variantOptions.map((option, optionIndex) => (
-                                <span 
-                                  key={optionIndex} 
-                                  className="inline-block bg-blue-100 text-blue-800 rounded-full px-2 py-1 text-xs font-medium border border-gray-300 mr-1"
-                                >
-                                  {combination[option.name]}
-                                </span>
-                              ))}
+                              {variantOptions.map((variant, variantIndex) => {
+                                if (variant) {
+                                  return variant.attributes.map((attribute, attributeIndex) => {
+                                    const [key, value] = Object.entries(attribute)[0]; // Get the first entry
+                                    const options = Object.values(combination);
+                                    
+                                    if (options.includes(value)) {
+                                      return (
+                                        <span 
+                                          key={attributeIndex} 
+                                          className="inline-block bg-blue-100 text-blue-800 rounded-full px-2 py-1 text-xs font-medium border border-gray-300 mr-1"
+                                        >
+                                          {value}
+                                        </span>
+                                      );
+                                    }
+                                    return null; // Explicitly return null if key is not found
+                                  });
+                                }
+                                return null; // Return null if variant is falsy
+                              })}
                             </div>
                             <input 
                               type="file" 
@@ -755,45 +993,71 @@ export default function ProductAdditionComponent() {
                     )}
 
 
+
                     <div className="mt-4">
                       <h4 className="text-lg font-semibold mb-2">Danh sách Biến thể</h4>
-                      <Table>
+                      <Table className="min-w-full border-collapse">
                         <TableHeader>
-                          {variantOptions.map((option, index) => (
-                            <TableHead key={index}>{option.name}</TableHead>
-                          ))}
-                          <TableHead>Giá bán lẻ</TableHead>
-                          <TableHead>Số lượng</TableHead>
-                          <TableHead>SKU Người bán</TableHead>
-                          <TableHead></TableHead>
+                          <TableRow className="bg-gray-200">
+                            {variantOptions.map((variant, variantIndex) => {
+                              if (variant) {
+                                const attribute = variant.attributes[0];
+                                const [key, value] = Object.entries(attribute)[0];
+                                return (
+                                  <TableHead className="px-4 py-2 border" key={variantIndex}>{key}</TableHead>
+                                );
+                              }
+                              return null;
+                            })}
+                            <TableHead className="px-4 py-2 border">Giá bán lẻ</TableHead>
+                            <TableHead className="px-4 py-2 border">Số lượng</TableHead>
+                            <TableHead className="px-4 py-2 border">SKU Người bán</TableHead>
+                            <TableHead className="px-4 py-2 border"></TableHead>
+                          </TableRow>
                         </TableHeader>
                         <TableBody>
                           {variantCombinations.map((combination, index) => (
-                            <TableRow key={index}>
-                              {variantOptions.map((option, optionIndex) => (
-                                <TableCell key={optionIndex}>{combination[option.name]}</TableCell>
-                              ))}
-                              <TableCell>
+                            <TableRow className="hover:bg-gray-100" key={index}>
+                              {variantOptions.map((variant, variantIndex) => {
+                                  if (variant) {
+                                      return variant.attributes.map((attribute, attributeIndex) => {
+                                          const [key, value] = Object.entries(attribute)[0];
+                                          const options = Object.values(combination);
+
+                                          if (options.includes(value)) {
+                                            return (
+                                              <TableCell className="px-4 py-2 border">
+                                                {value}
+                                              </TableCell>
+                                            )
+                                            
+                                          }
+                                          return null; 
+                                      });
+                                  }
+                                  return null; 
+                              })}
+                              <TableCell className="px-4 py-2 border">
                                 <Input
                                   type="number"
                                   value={combination.price}
-                                  onChange={(e) =>  handleVariantCombinationChange(index, 'price', e.target.value)}
-                                  placeholder="Giá" />
+                                  onChange={(e) => handleVariantCombinationChange(index, 'price', e.target.value)}
+                                  placeholder="Giá" className="border rounded p-1" />
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="px-4 py-2 border">
                                 <Input
                                   type="number"
                                   value={combination.quantity}
                                   onChange={(e) => handleVariantCombinationChange(index, 'quantity', e.target.value)}
-                                  placeholder="Số lượng" />
+                                  placeholder="Số lượng" className="border rounded p-1" />
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="px-4 py-2 border">
                                 <Input
                                   value={combination.sku}
                                   onChange={(e) => handleVariantCombinationChange(index, 'sku', e.target.value)}
-                                  placeholder="SKU" />
+                                  placeholder="SKU" className="border rounded p-1" />
                               </TableCell>
-                              <TableCell>
+                              <TableCell className="px-4 py-2 border">
                                 <Button
                                   variant="ghost"
                                   size="sm"
@@ -805,10 +1069,11 @@ export default function ProductAdditionComponent() {
                           ))}
                         </TableBody>
                       </Table>
+
                     </div>
                   </>
                 )}
-                {activateVariants && (
+                {!activateVariants && (
                   <Table>
                   <TableHeader>
                     <TableHead>Giá bán lẻ</TableHead>
@@ -821,28 +1086,28 @@ export default function ProductAdditionComponent() {
                         <TableCell>
                           <Input
                             type="number"
-                            value=""
-                            onChange={() => {}}
+                            value={variantCombinations[0]?.price}
+                            onChange={(e) => handleNotVariantCombinationChange('price', e.target.value)}
                             placeholder="Giá" />
                         </TableCell>
                         <TableCell>
                           <Input
                             type="number"
-                            value=""
-                            onChange={() => {}}
+                            value={variantCombinations[0]?.quantity}
+                            onChange={(e) => handleNotVariantCombinationChange('quantity', e.target.value)}
                             placeholder="Số lượng" />
                         </TableCell>
                         <TableCell>
                           <Input
-                            value=""
-                            onChange={() => {}}
+                            value={variantCombinations[0]?.sku}
+                            onChange={(e) => handleNotVariantCombinationChange('sku', e.target.value)}
                             placeholder="SKU" />
                         </TableCell>
                         <TableCell>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDeleteVariantCombination(index)}>
+                            onClick={() => handleDeleteVariantCombination(0)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </TableCell>
