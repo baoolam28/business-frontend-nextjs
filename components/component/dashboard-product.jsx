@@ -64,6 +64,7 @@ import formatVND from "../../utils/formatVND";
 import SellerAPI from "../../api/seller";
 import { useStore } from '../../context/StoreContext';
 import Navbar from "../component/navbar"
+import sellerAPI from "../../api/seller"
 export default function DashboardProduct() {
 
   const { storeId } = useStore();
@@ -97,6 +98,7 @@ export default function DashboardProduct() {
         const response = await SellerAPI.product.getAllProducts(storeId);
         if(response.statusCode === 200) {
           setProducts(response.data);
+          console.log(response.data);
         }
         
       } catch (error) {
@@ -207,7 +209,7 @@ export default function DashboardProduct() {
   const handleSaveProduct = async (productData) => {
     
     try {
-      const response = await productAPI.createProduct(productData);
+      const response = await sellerAPI.product.createProductOffline(productData);
       setProducts((prev) => [...prev, response]);
     } catch (error) {
       console.log('create product error: ', error);
@@ -267,7 +269,7 @@ export default function DashboardProduct() {
                     <Accordion type="single" collapsible>
                       <AccordionItem value="category">
                         <AccordionTrigger className="text-base">
-                          Loại hàng
+                          Loại hàng 
                         </AccordionTrigger>
                         <AccordionContent>
                           <div className="grid gap-2">
@@ -398,11 +400,19 @@ export default function DashboardProduct() {
                           <TableCell>{product.supplierName}</TableCell>
                           <TableCell>{product.originName}</TableCell>
                           <TableCell>
+                          <div className="flex gap-2">
+                              {product.images.map((image, index) => (
                             <img
-                              src={product.image}
-                              alt={product.productName}
-                              className="h-10 w-10 rounded-lg"  
-                            />
+                                  key={index}
+                                  src="https://down-vn.img.susercontent.com/file/vn-11134201-7ras8-m1f0p2kahly01a@resize_w450_nl.webp"
+                                  alt={image.imageId || product.productName}
+                                  className="h-10 w-10 rounded-lg"
+                                  
+                             />
+                             
+                             ))}
+
+                          </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">

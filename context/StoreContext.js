@@ -1,5 +1,5 @@
 "use client"
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import sellerAPI from "../api/seller";
 import { useUser } from "./UserContext"; // Sử dụng UserContext để lấy userId
 
@@ -13,7 +13,9 @@ export const StoreProvider = ({ children }) => {
 
 
   useEffect(() => {
+   
     if (user && user.id) {
+      console.log("Current userId:", user.id);      
       async function fetchStore() {
         
         try {
@@ -30,6 +32,8 @@ export const StoreProvider = ({ children }) => {
       fetchStore();
     }
   }, [user]);
+
+ 
 
   return (
     <StoreContext.Provider value={{ storeId, store }}>
