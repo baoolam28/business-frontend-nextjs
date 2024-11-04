@@ -68,7 +68,7 @@ export default function sales() {
   const handleCloseDialog = () => setDialogOpen(false);
   const [unpaidOrderProducts, setUnpaidOrderProducts] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
- const [selectedOrder, setSelectedOrder] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState("");
 
   const router = useRouter();
 
@@ -98,7 +98,7 @@ useEffect(() => {
     }
 
     const fetchOrders = async () => {
-  if (!storeId) return;
+      if (!storeId) return;
   
     try {
       const response = await sellerAPI.order.getAllOdersByStoreId(storeId);
@@ -118,6 +118,7 @@ useEffect(() => {
       fetchOrders();
     }
     // Gọi hàm fetchProducts
+
 
     const fetchCustomers = async () => {
       if (!storeId) return; // Nếu storeId không có, không gọi API
@@ -167,17 +168,17 @@ useEffect(() => {
     }
   }, [selectedOrderId]); // Chạy khi selectedOrderId thay đổi
 
- // Filtered Products
-  const filteredProducts = useMemo(() => {
-    return products.filter(product => 
-      product.productName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [products, searchTerm]);
+    const filteredProducts = useMemo(() => {
+      return products.filter(product =>
+        product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }, [products, searchTerm]);
 
-  // Handlers
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-  };
+    // Handlers
+    const handleSearch = (event) => {
+      const value = event.target.value;
+      setSearchTerm(value); // Chỉ cần cập nhật searchTerm, filteredProducts sẽ tự động cập nhật.
+    };
 
   const handleAddToCart = (product) => {
     if (cart.length === 0) {
@@ -415,11 +416,11 @@ const handleSelectOrder = (selectedOrderObj) => {
         <div className="flex items-center gap-4 mb-6">
           <div className="relative flex-1">
             <Input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="pl-10 w-full" />
+            type="text"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="pl-10 w-full" />
             <select
               id="unpaidOrders"
               value={selectedOrder}
