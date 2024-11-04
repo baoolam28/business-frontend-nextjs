@@ -1,7 +1,7 @@
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "../../components/ui/tooltip"
 import Link from "next/link"
 
-export default function menu() {
+export default function   menu() {
 
 
 
@@ -77,6 +77,18 @@ export default function menu() {
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="right">Reports</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/store/order"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  prefetch={false}>
+                  <OrderIcon className="h-5 w-5" />
+                  <span className="sr-only">Orders</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Orders</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </nav>
@@ -163,6 +175,28 @@ function Package2Icon(props) {
   );
 }
 
+function OrderIcon(props) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round">
+      {/* Hình chữ nhật đại diện cho tài liệu đơn hàng */}
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+      {/* Đường kẻ đại diện cho các dòng văn bản */}
+      <line x1="9" y1="8" x2="15" y2="8" />
+      <line x1="9" y1="12" x2="15" y2="12" />
+      <line x1="9" y1="16" x2="15" y2="16" />
+    </svg>
+  );
+}
 
 function PackageIcon(props) {
   return (

@@ -38,7 +38,7 @@ const LocationSelector = ({onSaveAddress}) => {
         console.log(response)
 
         if (response.data.code === 200) {
-          setProvinces(response.data.data); // response.data.data để lấy danh sách tỉnh
+          setProvinces(response.data.data); 
           console.log('Get provinces success');
         } else {
           console.error('Failed to fetch provinces, status code:', response.message);
@@ -97,7 +97,7 @@ const LocationSelector = ({onSaveAddress}) => {
 
           if (response.data.code === 200) {
             setWards(response.data.data);
-            console.log('Get wards success');
+            console.log('Get wards success, '+response.data.data);
           } else {
             console.error('Failed to fetch wards, error code:', response.message);
           }
@@ -117,6 +117,7 @@ const LocationSelector = ({onSaveAddress}) => {
     const province = provinces.find(p => p.ProvinceID === selectedProvince);
     const provinceName = province ? province.ProvinceName : '';
 
+
     // Tìm DistrictName
     const district = districts.find(d => d.DistrictID === selectedDistrict);
     const districtName = district ? district.DistrictName : '';
@@ -128,7 +129,10 @@ const LocationSelector = ({onSaveAddress}) => {
     // Tạo địa chỉ hoàn chỉnh
     const fullAddress = `${addressDetails}, ${wardName}, ${districtName}, ${provinceName}`;
     setAddress(fullAddress);
+
   }
+
+  
 
   },[selectedProvince, selectedDistrict, selectedWard, addressDetails]);
 

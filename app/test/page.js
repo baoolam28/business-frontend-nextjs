@@ -1,10 +1,10 @@
 import React from 'react'
-import Categorys from '../../@/components/product-search-page'
+import Shopp from '../../components/home-page/shop-profile'
 
 export default function () {
   return (
     <div>
-        <Categorys/>
+        <Shopp/>
     </div>
   )
 }

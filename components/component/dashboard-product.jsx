@@ -64,6 +64,9 @@ import formatVND from "../../utils/formatVND";
 import SellerAPI from "../../api/seller";
 import { useStore } from '../../context/StoreContext';
 import Navbar from "../component/navbar"
+import sellerAPI from "../../api/seller"
+import Loading from "../../components/component/loading-lottie"
+import Animation from "../../utils/lottie-animations/astronot.json"
 export default function DashboardProduct() {
 
   const { storeId } = useStore();
@@ -82,7 +85,7 @@ export default function DashboardProduct() {
 
 
   const [sortBy, setSortBy] = useState("price-asc");
-  const [products, setProducts] = useState([]);
+  const [productOffline, setProductsOffline] = useState([]);
   const [inventories, setInventories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [origins, setOrigins] = useState([]);
@@ -94,13 +97,13 @@ export default function DashboardProduct() {
     const fetchProducts = async () => {
       console.log(storeId)
       try {
-        const response = await SellerAPI.product.getAllProducts(storeId);
+        const response = await SellerAPI.product.getProductsOffline(storeId);
         if(response.statusCode === 200) {
-          setProducts(response.data);
+          setProductsOffline(response.data);
         }
         
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error("Error fetching productOffline:", error);
       } finally {
         setLoading(false);
       }
@@ -118,7 +121,7 @@ export default function DashboardProduct() {
     }
     const fetchCategories = async () => {
       try {
-        const response = await SellerAPI.category.getAllCategories();
+        const response = await SellerAPI.category.getCategoriesByStore(storeId);
         if(response.statusCode === 200){
           setCategories(response.data);
         }
@@ -156,6 +159,8 @@ export default function DashboardProduct() {
       fetchCategories();
       fetchSuppliers();
       fetchInventories();
+    }else{
+
     }
     
   }, [storeId]);
@@ -163,7 +168,7 @@ export default function DashboardProduct() {
   
 
   const filteredProducts = useMemo(() => {
-    let result = products;
+    let result = productOffline;
     if (filters.category.length > 0) {
       result = result.filter((product) =>
         filters.category.includes(product.categoryName)
@@ -187,7 +192,7 @@ export default function DashboardProduct() {
       default:
         return result;
     }
-  }, [filters, sortBy, products]);
+  }, [filters, sortBy, productOffline]);
 
   const handleFilterChange = (type, value) => {
     setFilters((prevFilters) => ({
@@ -207,8 +212,8 @@ export default function DashboardProduct() {
   const handleSaveProduct = async (productData) => {
     
     try {
-      const response = await productAPI.createProduct(productData);
-      setProducts((prev) => [...prev, response]);
+      const response = await sellerAPI.product.createProductOffline(productData);
+      setProductsOffline((prev) => [...prev, response]);
     } catch (error) {
       console.log('create product error: ', error);
     }
@@ -216,7 +221,7 @@ export default function DashboardProduct() {
   };
 
   if (loading) {
-    return <p>Loading products...</p>;
+    return <Loading animation={Animation}/>;
   }
 
   if (error) {
@@ -236,13 +241,13 @@ export default function DashboardProduct() {
           </div>
         </header>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Tabs defaultValue="products" className="w-full">
+          <Tabs defaultValue="productOffline" className="w-full">
             <TabsList className="flex items-center justify-between border-b">
-              <TabsTrigger value="products">Sản Phẩm</TabsTrigger>
+              <TabsTrigger value="productOffline">Sản Phẩm</TabsTrigger>
               <TabsTrigger value="printer">In Mã Vạch</TabsTrigger>
               <TabsTrigger value="imports">Nhập Hàng</TabsTrigger>
             </TabsList>
-            <TabsContent value="products" className="py-8">
+            <TabsContent value="productOffline" className="py-8">
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold">Kho sản phẩm</h1>
                 
@@ -267,7 +272,7 @@ export default function DashboardProduct() {
                     <Accordion type="single" collapsible>
                       <AccordionItem value="category">
                         <AccordionTrigger className="text-base">
-                          Loại hàng
+                          Loại hàng 
                         </AccordionTrigger>
                         <AccordionContent>
                           <div className="grid gap-2">
@@ -392,17 +397,25 @@ export default function DashboardProduct() {
                           <TableCell>{product.barcode}</TableCell>
                           <TableCell>{formatVND(product.price)}</TableCell>
                           <TableCell>
-                            {inventories.map((inventory) => inventory.barcode === product.barcode ? inventory.quantityInStock : null)}
+                            {inventories.map((inventory) => inventory.barcode === product.barcode ? inventory.quantityInStock : '0')}
                           </TableCell>
                           <TableCell>{product.categoryName}</TableCell>
                           <TableCell>{product.supplierName}</TableCell>
                           <TableCell>{product.originName}</TableCell>
                           <TableCell>
+                          <div className="flex gap-2">
+                              {product.images.map((image, index) => (
                             <img
-                              src={product.image}
-                              alt={product.productName}
-                              className="h-10 w-10 rounded-lg"  
-                            />
+                                  key={index}
+                                  src="https://down-vn.img.susercontent.com/file/vn-11134201-7ras8-m1f0p2kahly01a@resize_w450_nl.webp"
+                                  alt={image.imageId || product.productName}
+                                  className="h-10 w-10 rounded-lg"
+                                  
+                             />
+                             
+                             ))}
+
+                          </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">

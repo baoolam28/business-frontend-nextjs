@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function orderDetail() {
+export default function orderDetail({order }) {
   return (
     <div>
         <div className="p-6 bg-gray-100 min-h-screen">
@@ -17,60 +17,36 @@ export default function orderDetail() {
                             </div>
                         </div>
                         <div className="flex justify-between items-center mb-4">
-                            <h1 className="text-2xl font-bold">Order #2471</h1>
-                            <span className="text-sm text-gray-500">13 Sep, 2022 at 4:39 PM</span>
-                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded">Paid</span>
+                            <h1 className="text-2xl font-bold">Order {order.orderId}</h1>
+                            <span className="text-sm text-gray-500">{order.orderDate}</span>
+                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded">{order.status.replaceAll('_', ' ')}</span>
                         </div>
                         <div className="grid grid-cols-3 gap-6">
                             <div className="col-span-2">
                                 <div className="bg-gray-50 p-4 rounded-lg mb-6">
                                     <h2 className="text-lg font-bold mb-4">Order Details</h2>
                                     <div className="space-y-4">
-                                        <div className="flex items-center">
-                                            <img src="https://placehold.co/60x60" alt="Laced shoes on high current" className="w-16 h-16 rounded mr-4"/>
+                                        {order.orderDetails.map((item, index) => (
+                                            <div key={index} className="flex items-center">
+                                            <img src={item.imageUrl || "https://placehold.co/60x60"} alt={item.productName} className="w-16 h-16 rounded mr-4" />
                                             <div className="flex-1">
-                                                <div className="font-bold">Laced shoes on high current</div>
-                                                <div className="text-sm text-gray-500">SKU: <a href="#" className="text-blue-500">dfr-t685y-1</a></div>
-                                                <div className="text-sm text-gray-500">Quantity: 1</div>
+                                                <div className="font-bold">{item.productName}</div>
+                                                <div className="text-sm text-gray-500">SKU: <a href="#" className="text-blue-500">{item.sku}</a></div>
+                                                <div className="text-sm text-gray-500">Quantity: {item.quantity}</div>
                                             </div>
-                                            <div className="font-bold">$140.48</div>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <img src="https://placehold.co/60x60" alt="Barbes large east-west shopper" className="w-16 h-16 rounded mr-4"/>
-                                            <div className="flex-1">
-                                                <div className="font-bold">Barbes large east-west shopper</div>
-                                                <div className="text-sm text-gray-500">SKU: <a href="#" className="text-blue-500">BN-9-1</a></div>
-                                                <div className="text-sm text-gray-500">Quantity: 1</div>
+                                            <div className="font-bold">{item.price.toLocaleString('vi-VN')} đ</div>
                                             </div>
-                                            <div className="font-bold">$98.50</div>
-                                        </div>
-                                        <div className="flex items-center">
-                                            <img src="https://placehold.co/60x60" alt="Burberry Beige 38mm Stainless Steel Watch with..." className="w-16 h-16 rounded mr-4"/>
-                                            <div className="flex-1">
-                                                <div className="font-bold">Burberry Beige 38mm Stainless Steel Watch with...</div>
-                                                <div className="text-sm text-gray-500">SKU: <a href="#" className="text-blue-500">II300cab-12</a></div>
-                                                <div className="text-sm text-gray-500">Quantity: 1</div>
-                                            </div>
-                                            <div className="font-bold">$102.50</div>
-                                        </div>
+                                        ))}
                                     </div>
                                     <div className="mt-4 border-t pt-4">
-                                        <div className="flex justify-between text-sm">
-                                            <div>Subtotal</div>
-                                            <div className="font-bold">$340.48</div>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <div>Shipping</div>
-                                            <div className="font-bold">$0.00</div>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <div>Sales tax</div>
-                                            <div className="font-bold">$0.00</div>
-                                        </div>
-                                        <div className="flex justify-between text-lg font-bold">
-                                            <div>Total</div>
-                                            <div>$340.48</div>
-                                        </div>
+                                    <div className="flex justify-between text-sm">
+                                        <div>Subtotal</div>
+                                        <div className="font-bold">{order.orderDetails.reduce((acc, item) => acc + item.price * item.quantity, 0).toLocaleString('vi-VN')} đ</div>
+                                    </div>
+                                    <div className="flex justify-between text-lg font-bold">
+                                        <div>Total</div>
+                                        <div>{(order.orderDetails.reduce((acc, item) => acc + item.price * item.quantity, 0)).toLocaleString('vi-VN')} đ</div>
+                                    </div>
                                     </div>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">
@@ -105,28 +81,13 @@ export default function orderDetail() {
                                         <div className="flex items-center">
                                             <img src="https://placehold.co/40x40" alt="Customer profile" className="w-10 h-10 rounded-full mr-4"/>
                                             <div>
-                                                <div className="font-bold">Svetoslava Panayotova</div>
-                                                <div className="text-sm text-gray-500">Email: <a href="mailto:you@example.com" className="text-blue-500">you@example.com</a></div>
-                                                <div className="text-sm text-gray-500">IP Address: 94.155.40.227</div>
+                                                <div className="font-bold">User A</div>
+                                                <div className="text-sm text-gray-500">Phone: 0911835993</div>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <button className="px-2 py-1 bg-red-100 text-red-700 rounded">Add to Blacklist</button>
-                                            <a href="#" className="text-blue-500">11 Orders</a>
                                         </div>
                                     </div>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <h2 className="text-lg font-bold">Delivery Details</h2>
-                                        <button className="text-blue-500">Edit</button>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <div className="text-sm text-gray-500">Speedy: Delivery to office</div>
-                                        <div className="text-sm text-gray-500">Office: RUSE - THE Wrestlers</div>
-                                        <div className="text-sm text-gray-500">Address: Laura Petkova 3400 Montana, Bulgaria</div>
-                                        <div className="text-sm text-gray-500">Tracking No: <a href="#" className="text-blue-500">61833014106</a></div>
-                                    </div>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">
                                     <div className="flex justify-between items-center mb-4">
@@ -134,9 +95,8 @@ export default function orderDetail() {
                                         <button className="text-blue-500">Edit</button>
                                     </div>
                                     <div className="space-y-2">
-                                        <div className="text-sm text-gray-500">Address: Laura Petkova 3400 Montana, Bulgaria</div>
-                                        <div className="text-sm text-gray-500">Phone: 0876537622</div>
-                                        <div className="text-sm text-gray-500">VAT Number: -</div>
+                                        <div className="text-sm text-gray-500">Address: 344a Bùi Thị Điệt , ấp 3 , Phạm Văn Cội , Củ Chi  ,TP Hồ Chí Minh</div>
+                                        <div className="text-sm text-gray-500">Phone: 0911835993</div>
                                         <a href="#" className="text-blue-500">View map</a>
                                     </div>
                                 </div>
@@ -146,8 +106,8 @@ export default function orderDetail() {
                                         <button className="text-blue-500">Edit</button>
                                     </div>
                                     <div className="space-y-2">
-                                        <div className="text-sm text-gray-500">Payment Method: Cash on delivery</div>
-                                        <div className="text-sm text-gray-500">Payment Transaction №: <a href="#" className="text-blue-500">0876537622</a></div>
+                                        <div className="text-sm text-gray-500">Payment Method: true</div>
+                                        <div className="text-sm text-gray-500">Payment Transaction №: <a href="#" className="text-blue-500">0911835993</a></div>
                                         <a href="#" className="text-blue-500">View Transactions</a>
                                     </div>
                                 </div>

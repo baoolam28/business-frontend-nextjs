@@ -27,7 +27,11 @@ export default function CheckoutPageComponent() {
   const [selectedAddress, setSelectedAddress] = useState(null)
   const [isAddressDialogOpen, setIsAddressDialogOpen] = useState(false)
   const [isNewAddressDialogOpen, setIsNewAddressDialogOpen] = useState(false)
+  const [fee, setFee] = useState(0)
+  const [deliveryTime, setDeliveryTime] = useState(null)
+  const [shippingMethod, setShippingMethod] = useState(null)
   const [data, setData] = useState([])
+  const [totalPrice, setTotalPrice] = useState(0)
   const [orderData, setOrderData] = useState(null)
 
   // Fetch data from search params
@@ -53,6 +57,7 @@ export default function CheckoutPageComponent() {
         const response = await buyerAPI.shippingAddress.getShippingAddressByUserId(user.id)
         if (response.statusCode === 200) {
           setShippingAddresses(response.data || [])
+          setSelectedAddress(response.data[0])
         } else {
           console.error("Failed to fetch shipping address:", response.status)
         }
@@ -78,6 +83,10 @@ export default function CheckoutPageComponent() {
 
   useEffect(() => {
     
+    const totalPrice = data?.reduce((sum, item) => {
+      return sum + (item.price * item.quantity);
+    }, 0) || 0;
+
     const orderOnlineDetailRequests = data?.map((item) => ({
       storeId: item.storeId,
       productDetailId: item.productDetailId,
@@ -87,17 +96,29 @@ export default function CheckoutPageComponent() {
     const request = {
       userId: user?.id,
       addressId: selectedAddress?.addressId || null,
+      shippingFee: fee,
+      shippingMethod: shippingMethod,
+      expectedDeliverDate: new Date(deliveryTime * 1000),
       paymentMethod: paymentMethod,
       orderOnlineDetailRequests: orderOnlineDetailRequests
     }
 
     console.log("request order :"+JSON.stringify(request))
     setOrderData(request)
-  },[selectedAddress, paymentMethod, user, data])
+    setTotalPrice(totalPrice);
+  },[selectedAddress, paymentMethod, fee, deliveryTime, user, data])
 
   const handleNewAddress = (address) => {
     setShippingAddresses((prevAddresses) => [...prevAddresses, address]);
   };
+
+  const handleShippingData = (fee, deliveryTime, shippingMethod) =>{
+    console.log("fee and delivery time: ",fee, deliveryTime, shippingMethod)
+    setFee(fee)
+    setDeliveryTime(deliveryTime)
+    setShippingMethod(shippingMethod)
+  }
+
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -116,11 +137,11 @@ export default function CheckoutPageComponent() {
             setIsNewAddressDialogOpen={setIsNewAddressDialogOpen}
           />
           <ProductSection data={data} />
-          <SellerNotesAndShipping orderData={data} selectedAddress={selectedAddress}/>
+          <SellerNotesAndShipping orderData={data} selectedAddress={selectedAddress} onShippingData={handleShippingData}/>
         </div>
         <div className="space-y-8">
           <PaymentOptionsSection paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} />
-          <OrderSummary orderData={orderData}/>
+          <OrderSummary orderData={orderData} fee={fee} totalPrice={totalPrice} />
         </div>
       </main>
       <AddressSelectionDialog

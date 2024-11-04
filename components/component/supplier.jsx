@@ -34,14 +34,13 @@ import supplierAPI from "../../api/supplier";
 import { Textarea } from "../../components/ui/textarea";
 import { Input } from "../../components/ui/input";
 import Navbar from "../component/navbar";
-import {useUser} from '../../context/UserContext'
+import {useStore} from '../../context/StoreContext'
 import sellerAPI from "../../api/seller"
 import { showConfirmAlert, showSuccessAlert, showErrorAlert } from "../../utils/reactSweetAlert";
 
 
 export default function Supplier() {
   const [suppliers, setSuppliers] = useState([]);
-  const [storeId, setStoreId] = useState([]);
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -51,35 +50,11 @@ export default function Supplier() {
     fax: '',
     address: ''
   });
-  const { user } = useUser();
-
-  const userId = user ? user.id : null; 
-
-  useEffect(() =>{  
-    console.log("Current userId:", userId);
-    if(userId){
-      const fetchStore = async () =>{
-        try{
-          const response = await sellerAPI.store.getStoreByUserId(userId)
-          console.log("Full response from API:", response)
-          
-          if(response.statusCode === 200){
-            console.log("Data structure:", response.data);
-            setStoreId(response.data.storeId); 
-          }else {
-            console.error("Error fetching: ", response.message);
-          }
-        }catch(error){
-          console.log("Error fetching: ", error)
-        }
-    }
-    fetchStore()
-    }
-  }, [userId])
-
+  const { storeId } = useStore();
 
   useEffect(() => {
     if(storeId){
+      console.log("Store Id: ", storeId)
       const fetchSuppliers = async () => {
         try {
           const response = await sellerAPI.supplier.getAllSuppliers(storeId);
