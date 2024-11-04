@@ -128,14 +128,8 @@ const LocationSelector = ({onSaveAddress}) => {
 
     // Tạo địa chỉ hoàn chỉnh
     const fullAddress = `${addressDetails}, ${wardName}, ${districtName}, ${provinceName}`;
-<<<<<<< HEAD
     setAddress(fullAddress);
 
-=======
-    setAddress(fullAddress); setAddress(fullAddress);
-
-    
->>>>>>> 1b7f2576160fae7822e91e9c9b6d8b2d54fda98d
   }
 
   
