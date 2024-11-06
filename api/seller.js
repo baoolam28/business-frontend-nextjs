@@ -32,7 +32,7 @@ const sellerAPI = {
       axiosClient.delete(`${baseUrl}/suppliers/${supplierId}`),
   },
   inventory: {
-    getAllInventory: (storeId) => axiosClient.get(`${baseUrl}/inventories/${storeId}`),
+    getAllInventory: (storeId) => axiosClient.get(`${baseUrl}/inventories/${storeId}`)
   },
   store: {
     getStoreByUserId: (userId) =>

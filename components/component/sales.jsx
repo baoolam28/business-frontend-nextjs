@@ -70,6 +70,7 @@ export default function sales() {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState("");
 
+
   const router = useRouter();
 
 useEffect(() => {
@@ -95,6 +96,25 @@ useEffect(() => {
 
     if(storeId != null) {
       fetchProducts(); 
+    }
+
+    const fetchQuantity = async () => {
+      if(!storeId) return;
+
+      try {
+        const response = await sellerAPI.inventory.getAllInventory(storeId);
+        if(response.statusCode === 200) {
+          setInventories(response.data);
+        } else {
+          console.error("Failed to fetch quantity: " + response.status);
+        }
+      } catch (error) {
+           console.error("Error fetching quantity: " + error);
+      }
+    };
+
+    if (storeId != null) {
+      fetchQuantity();
     }
 
     const fetchOrders = async () => {
@@ -127,7 +147,7 @@ useEffect(() => {
       setError(null);
 
       try {
-        const response = await sellerAPI.customer.getAllCustomerssByStoreId(storeId);
+        const response = await sellerAPI.customer.getAllCustomerByStoreId(storeId);
         console.log("Customers Response:", response);
 
         if (response.statusCode === 200) {
@@ -447,13 +467,13 @@ const handleSelectOrder = (selectedOrderObj) => {
             <span className="sr-only">Scan Barcode</span>
           </Button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {
             filteredProducts.map((product) => (
-              <Card key={product.barcode} className="group">
+              <Card key={product.barcode} className="group p-4">
                 <div className="relative">
                   <img
-                    src="/placeholder.svg"
+                    src={product ? product.images[0] : '/placeholder.svg'}
                     alt={product.productName}
                     width={200}
                     height={200}
@@ -467,19 +487,23 @@ const handleSelectOrder = (selectedOrderObj) => {
                     <span className="sr-only">Add to cart</span>
                   </Button>
                 </div>
-                <div className="flex flex-col gap-1 p-4">
-                  <div className="flex flex-row justify-between">
-                    <h3 className="font-medium">{product.productName}</h3>
-                    <span className="font-medium">Tồn kho: {inventories.map((inventory) => inventory.barcode === product.barcode ? inventory.quantityInStock : 0)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-primary font-medium">{formatVND(product.price.toFixed(2))} </span>
-                    <span className="text-xs text-muted-foreground">{product.barcode}</span>
-                  </div>
+                <div className="flex flex-col gap-2 pt-4">
+                  <h3 className="font-medium text-lg">{product.productName}</h3>
+                  <span className="font-medium text-sm text-gray-600">
+                    Tồn kho: { 
+                      inventories.find((inventory) => inventory.barcode === product.barcode)?.quantityInStock || "Không có thông tin"
+                    }
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-primary font-medium">{formatVND(product.price.toFixed(2))}</span>
+                  <span className="text-xs text-muted-foreground">{product.barcode}</span>
                 </div>
               </Card>
-            ))}
+            ))
+          }
         </div>
+
       </div>
       <div className="w-150 bg-muted p-8 border-l">
         <div className="flex items-center justify-between mb-6">
