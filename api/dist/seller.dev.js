@@ -61,7 +61,7 @@ var sellerAPI = {
   },
   order: {
     getAllOdersByStoreId: function getAllOdersByStoreId(storeId) {
-      return _axiosClient["default"].get("".concat(baseUrl, "/orders/store/").concat(storeId));
+      return _axiosClient["default"].get("".concat(baseUrl, "/orders/online/stores/").concat(storeId));
     },
     getOrderById: function getOrderById(orderId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/orders/").concat(orderId));
@@ -82,13 +82,13 @@ var sellerAPI = {
       return _axiosClient["default"].put("".concat(baseUrl, "/orders/update/").concat(orderId), orderData);
     },
     updateOrderById: function updateOrderById(orderId, newStatus) {
-      return _axiosClient["default"].put("".concat(baseUrl, "/orders/").concat(orderId, "/status"), {
+      return _axiosClient["default"].put("".concat(baseUrl, "/orders/online/").concat(orderId, "/status"), {
         status: newStatus
       });
     },
     // Cập nhật phương thức udateOrderByStoreID để nhận thêm tham số status
     udateOrderByStoreID: function udateOrderByStoreID(storeId, newStatus) {
-      return _axiosClient["default"].put("".concat(baseUrl, "/orders/stores/").concat(storeId, "/status"), {
+      return _axiosClient["default"].put("".concat(baseUrl, "/orders/online/stores/").concat(storeId, "/status"), {
         status: newStatus
       });
     }

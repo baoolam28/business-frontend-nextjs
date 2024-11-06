@@ -36,7 +36,7 @@ const Orders = () => {
 
     const fetchOrders = async () => {
         try {
-            const response = await sellerAPI.store.getAllOrderByStoreId(storeId);
+            const response = await sellerAPI.order.getAllOdersByStoreId(storeId);
             if (response.statusCode === 200) {
                 setOrders(response.data);
             } else {
