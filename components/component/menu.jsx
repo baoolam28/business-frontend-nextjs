@@ -1,6 +1,6 @@
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "../../components/ui/tooltip"
 import Link from "next/link"
-
+import { BookText, ClipboardPenLine   } from 'lucide-react';
 export default function   menu() {
 
 
@@ -84,11 +84,23 @@ export default function   menu() {
                   href="/store/order"
                   className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
                   prefetch={false}>
-                  <OrderIcon className="h-5 w-5" />
+                  <ClipboardPenLine  className="h-5 w-5" />
                   <span className="sr-only">Orders</span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="right">Orders</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link
+                  href="/store/document"
+                  className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
+                  prefetch={false}>
+                  <BookText className="h-5 w-5" />
+                  <span className="sr-only">Document</span>
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent side="right">Document</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </nav>

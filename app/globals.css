@@ -77,3 +77,8 @@
   flex-direction: column;
   overflow-y: auto;
 }
+
+.custom-swal2-container {
+  z-index: 10000 !important;
+  /* Đảm bảo z-index cao hơn so với dialog */
+}

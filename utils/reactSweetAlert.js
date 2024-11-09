@@ -4,9 +4,13 @@ import withReactContent from "sweetalert2-react-content";
 const MySwal = withReactContent(Swal); // Bọc SweetAlert2 để hỗ trợ React components
 
 const showAlert = (options) => {
-  return MySwal.fire(options); // Sử dụng MySwal thay vì Swal
+  return MySwal.fire({
+    ...options,
+    customClass: {
+      container: "custom-swal2-container",
+    },
+  });
 };
-
 export const showSuccessAlert = (title, message) => {
   return showAlert({
     title: <strong>{title}</strong>, // JSX được hỗ trợ
