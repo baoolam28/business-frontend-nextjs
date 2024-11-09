@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Header from "../../components/component/Header";
 import Footer from "./Footer";
 import buyerAPI from "../../api/buyer";
+import FormatVND from "../../utils/formatVND";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { Slider } from "../../components/ui/slider";
 import ProductCard from "./ProductCard";
@@ -174,7 +175,7 @@ const Category = () => {
                 </CardHeader>
                 <CardContent className="p-4">
                   <CardTitle className="text-lg mb-2">{product.productName}</CardTitle>
-                  <p className="text-sm text-muted-foreground mb-2">{product.price} VND</p>
+                  <p className="text-sm text-red-600 mb-2">{FormatVND(product.price)} </p>
                   <div className="flex items-center mb-2">
                     {[...Array(5)].map((_, index) => (
                       <Star

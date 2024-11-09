@@ -17,6 +17,9 @@ var buyerAPI = {
     getAllProducts: function getAllProducts() {
       return _axiosClient["default"].get("".concat(baseUrl, "/products"));
     },
+    getAllProductsOnline: function getAllProductsOnline() {
+      return _axiosClient["default"].get("".concat(baseUrl, "/products/online"));
+    },
     getAllBestSeller: function getAllBestSeller() {
       return _axiosClient["default"].get("".concat(baseUrl, "/products/bestseller"));
     },
@@ -58,9 +61,20 @@ var buyerAPI = {
       });
     }
   },
+  orderStatus: {
+    getAllOrderStatus: function getAllOrderStatus(userId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/purchase/orderOnline/").concat(userId));
+    },
+    getShipment: function getShipment(shipmentId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/purchase/").concat(shipmentId));
+    }
+  },
   shippingAddress: {
     getShippingAddressByUserId: function getShippingAddressByUserId(userId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/shipping-addresses/").concat(userId));
+    },
+    getAddressById: function getAddressById(addressId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/shipping-addresses/address/").concat(addressId));
     },
     createShippingAddressByUserId: function createShippingAddressByUserId(data) {
       return _axiosClient["default"].post("".concat(baseUrl, "/shipping-addresses"), data);
@@ -72,6 +86,21 @@ var buyerAPI = {
   order: {
     createOrderOnline: function createOrderOnline(data) {
       return _axiosClient["default"].post("".concat(baseUrl, "/ordersOnline"), data);
+    }
+  },
+  register: {
+    createNewUser: function createNewUser(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/register"), data);
+    }
+  },
+  otp: {
+    sendOtp: function sendOtp(phoneNumber) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/send-otp"), {
+        phoneNumber: phoneNumber
+      });
+    },
+    verifyOtp: function verifyOtp(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/verify-otp"), data);
     }
   },
   store: {

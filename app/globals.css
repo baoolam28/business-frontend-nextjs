@@ -77,3 +77,16 @@
   flex-direction: column;
   overflow-y: auto;
 }
+@keyframes flip {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+.hover\:animate-flip:hover {
+  animation: flip 0.5s ease-in-out;
+}
+

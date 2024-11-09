@@ -4,6 +4,7 @@ const baseUrl = "/api/buyer";
 const buyerAPI = {
   product: {
     getAllProducts: () => axiosClient.get(`${baseUrl}/products`),
+    getAllProductsOnline: () => axiosClient.get(`${baseUrl}/products/online`),
     getAllBestSeller: () => axiosClient.get(`${baseUrl}/products/bestseller`),
     getProductById:(id) => axiosClient.get(`${baseUrl}/products/${id}`),
     getProductDetails: (id) => axiosClient.get(`${baseUrl}/products/product-detail/${id}`),

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import ProductCard from "./ProductCard";
 import BuyerAPI from "../../api/buyer";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,13 +12,12 @@ const FlashSale = () => {
   const fallbackImage = "https://via.placeholder.com/150";
   const [direction, setDirection] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
-  const autoSlideInterval = useRef(null);
 
   // Fetch products on mount
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await BuyerAPI.product.getAllProducts();
+        const response = await BuyerAPI.product.getAllProductsOnline();
         if (response.statusCode === 200) {
           const filteredProducts = response.data.map((product) => ({
             id: product.productId,
@@ -28,9 +27,10 @@ const FlashSale = () => {
             originalPrice: "100",
             rating: 4.5,
             reviews: 65,
-            image: fallbackImage,
+            image: product.images ? product.images[0] : fallbackImage, 
           }));
           setFlashSaleProducts(filteredProducts);
+          console.log(filteredProducts);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -38,30 +38,6 @@ const FlashSale = () => {
     };
     fetchProducts();
   }, []);
-
-  // Auto-slide every 3 seconds
-  useEffect(() => {
-    if (flashSaleProducts.length > 0) {
-      startAutoSlide(); // Start auto-slide on mount
-      return () => stopAutoSlide(); // Cleanup on unmount
-    }
-  }, [flashSaleProducts.length]);
-
-  // Start the auto-slide interval
-  const startAutoSlide = () => {
-    if (autoSlideInterval.current) return; // Prevent creating multiple intervals
-    autoSlideInterval.current = setInterval(() => {
-      handleManualNavigation(1); // Move to the next slide
-    }, 3000); // 3000ms = 3 seconds
-  };
-
-  // Stop the auto-slide interval
-  const stopAutoSlide = () => {
-    if (autoSlideInterval.current) {
-      clearInterval(autoSlideInterval.current);
-      autoSlideInterval.current = null;
-    }
-  };
 
   // Manual slide navigation
   const handleManualNavigation = (dir) => {
@@ -86,26 +62,31 @@ const FlashSale = () => {
     currentIndex + itemsPerPage
   );
 
+  // Updated slide variants for smoother transition
   const slideVariants = {
     enter: (direction) => ({
-      x: direction > 0 ? 300 : -300,
-      opacity: 0,
-      scale: 0.8,
+      x: direction > 0 ? 30 : -30, // Giảm độ dịch chuyển để trông mượt mà hơn
+      opacity: 0, // Bắt đầu với độ mờ hoàn toàn
+      transition: {
+        duration: 0.3, // Thời gian vào nhanh hơn
+        ease: "easeInOut", // Chuyển động mượt mà cả vào lẫn ra
+      },
     }),
     center: {
       x: 0,
-      opacity: 1,
-      scale: 1,
+      opacity: 1, // Hiển thị rõ
       transition: {
-        duration: 0.5, // Smoother and controlled transition
+        type: "tween", // Sử dụng 'tween' để có chuyển động đều
+        ease: "easeInOut", // Chuyển động trơn tru
+        duration: 0.6, // Thời gian dài hơn để chuyển động trơn tru
       },
     },
     exit: (direction) => ({
-      x: direction < 0 ? 300 : -300,
-      opacity: 0,
-      scale: 0.8,
+      x: direction < 0 ? 30 : -30, // Giảm độ dịch chuyển để chuyển động tự nhiên hơn
+      opacity: 0, // Mờ dần khi thoát
       transition: {
-        duration: 0.3, // Exit faster
+        duration: 0.3, // Thời gian thoát nhanh hơn
+        ease: "easeInOut", // Dễ dàng chuyển động thoát
       },
     }),
   };
@@ -147,9 +128,9 @@ const FlashSale = () => {
           {displayedProducts.map((product, index) => (
             <motion.div
               key={product.id}
-              initial={{ opacity: 0, y: 0 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
             >
               <ProductCard {...product} />
             </motion.div>
