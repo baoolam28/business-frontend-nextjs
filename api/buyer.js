@@ -54,7 +54,8 @@ const buyerAPI = {
   store:{
     createStore : (dataStore) => axiosClient.post(`${baseUrl}/stores`,dataStore),
 
-  }
+  },
+
   
 };
 
