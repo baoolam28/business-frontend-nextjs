@@ -14,22 +14,33 @@ import generateBarcode from "../../utils/GenerationBarcode";
 import sellerAPI from '../../api/seller';
 import Image from "next/image"
 import { useUser } from "../../context/UserContext";
-import { showErrorAlert, showSuccessAlert } from "../../utils/reactSweetAlert"
-const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origins, setCategories, setSuppliers, setOrigins, storeId }) => {
+import { useStore } from "../../context/StoreContext"
+
+
+
+const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origins, setCategories, setSuppliers, setOrigins, selectedData }) => {
   const {user} = useUser();
-  const [productData, setProductData] = useState({
-    barcode: '',
-    images: [],
-    productName: '',
-    abbreviations: '',
-    unit: '',
-    price: '',
-    categoryId: '',
-    supplierId: '',
-    originId: '',
-    createBy: '',
-  });
+  const {storeId} = useStore();
+  const [productData, setProductData] = useState({});
   const [selectedImages, setSelectedImages] = useState([]);
+
+  useEffect(() => {
+    if(selectedData){
+      setSelectedImages(selectedData.images)
+      setProductData({
+        barcode: selectedData.barcode,
+        images: [],
+        productName: selectedData.productName,
+        abbreviations: selectedData.abbreviations,
+        unit: selectedData.unit,
+        price: selectedData.price,
+        categoryId: selectedData.categoryId,
+        supplierId: selectedData.supplierId,
+        originId: selectedData.originId,
+        createBy: user?.id,
+      });
+    }
+  },[selectedData])
 
   const handleImageChange = (e) => {
     const files = e.target.files;
@@ -73,24 +84,21 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
 
     e.preventDefault();
     
-    if(!validateProductData){
-      showErrorAlert("Thêm sản phẩm mới","Vui lòng điền thông tin hợp lệ!");
+    if(!validateProductData()){
+      
       return
     }
+    console.log('ProductData: ' + JSON.stringify(productData)); 
 
     const reqData = convertToFormData(productData);
-    const res = fetchCreateProduct(reqData);
-
-    if(res){
-      console.log("product response : " + JSON.stringify(res));
-      showSuccessAlert("Thêm sản phẩm mới","Thêm sản phẩm thành công!");
-    }
+    onSave(reqData);
+    onClose();
 
   };
 
   const validateProductData = () => {
     if (!productData.barcode) return false;
-    if (productData.images.length === 0) return false;
+    // if (productData.images.length === 0) return false;
     if (!productData.productName) return false;
     if (!productData.unit) return false;
     if (!productData.price || isNaN(productData.price) || productData.price <= 0) return false;
@@ -98,6 +106,7 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
     if (!productData.supplierId) return false;
     if (!productData.originId) return false;
     if (!productData.createBy) return false;
+    if (!storeId) return false;
     return true;
   };
 
@@ -115,18 +124,12 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
     formData.append('supplierId', data.supplierId);
     formData.append('originId', data.originId);
     formData.append('createBy', data.createBy);
+    formData.append('storeId', storeId);
 
     return formData;
   };
 
-  const fetchCreateProduct = async (data) => {
-    try {
-      const res = await sellerAPI.product.createProductOffline(data);
-      return res;
-    } catch (error) {
-      return null;
-    }
-  };
+  
 
   const handleSaveSupplier = async (supplierData) => {
     try {
@@ -159,7 +162,7 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
   }
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose} className="">
       <DialogContent className="fullscreen-dialog">
         <form onSubmit={handleSubmit}>
           <div className="w-full max-w-4xl mx-auto p-6 md:p-8">
@@ -179,7 +182,10 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
                       onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
                       required
                     />
-                    <Button variant="outline" size="icon" onClick={handleGenerateBarcode}>
+                    <Button variant="outline" size="icon" onClick={(e) => {
+                      e.preventDefault();
+                      handleGenerateBarcode();
+                    }}>
                       <BarcodeIcon className="h-5 w-5" />
                       <span className="sr-only">Generate Barcode</span>
                     </Button>
@@ -233,29 +239,7 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="productImage">Hình ảnh sản phẩm</Label>
-                  <Input
-                    id="productImage"
-                    name="productImage"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleImageChange}
-                  />
-                  {selectedImages.length > 0 && (
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      {selectedImages.map((image, index) => (
-                        <img
-                          key={index}
-                          src={image}
-                          alt={`Hình ảnh sản phẩm ${index + 1}`}
-                          className="h-20 w-20 rounded-lg"
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
+                
               </div>
               <div className="grid gap-4">
                 <div>
@@ -279,7 +263,7 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <AddCategoryDialog onSave={(cat) => handleChange('categoryId', cat)} buttonText="" buttonIcon={PlusIcon} />
+                  {/* <AddCategoryDialog onSave={(cat) => handleChange('categoryId', cat)} buttonText="" buttonIcon={PlusIcon} /> */}
                 </div>
                 <div>
                   <Label htmlFor="supplierId">Nhà cung cấp</Label>
@@ -325,7 +309,30 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <AddOriginDialog onSave={(ori) => handleChange('originId', ori)} buttonText="" buttonIcon={PlusIcon} />
+                  {/* <AddOriginDialog onSave={(ori) => handleChange('originId', ori)} buttonText="" buttonIcon={PlusIcon} /> */}
+                </div>
+                <div>
+                  <Label htmlFor="productImage">Hình ảnh sản phẩm</Label>
+                  <Input
+                    id="productImage"
+                    name="productImage"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                  />
+                  {selectedImages.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {selectedImages.map((image, index) => (
+                        <img
+                          key={index}
+                          src={image}
+                          alt={`Hình ảnh sản phẩm ${index + 1}`}
+                          className="h-20 w-20 rounded-lg"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -333,7 +340,10 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
           <DialogFooter>
             <div className="flex justify-end mt-6">
               <DialogClose>
-                <Button variant="outline" className="mr-2">Cancel</Button>
+                <Button 
+                onClick={(e) => e.preventDefault()}
+                variant="outline" 
+                className="mr-2">Cancel</Button>
               </DialogClose>
               <Button type="submit">Save Product</Button>
             </div>

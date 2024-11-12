@@ -39,7 +39,7 @@ export default function BarcodePrinter() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await SellerAPI.product.getAllProducts(storeId);
+        const response = await SellerAPI.product.getProductsOffline(storeId);
         if (response.statusCode === 200) {
           setProducts(response.data);
         }

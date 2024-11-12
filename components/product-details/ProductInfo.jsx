@@ -1,122 +1,130 @@
-"use client"
-import React, { useState, useEffect } from "react";
-import AttributeSelector from "./AttributeSelector";
-import QuantitySelector from "./QuantitySelector";
-import DeliveryInfo from "./DeliveryInfo";
+'use client'
+
+import React, { useState, useEffect } from "react"
+import { Separator } from "../../components/ui/separator"
+import { Button } from "../../components/ui/button"
+import { MinusIcon, PlusIcon, RefreshCw } from "lucide-react"
 import BuyNow from "../../components/component/buy-now-button"
 import AddToCart from "../../components/component/add-to-cart-button"
-function ProductInfo({ productData, onVariantImage }) {
-  const [selectedAttributes, setSelectedAttributes] = useState({});
-  const [filteredVariant, setFilteredVariant] = useState(null);
-  const [availableOptions, setAvailableOptions] = useState({});
-  const [quantity, setQuantity] = useState(1);
+import FormatAsVND from "../../utils/formatVND"
+import QuantitySelector from "../../components/product-details/QuantitySelector"
+
+
+function AttributeSelector({ attribute, options, selectedValue, availableOptions, onChange }) {
+  return (
+    <div className="mt-6">
+      <h3 className="text-sm font-medium text-gray-900 mb-2">{attribute}</h3>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => (
+          <Button
+            key={option}
+            variant={selectedValue === option ? "default" : "outline"}
+            size="sm"
+            onClick={() => onChange(option)}
+            disabled={!availableOptions.includes(option)}
+            className="px-3 py-1 rounded-full text-sm"
+          >
+            {option}
+          </Button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export default function ProductInfo({ productData, onVariantImage }) {
+  const [selectedAttributes, setSelectedAttributes] = useState({})
+  const [filteredVariant, setFilteredVariant] = useState(null)
+  const [availableOptions, setAvailableOptions] = useState({})
+  const [quantity, setQuantity] = useState(1)
 
   const handleQuantityChange = (newQuantity) => {
-    setQuantity(newQuantity);
-  }; 
+    setQuantity(newQuantity)
+  }
 
   useEffect(() => {
     if (Object.keys(selectedAttributes).length > 0) {
-      const matchingVariant = productData.variants.find((variant) =>
+      const matchingVariant = productData?.variants.find((variant) =>
         Object.keys(selectedAttributes).every(
           (key) => variant.attributes[key] === selectedAttributes[key]
         )
-      );
-      setFilteredVariant(matchingVariant);
-      onVariantImage(matchingVariant ? matchingVariant.image : null);
+      )
+      setFilteredVariant(matchingVariant)
+      onVariantImage(matchingVariant ? matchingVariant.image : null)
     } else {
-      setFilteredVariant(null);
-      onVariantImage(null);
+      setFilteredVariant(null)
+      onVariantImage(null)
     }
-  },[selectedAttributes])
+  }, [selectedAttributes, productData?.variants, onVariantImage])
 
-
-  // Lấy danh sách các thuộc tính từ các biến thể
-  const attributeOptions = {};
-  productData.variants.forEach((variant) => {
+  const attributeOptions = {}
+  productData?.variants.forEach((variant) => {
     Object.keys(variant.attributes).forEach((attrKey) => {
       if (!attributeOptions[attrKey]) {
-        attributeOptions[attrKey] = new Set();
+        attributeOptions[attrKey] = new Set()
       }
-      attributeOptions[attrKey].add(variant.attributes[attrKey]);
-    });
-  });
+      attributeOptions[attrKey].add(variant.attributes[attrKey])
+    })
+  })
 
   const attributes = Object.keys(attributeOptions).reduce((acc, key) => {
-    acc[key] = Array.from(attributeOptions[key]);
-    return acc;
-  }, {});
+    acc[key] = Array.from(attributeOptions[key])
+    return acc
+  }, {})
 
-  // Cập nhật biến thể phù hợp và các tùy chọn khả dụng
   useEffect(() => {
-    const matchingVariant = productData.variants.find((variant) =>
-      Object.keys(selectedAttributes).every(
-        (key) => variant.attributes[key] === selectedAttributes[key]
-      )
-    );
-    setFilteredVariant(matchingVariant);
-    
-    const newAvailableOptions = {};
-    productData.variants.forEach((variant) => {
+    const newAvailableOptions = {}
+    productData?.variants.forEach((variant) => {
       Object.keys(variant.attributes).forEach((attrKey) => {
         if (!newAvailableOptions[attrKey]) {
-          newAvailableOptions[attrKey] = new Set();
+          newAvailableOptions[attrKey] = new Set()
         }
         const isMatching = Object.keys(selectedAttributes).every(
           (key) =>
             key === attrKey ||
             !selectedAttributes[key] ||
             variant.attributes[key] === selectedAttributes[key]
-        );
+        )
         if (isMatching) {
-          newAvailableOptions[attrKey].add(variant.attributes[attrKey]);
+          newAvailableOptions[attrKey].add(variant.attributes[attrKey])
         }
-      });
-    });
+      })
+    })
 
     setAvailableOptions(
       Object.keys(newAvailableOptions).reduce((acc, key) => {
-        acc[key] = Array.from(newAvailableOptions[key]);
-        return acc;
+        acc[key] = Array.from(newAvailableOptions[key])
+        return acc
       }, {})
-    );
-    
-  }, [selectedAttributes, productData.variants]);
+    )
+  }, [selectedAttributes, productData?.variants])
 
-  // Xử lý khi người dùng thay đổi thuộc tính
   const handleAttributeChange = (attribute, value) => {
     setSelectedAttributes((prev) => ({
       ...prev,
       [attribute]: value,
-    }));
-  };
+    }))
+  }
 
-  // Reset khi cần thay đổi lại các thuộc tính đã chọn
   const resetSelection = () => {
-    setSelectedAttributes({});
-    setFilteredVariant(null);
-  };
-
-  const handleBuyNow = () => {
-    console.log("filteredVariant: ", filteredVariant);
-    console.log("selectedAttributes: ", selectedAttributes);
-  };
+    setSelectedAttributes({})
+    setFilteredVariant(null)
+  }
 
   return (
-    <div className="flex flex-col ml-5 w-[36%] max-md:ml-0 max-md:w-full">
-      <div className="flex flex-col items-start w-full max-md:mt-10">
-        <h2 className="text-2xl font-semibold tracking-wider leading-none text-black">
-          {productData.name}
+    <div className="flex flex-col w-full lg:w-[36%] lg:ml-5 space-y-6">
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          {productData?.productName}
         </h2>
-        <div className="mt-4 text-2xl tracking-wider leading-none text-black">
-          {filteredVariant ? filteredVariant.price : productData.originalPrice} <b>VND</b>
+        <div className="text-2xl font-semibold text-red-600 mb-4">
+          {filteredVariant
+            ? FormatAsVND(filteredVariant.price)
+            : FormatAsVND(productData.price)}
         </div>
-        <p className="self-stretch mt-6 mr-7 text-sm leading-5 text-black max-md:mr-2.5">
-          {productData.description}
-        </p>
-        <div className="shrink-0 self-stretch mt-6 w-full h-px bg-black border border-black border-solid" />
+        <p className="text-gray-600 mb-6">{productData.productDescription}</p>
+        <Separator className="my-6" />
 
-        {/* Hiển thị các lựa chọn thuộc tính */}
         {Object.keys(attributes).map((attrKey) => (
           <AttributeSelector
             key={attrKey}
@@ -128,24 +136,37 @@ function ProductInfo({ productData, onVariantImage }) {
           />
         ))}
 
-        <button
+        <Button
           onClick={resetSelection}
-          className="mt-4 text-sm text-blue-500 hover:underline"
+          variant="ghost"
+          size="sm"
+          className="mt-4 text-blue-600 hover:text-blue-800"
         >
+          <RefreshCw className="mr-2 h-4 w-4" />
           Reset Selection
-        </button>
+        </Button>
 
-        <div className="flex gap-4 self-stretch mt-6 w-full font-medium">
-          <QuantitySelector initialQuantity={quantity} onQuantityChange={handleQuantityChange} />
+        <div className="mt-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <QuantitySelector
+              initialQuantity={quantity}
+              onQuantityChange={handleQuantityChange}
+            />
+          </div>
+          <div className="flex gap-4 w-full">
+            <BuyNow
+              id={filteredVariant?.productDetailId}
+              quantity={quantity}
+              className="flex-1"
+            />
+            <AddToCart
+              id={filteredVariant?.productDetailId}
+              quantity={quantity}
+              className="flex-1"
+            />
+          </div>
         </div>
-        <div className="flex gap-4 self-stretch mt-6 w-full font-medium mt-4">
-          <BuyNow id={filteredVariant?.productDetailId} quantity={quantity}/>
-          <AddToCart id={filteredVariant?.productDetailId} quantity={quantity}/>
-        </div>
-        {/* <DeliveryInfo /> */}
       </div>
     </div>
-  );
+  )
 }
-
-export default ProductInfo;

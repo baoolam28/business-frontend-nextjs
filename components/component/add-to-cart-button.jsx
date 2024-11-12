@@ -2,11 +2,10 @@ import { ShoppingCart } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import BuyerAPI from "../../api/buyer"
 import { useUser } from "../../context/UserContext"
-import { useRouter } from "next/navigation"
+import { showSuccessAlert } from "../../utils/reactSweetAlert";
 export default function AddToCartButton({ id, quantity }) {
 
   const {user} = useUser();  
-  const router = useRouter();
   const onAddToCart = () => {
     
     if(!user){
@@ -31,9 +30,9 @@ export default function AddToCartButton({ id, quantity }) {
     try {
       const res = await BuyerAPI.cart.addToCart(data);
       if(res.statusCode === 200) {
-        console.log("Product added to cart successfully")
-        router.push("/cart")
-        
+        const cart = res.data.cartItems
+        localStorage.setItem('cart', JSON.stringify(cart));
+        showSuccessAlert("Thêm vào giỏ hàng","Thêm vào giỏ hàng thành công")
       }
     } catch (error) {
       console.error("Error adding product to cart:", error)

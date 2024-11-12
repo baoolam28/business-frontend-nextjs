@@ -8,8 +8,9 @@ import Footer from "./Footer";
 const Layout = ({ children }) => {
   return (
     <div className="flex overflow-hidden flex-col bg-white">
+      
       <Header />
-      <main>{children}</main>
+      <main >{children}</main>
       <Footer />
     </div>
   );

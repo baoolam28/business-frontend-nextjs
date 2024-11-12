@@ -12,6 +12,10 @@ const sellerAPI = {
       axiosClient.post(`${baseUrl}/products/online`, data),
     createProductOffline: (data) =>
       axiosClient.post(`${baseUrl}/products/offline`, data),
+    updateProductOffline: (data) =>
+      axiosClient.post(`${baseUrl}/products/offline/update`, data),
+    deleteProductOffline: (id) =>
+      axiosClient.delete(`${baseUrl}/products/offline/delete/${id}`),
   },
   category: {
     getAllCategories: () => axiosClient.get(`${baseUrl}/categories`),
@@ -32,7 +36,8 @@ const sellerAPI = {
       axiosClient.delete(`${baseUrl}/suppliers/${supplierId}`),
   },
   inventory: {
-    getAllInventory: () => axiosClient.get(`${baseUrl}/inventories/${storeId}`),
+    getAllInventory: (storeId) =>
+      axiosClient.get(`${baseUrl}/inventories/${storeId}`),
   },
   store: {
     getStoreByUserId: (userId) =>
@@ -41,9 +46,14 @@ const sellerAPI = {
       axiosClient.get(`${baseUrl}/orders-online/stores/${storeId}`),
   },
 
+  document: {
+    createDocument: (data) => axiosClient.post(`${baseUrl}/documents`, data),
+    getDocumentByStore: (storeId) => axiosClient.get(`${baseUrl}/documents/${storeId}`),
+  },
+
   order: {
-    getAllOdersByStoreId: (storeId) =>
-      axiosClient.get(`${baseUrl}/orders/store/${storeId}`),
+    getOrdersOnlineByStoreId: (storeId) =>
+      axiosClient.get(`${baseUrl}/orders/online/${storeId}`),
     getOrderById: (orderId) => axiosClient.get(`${baseUrl}/orders/${orderId}`),
     createOrder: (orderData) =>
       axiosClient.post(`${baseUrl}/orders`, orderData),
@@ -71,3 +81,4 @@ const sellerAPI = {
 };
 
 export default sellerAPI;
+
