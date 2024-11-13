@@ -1,7 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 function ProductGallery({ images, variantImage }) {
-  const [selectedImage, setSelectedImage] = useState(images[0]);
+  const defaultImage = 'https://shpetro.com/images/no_image.png';
+  const [selectedImage, setSelectedImage] = useState(defaultImage);
+  
+  useEffect(() => {
+    setSelectedImage(images[0] || defaultImage);
+  },[images])
 
   return (
     <div className="flex flex-col items-center w-[64%] max-md:w-full max-md:ml-0">
@@ -20,7 +25,7 @@ function ProductGallery({ images, variantImage }) {
             >
               <img
                 loading="lazy"
-                src={image}
+                src={image || defaultImage}
                 className="object-cover w-32 h-32"
                 alt={`Thumbnail ${index + 1}`}
               />
@@ -50,7 +55,7 @@ function ProductGallery({ images, variantImage }) {
           >
             <img
               loading="lazy"
-              src={image}
+              src={image || defaultImage}
               className="object-cover w-32 h-32 max-md:w-16 max-md:h-16"
               alt={`Thumbnail ${index + 4}`}
             />

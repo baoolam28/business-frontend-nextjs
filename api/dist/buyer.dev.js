@@ -1,6 +1,9 @@
 "use strict";
 
-var _domain = require("domain");
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports["default"] = void 0;
 
 var _axiosClient = _interopRequireDefault(require("./axiosClient"));
 
@@ -10,7 +13,7 @@ var baseUrl = "/api/buyer";
 var buyerAPI = {
   product: {
     getAllProducts: function getAllProducts() {
-      return _axiosClient["default"].get("".concat(baseUrl, "/products"));
+      return _axiosClient["default"].get("".concat(baseUrl, "/products/online"));
     },
     getAllBestSeller: function getAllBestSeller() {
       return _axiosClient["default"].get("".concat(baseUrl, "/products/bestseller"));
@@ -34,23 +37,14 @@ var buyerAPI = {
     }
   },
   cart: {
-    // Lấy thông tin giỏ hàng theo userId
     getCartByUserId: function getCartByUserId(userId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/cart/get-by-user/").concat(userId));
     },
-    // Thêm sản phẩm vào giỏ hàng
     addToCart: function addToCart(cartRequest) {
       return _axiosClient["default"].post("".concat(baseUrl, "/cart/add-to-cart"), cartRequest);
     },
-    // Cập nhật sản phẩm trong giỏ hàng
-    updateCart: function updateCart(cartRequest) {
-      return _axiosClient["default"].put("".concat(baseUrl, "/cart/update-cart"), cartRequest);
-    },
-    // Xóa sản phẩm khỏi giỏ hàng
-    deleteProductFromCart: function deleteProductFromCart(cartRequest) {
-      return _axiosClient["default"]["delete"]("".concat(baseUrl, "/cart/delete-product"), {
-        data: cartRequest
-      });
+    updateCartByUserId: function updateCartByUserId(data) {
+      return _axiosClient["default"].put("".concat(baseUrl, "/cart"), data);
     }
   },
   orderStatus: {
@@ -101,3 +95,5 @@ var buyerAPI = {
     }
   }
 };
+var _default = buyerAPI;
+exports["default"] = _default;

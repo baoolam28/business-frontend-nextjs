@@ -7,47 +7,51 @@ import Header from "../../components/component/Header";
 import ProductDetails from "./ProductDetails";
 import RelatedProducts from "./RelatedProducts";
 import Footer from "./Footer";
-import ProductId from "../../api/buyer";
+import BuyerAPI from "../../api/buyer";
 import { useSearchParams } from 'next/navigation'
-
+import Loading from "../../components/component/loading-lottie"
+import Animation from "../../utils/lottie-animations/astronot.json"
 function ProductPage() {
+  const searchParams = useSearchParams();
+  const id = searchParams.get("id");
+  const [loading, setLoading ] = useState(true);
   const [productData, setProductData] = useState(null);
-  const [productId, setProductId] = useState(null);
 
   const fallbackImage =
   "https://via.placeholder.com/150";
 
+  
+
   useEffect(() => {
-     // Lấy id từ URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const id = urlParams.get('id');
-    setProductId(id)
 
-    const fetchProductById = async () => {
-      if (!id) return; 
+    if(!id) return;
 
-      try {
-        const response = await ProductId.product.getProductById(id); 
-        console.log("Response Status Code:", response);
-        
-        if (response.statusCode === 200) {
-          setProductData(response.data);
-          console.log("Product fetched:", response.data);
-        } else {
-          console.error("Failed to fetch product details");
-        }
-      } catch (error) {
-        console.error("Error fetching product details:", error);
+    console.log("id: " + id);
+    fetchProductById(); 
+
+  }, [id]);
+
+  const fetchProductById = async () => {
+    setLoading(true);
+    try {
+      const response = await BuyerAPI.product.getProductDetails(id); 
+      console.log("Response Status Code:", response);
+      
+      if (response.statusCode === 200) {
+        setProductData(response.data);
+        console.log("Product fetched:", response.data);
+      } else {
+        console.error("Failed to fetch product details");
       }
-    };
-  
-    if (id) {
-      fetchProductById();  // Chỉ fetch khi có productId
+    } catch (error) {
+      console.error("Error fetching product details:", error);
+    }finally{
+      setLoading(false);
     }
-  }, []);
+  };
   
-  if (!productData) {
-    return <div>Loading...</div>; // Hiển thị loading khi chưa có dữ liệu
+  if (loading) {
+    return <Loading animation={Animation} />; // Hiển thị loading khi chưa có dữ liệu
   }
 
   return (

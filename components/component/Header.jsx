@@ -9,67 +9,83 @@ import IconButton from "./IconButton";
 import { useUser } from "../../context/UserContext";
 import AccountDropdown from "./account-dropdown";
 import { ShoppingBag } from 'lucide-react'
+
+import { Button } from "../../components/ui/button"
 function Header() {
 
   const { user } = useUser();
 
+  const menuData = [
+    {
+      label: "Liên hệ",
+      href: "/contact",
+    },
+    {
+      label: "Giới thiệu",
+      href: "/about",
+    },
+    {
+      label: "Yêu thích",
+      href: "/whish-list",
+    },
+    {
+      label: "Đăng ký",
+      href: "/register",
+    },
+    {
+      label: "Đăng nhập",
+      href: "/login",
+    }
+  ]
+
   
 
-
   return (
-    <header className="flex flex-col bg-white">
-      {/* Phần toàn bộ nền đen */}
-      <div className="flex justify-center items-center px-16 py-3 w-full bg-black text-neutral-50 text-sm max-md:px-5">
-        <div className="flex justify-between items-center w-full max-w-7xl">
-          <span className="text-neutral-50 font-medium text-center mx-auto">
-            Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%! &nbsp;
-            <a
-              href="/home-page"
-              className="font-semibold underline text-neutral-50"
-            >
+    
+    
+    <div className="mt-[100px]">
+      <header className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      {/* Promotional Banner */}
+      <div className="bg-primary text-primary-foreground">
+        <div className="container flex h-10 items-center justify-between px-4 sm:px-6 lg:px-8">
+          <p className="text-sm font-medium">
+            Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%!{" "}
+            <Button variant="link" className="h-auto p-0 text-primary-foreground underline-offset-4 hover:underline">
               Shop Now
-            </a>
-          </span>
+            </Button>
+          </p>
           <div className="ml-auto">
-            <LanguageSelector />
+            <select className="bg-transparent text-sm font-medium text-primary-foreground focus:outline-none">
+              <option value="en">English</option>
+              <option value="fr">French</option>
+              <option value="de">German</option>
+            </select>
           </div>
         </div>
       </div>
 
-      <nav className="flex justify-between items-center px-16 py-6 max-md:flex-col max-md:px-5 max-md:items-start">
-        <div className="flex items-center gap-10">
-          <ShoppingBag className="h-8 w-8 text-black-500 mr-2" />
-            <h1 className="text-3xl font-bold text-black-500">Shop VN</h1>
-          <ul className="flex gap-8 text-base">
-            <li>
-              <a href="/home-page" className="hover:underline">
-                Home
+      {/* Main Navigation */}
+      <div className="container px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2">
+              <a href="/home-page" className="flex">
+                <ShoppingBag className="h-6 w-6" />
+                <span className="text-xl font-bold">Shop VN</span>
               </a>
-            </li>
-            <li>
-              <a href="/contact" className="hover:underline">
-                Contact
-              </a>
-            </li>
-            <li>
-              <a href="/about" className="hover:underline">
-                About
-              </a>
-            </li>
-            <li>
-              <a href="/login" className="hover:underline">
-                Sign Up
-              </a>
-            </li>
-            <li>
-              <a href="/wishlist" className="hover:underline">
-                Wish List 
-              </a>
-            </li>
-          </ul>
-        </div>
+            </div>
+            <nav className="hidden md:flex items-center gap-6">
+              {menuData.map((item) => (
+                <a 
+                className="text-foreground/60 hover:text-foreground"
+                href={item.href}>
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+          </div>
 
-        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-6">
           <SearchBar />
           <div className="flex gap-4">
             <a href="/wishlist">
@@ -99,11 +115,10 @@ function Header() {
 
           </div>
         </div>
-      </nav>
-
-      {/* Line separator */}
-      <div className="w-full bg-black border border-black opacity-30" />
+        </div>
+      </div>
     </header>
+    </div>
   );
 }
 

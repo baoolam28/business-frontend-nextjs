@@ -13,32 +13,75 @@ export default function ShoppingCartComponent() {
   const router = useRouter();
   const { user } = useUser();
   const userId = user ? user.id : null;
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(JSON.parse(localStorage.getItem('cart')) || []);
   const [selectedItems, setSelectedItems] = useState([]); 
 
   useEffect(() => {
-    if (userId) {
-      const fetchCart = async () => {
-        try {
-          const response = await BuyerAPI.cart.getCartByUserId(userId);
-          console.log("Full response from API:", JSON.stringify(response));
 
-          if (response.statusCode === 200) {
-            console.log("Data structure:", response.data);
-            const items = response.data && Array.isArray(response.data.cartItems) ? response.data.cartItems : [];
-            setCart(items);
-          } else {
-            console.error("Error fetching cart items: ", response.message);
-          }
-        } catch (error) {
-          console.log("Error fetching Cart: ", error);
-        }
-      };
-      fetchCart();
-    } else {
-      console.log("userId is null, cannot fetch cart.");
-    }
+    if(!userId) return;
+
+    const cartStorage =  getCartInStorage();
+    fetchUpdateCart(cartStorage);
+    setCart(cartStorage);
+
   }, [userId]);
+
+  useEffect(() => {
+    if (userId) {
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+  }, [cart, userId]);
+
+  const getCartInStorage = () => {
+    
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    
+
+    return cart
+
+  }
+
+  const fetchCart = async () => {
+    try {
+      const response = await BuyerAPI.cart.getCartByUserId(userId);
+      console.log("Full response from API:", JSON.stringify(response));
+
+      if (response.statusCode === 200) {
+        console.log("Data structure:", response.data);
+        const items = response.data && Array.isArray(response.data.cartItems) ? response.data.cartItems : [];
+        setCart(items);
+      } else {
+        console.error("Error fetching cart items: ", response.message);
+      }
+    } catch (error) {
+      console.log("Error fetching Cart: ", error);
+    }
+  };
+
+  const fetchUpdateCart = async (cart) => {
+
+    const data = {
+      userId: userId,  
+      cartItems: cart.map((item) => ({
+        productDetailId: item.productDetailId, 
+        quantity: item.quantity 
+      })) || []
+    };
+
+
+    try {
+      const response = await BuyerAPI.cart.updateCartByUserId(data);
+      console.log("Updated response from API:", JSON.stringify(response));
+      if (response.statusCode === 200) {
+        console.log("Cart updated successfully!");
+      } else {
+        console.error("Error updating cart: ", response.message);
+      }
+    } catch (error) {
+      console.log("Error updating Cart: ", error);
+    }
+  }
 
   const toggleSelect = (id) => {
     setSelectedItems((prevSelected) => {
@@ -60,25 +103,25 @@ export default function ShoppingCartComponent() {
   };
 
   const updateQuantity = (id, newQuantity) => {
-    if (newQuantity >= 0) {
-      const updatedCart = cart.map((item) =>
-        item.productDetailId === id ? { ...item, quantity: newQuantity } : item
-      );
-      setCart(updatedCart);
-      
-      // If the item is selected, we should update the total price accordingly
-      if (selectedItems.includes(id)) {
-        setSelectedItems((prev) => {
-          const newSelectedItems = [...prev];
-          if (newQuantity === 0) {
-            // If quantity is zero, remove from selected items
-            return newSelectedItems.filter(item => item !== id);
-          }
-          return newSelectedItems;
-        });
-      }
+    // If the quantity is zero, remove the item from the cart
+    if (newQuantity === 0) {
+      setCart(cart.filter(item => item.productDetailId !== id));
+      setSelectedItems(prev => prev.filter(item => item !== id)); // Remove from selected items
+      return;
+    }
+
+    // Update the cart with the new quantity
+    const updatedCart = cart.map((item) =>
+      item.productDetailId === id ? { ...item, quantity: newQuantity } : item
+    );
+    setCart(updatedCart);
+
+    // Update selected items if necessary
+    if (!selectedItems.includes(id) && newQuantity > 0) {
+      setSelectedItems(prev => [...prev, id]); // Add to selected items if not already selected
     }
   };
+
 
   const removeItem = (id) => {
     setCart(cart.filter((item) => item.productDetailId !== id));
@@ -95,6 +138,8 @@ export default function ShoppingCartComponent() {
     router.push(`/checkout-online?data=${encodeURIComponent(JSON.stringify(detailedItems))}`)
   };
 
+  const defaultImage = 'https://shpetro.com/images/no_image.png';
+
   return (
     <div className="min-h-screen bg-gray-100">
       <main className="container mx-auto px-4 py-8 pb-24">
@@ -106,8 +151,14 @@ export default function ShoppingCartComponent() {
                 onCheckedChange={() => toggleSelect(item.productDetailId)}
                 className="mt-1"
               />
-              <img src={item.image} alt={item.productName} className="w-24 h-24 object-cover rounded-md" />
-              <div className="flex-grow grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <img 
+                src={item.image || defaultImage} 
+                alt={item.productName || "Default Image"} 
+                loading="lazy" // Lazy load the image
+                width={100}
+                height={100}
+              />
+              <div className="flex-grow items-center grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div className="flex flex-col text-center">
                   <h2 className="text-lg font-semibold text-gray-900">{item.productName}</h2>
                 </div>

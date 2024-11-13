@@ -4,6 +4,7 @@ import { SessionProvider } from "next-auth/react"; // Import SessionProvider
 import { StoreProvider } from "../context/StoreContext";
 import { UserProvider } from "../context/UserContext";
 import { ChatProvider } from "../context/chatContext"
+import "react-toastify/ReactToastify.css";
 const inter = Inter({ subsets: ["latin"] });
 import EnhancedChatBox from "../components/chat-box/enhanced-chat-box";
 export const metadata = {

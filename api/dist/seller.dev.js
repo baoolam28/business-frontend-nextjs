@@ -15,16 +15,31 @@ var sellerAPI = {
     getAllProductsByStoreId: function getAllProductsByStoreId(storeId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/products/").concat(storeId));
     },
+    getProductsOnline: function getProductsOnline(storeId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/products/online/").concat(storeId));
+    },
+    getProductsOffline: function getProductsOffline(storeId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/products/offline/").concat(storeId));
+    },
     createProductOnline: function createProductOnline(data) {
       return _axiosClient["default"].post("".concat(baseUrl, "/products/online"), data);
     },
     createProductOffline: function createProductOffline(data) {
       return _axiosClient["default"].post("".concat(baseUrl, "/products/offline"), data);
+    },
+    updateProductOffline: function updateProductOffline(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/products/offline/update"), data);
+    },
+    deleteProductOffline: function deleteProductOffline(id) {
+      return _axiosClient["default"]["delete"]("".concat(baseUrl, "/products/offline/delete/").concat(id));
     }
   },
   category: {
     getAllCategories: function getAllCategories() {
       return _axiosClient["default"].get("".concat(baseUrl, "/categories"));
+    },
+    getCategoriesByStore: function getCategoriesByStore(storeId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/categories/by-store/").concat(storeId));
     }
   },
   origin: {
@@ -47,20 +62,25 @@ var sellerAPI = {
     }
   },
   inventory: {
-    getAllInventory: function getAllInventory() {
+    getAllInventory: function getAllInventory(storeId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/inventories/").concat(storeId));
     }
   },
   store: {
     getStoreByUserId: function getStoreByUserId(userId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/store/by-user/").concat(userId));
+    }
+  },
+  document: {
+    createDocument: function createDocument(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/documents"), data);
     },
-    getAllOrderByStoreId: function getAllOrderByStoreId(storeId) {
-      return _axiosClient["default"].get("".concat(baseUrl, "/orders/stores/").concat(storeId));
+    getDocumentByStore: function getDocumentByStore(storeId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/documents/").concat(storeId));
     }
   },
   order: {
-    getAllOdersByStoreId: function getAllOdersByStoreId(storeId) {
+    getOrdersOnlineByStoreId: function getOrdersOnlineByStoreId(storeId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/orders/online/stores/").concat(storeId));
     },
     getOrderById: function getOrderById(orderId) {
@@ -94,7 +114,7 @@ var sellerAPI = {
     }
   },
   customer: {
-    getAllCustomerssByStoreId: function getAllCustomerssByStoreId(storeId) {
+    getAllCustomerByStoreId: function getAllCustomerByStoreId(storeId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/customers/store/").concat(storeId));
     },
     createCustomer: function createCustomer(customerData) {

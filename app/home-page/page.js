@@ -1,11 +1,14 @@
 import React from "react";
 import HomePage from "../../components/home-page/pages/HomePage"
-import Loading from "../../components/component/loading-lottie"
-import animationData from "../../utils/lottie-animations/rocket.json"; 
+
+export const metadata = {
+  title: 'Home Page',
+  description: 'This is a description for My Custom Site',
+};
+
 export default function page() {
   return (
     <div>
-      <Loading animation={animationData} />
       <HomePage />
     </div>
   );
