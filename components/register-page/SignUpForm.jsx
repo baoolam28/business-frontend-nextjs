@@ -13,6 +13,7 @@ export default function SignUpForm() {
       password: "",
       phoneNumber: "",
       fullName: "",
+      email: "",
     });
     const [errors, setErrors] = useState({});
     const router  = useRouter();
@@ -49,6 +50,11 @@ export default function SignUpForm() {
       }
       if (!formData.phoneNumber) {
         newErrors.phoneNumber = "Phone number is required";
+      }
+      if (!formData.email) {
+        newErrors.email = "Email is required"; // Kiểm tra xem email có được nhập không
+      } else if (!/\S+@\S+\.\S+/.test(formData.email)) { // Kiểm tra định dạng email
+          newErrors.email = "Email is invalid"; // Thông báo lỗi nếu email không hợp lệ
       }
       return newErrors;
     };
@@ -101,6 +107,21 @@ export default function SignUpForm() {
               </div>
       
               <form onSubmit={onSubmit} className="space-y-6">
+
+                {/* Fullname Input */}
+                <Input
+                  label="Full name"
+                  placeholder="Enter your full name"
+                  type="text"
+                  name="fullName"
+                  value={formData.fullName}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 p-3 rounded-lg"
+                />
+                  {errors.fullName && (
+                    <p className="text-red-500 text-sm">{errors.fullName}</p>
+                  )}
+
                 {/*User Name Input */}
                 <Input
                   label="User name"
@@ -113,6 +134,34 @@ export default function SignUpForm() {
                 />
                   {errors.username && (
                     <p className="text-red-500 text-sm">{errors.username}</p>
+                  )}
+                
+                {/* Email Input */}
+                <Input
+                  label="Email"
+                  placeholder="Enter your email"
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 p-3 rounded-lg"
+                />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm">{errors.email}</p>
+                  )}  
+                
+                {/* Phone Number Input */}
+                <Input
+                  label="Phone number"
+                  placeholder="Enter your phone number"
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber.startsWith("84") ? "0" + formData.phoneNumber.slice(2) : formData.phoneNumber}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 p-3 rounded-lg"
+                />
+                  {errors.phoneNumber && (
+                    <p className="text-red-500 text-sm">{errors.phoneNumber}</p>
                   )}
       
                 {/* Password Input */}
@@ -128,34 +177,7 @@ export default function SignUpForm() {
                   {errors.password && (
                     <p className="text-red-500 text-sm">{errors.password}</p>
                   )}
-                {/* Phone Number Input */}
-                <Input
-                  label="Phone number"
-                  placeholder="Enter your phone number"
-                  type="tel"
-                  name="phoneNumber"
-                  value={formData.phoneNumber.startsWith("84") ? "0" + formData.phoneNumber.slice(2) : formData.phoneNumber}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 p-3 rounded-lg"
-                />
-                  {errors.phoneNumber && (
-                    <p className="text-red-500 text-sm">{errors.phoneNumber}</p>
-                  )}
-      
-                {/* Fullname Input */}
-                <Input
-                  label="Full name"
-                  placeholder="Enter your full name"
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  className="w-full border border-gray-300 p-3 rounded-lg"
-                />
-                  {errors.fullName && (
-                    <p className="text-red-500 text-sm">{errors.fullName}</p>
-                  )}
-      
+                
                 {/* Submit Button */}
                 <button
                   type="submit"
