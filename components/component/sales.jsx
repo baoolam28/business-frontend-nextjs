@@ -31,7 +31,7 @@ import productAPI from "../../api/seller"
 import buyerAPI from "../../api/buyer"
 import sellerAPI from "../../api/seller"
 import inventoryAPI from "../../api/inventory";
-import BarcodeScanner from "./barcodeScanner"
+import BarcodeScanner from "../component/BarcodeScanner"
 import AddCustomerDialog from "../../components/component/addCustomer"
 import inventory from "./inventory"
 import { useRouter } from 'next/navigation';

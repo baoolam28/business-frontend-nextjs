@@ -25,7 +25,7 @@ export default function Component() {
     const [isPayment, setIsPayment] = useState(false);
     const [qrCode, setQrCode] = useState([]);
     const [qrData, setQrData] = useState({});
-
+    const [error, setError] = useState('');
     const [order, setOrder] = useState([]); 
 
   useEffect(() => {

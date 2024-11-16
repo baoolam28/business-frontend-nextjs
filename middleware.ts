@@ -64,7 +64,7 @@ export default async function middleware(req) {
   }
 
   // Nếu người dùng đã xác thực và có vai trò, kiểm tra quyền truy cập
-  const allowedPaths = roleAccess[userRole] || [];
+  const allowedPaths = roleAccess[(userRole as any)] || [];
 
   // Kiểm tra nếu đường dẫn yêu cầu thuộc phạm vi quyền của vai trò
   const hasAccess = allowedPaths.some((path) => pathname.startsWith(path));

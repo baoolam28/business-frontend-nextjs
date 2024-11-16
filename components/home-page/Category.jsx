@@ -4,15 +4,11 @@ import { useSearchParams } from "next/navigation";
 import Header from "../../components/component/Header";
 import Footer from "./Footer";
 import buyerAPI from "../../api/buyer";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
-import { Slider } from "../../components/ui/slider";
-import ProductCard from "./ProductCard";
 import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
-import { Checkbox } from "../../components/ui/checkbox"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
-import { Search, Star, MapPin ,Store } from "lucide-react";
+import {  Star, MapPin ,Store } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -137,9 +133,9 @@ const Category = () => {
               <div>
                 <h2 className="text-lg font-semibold mb-2">Rating</h2>
                 <div className="flex items-center">
-                  {[1, 2, 3, 4, 5].map((rating) => (
+                  {[1, 2, 3, 4, 5].map((rating, index) => (
                     <div key={rating} onClick={() => handleRatingClick(rating)} className="cursor-pointer">
-                      <Star className={`w-5 h-5 ${rating <= selectedRating ? 'text-yellow-400' : 'text-gray-400'} fill-current`} />
+                      <Star key={index} className={`w-5 h-5 ${rating <= selectedRating ? 'text-yellow-400' : 'text-gray-400'} fill-current`} />
                     </div>
                   ))}
                   <span className="ml-2">& Up</span>
@@ -161,8 +157,8 @@ const Category = () => {
           {/* Danh sách sản phẩm */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.filter((product) => (!selectedStore || product.storeName === selectedStore) &&
-                                          (selectedRating === 0 || product.rating >= selectedRating) ).map((product) => (
-              <Card key={product.productId} className="overflow-hidden transition-shadow hover:shadow-lg">
+                                          (selectedRating === 0 || product.rating >= selectedRating) ).map((product, index) => (
+              <Card key={index} className="overflow-hidden transition-shadow hover:shadow-lg">
                 <CardHeader className="p-0">
                   <div className="h-48 bg-gray-200">
                     <img

@@ -74,8 +74,9 @@ function Header() {
               </a>
             </div>
             <nav className="hidden md:flex items-center gap-6">
-              {menuData.map((item) => (
+              {menuData.map((item, index) => (
                 <a 
+                key={index}
                 className="text-foreground/60 hover:text-foreground"
                 href={item.href}>
                   {item.label}

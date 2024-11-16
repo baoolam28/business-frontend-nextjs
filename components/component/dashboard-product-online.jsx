@@ -80,8 +80,7 @@ export default function ProductDashboard({productsOnline}) {
 
 
   const handleAddProduct = () => {
-    // Implement add product logic
-    console.log('Add product clicked')
+    
   }
 
   const handleEditProduct = (product) => {
@@ -103,8 +102,7 @@ export default function ProductDashboard({productsOnline}) {
 
   return (
     <div className="container mx-auto  space-y-6">
-      <h1 className="text-3xl font-bold">Product Management Dashboard</h1>
-      
+      <h1 className="text-3xl font-bold">Quản lý sản phẩm online</h1>
       <div className="flex flex-col sm:flex-row gap-4">
         <Input
           placeholder="Search products..."
@@ -125,9 +123,11 @@ export default function ProductDashboard({productsOnline}) {
               ))}
           </SelectContent>
         </Select>
-        <Button onClick={handleAddProduct}>
-          <Plus className="mr-2 h-4 w-4" /> Add Product
-        </Button>
+        <a href="/store/product/online/create-product">
+              <Button onClick={handleAddProduct}>
+                <Plus className="mr-2 h-4 w-4" /> thêm sản phẩm
+              </Button>
+        </a>
       </div>
 
       <div className="space-y-2">
@@ -173,16 +173,16 @@ export default function ProductDashboard({productsOnline}) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">
-                      <span className="sr-only">Open menu</span>
+                      <span className="sr-only">Menu</span>
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => handleEditProduct(product)}>
-                      <Edit className="mr-2 h-4 w-4" /> Edit
+                      <Edit className="mr-2 h-4 w-4" /> Sửa
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => handleDeleteProduct(product.id)}>
-                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                      <Trash2 className="mr-2 h-4 w-4" /> Xóa
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -191,8 +191,8 @@ export default function ProductDashboard({productsOnline}) {
             <CardContent>
               <ProductImageCarousel images={product.images} />
               <div className="mt-4">
-                <p className="text-2xl font-bold">${FormatAsVND(product.price.toFixed(2))}</p>
-                <p className="text-sm text-muted-foreground">{product.categoryName}</p>
+                <p className="text-2xl font-bold">{FormatAsVND(product.price.toFixed(2))}</p>
+                <p className="text-md text-muted-foreground">{product.categoryName}</p>
               </div>
             </CardContent>
             <CardFooter className="flex-grow flex flex-col justify-end">
