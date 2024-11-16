@@ -80,6 +80,21 @@ const sellerAPI = {
   payment: {
     createQrCode: (qrData) => axiosClient.post(`${baseUrl}/qr/create`, qrData),
   },
+  report: {
+    getOrderByDay: (storeId, startDate, endDate) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-day`,
+      {
+        params: {
+          startDate: startDate,
+          endDate: endDate,
+        }
+      }
+    ),
+    getOrderByMonth: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-month`),
+    getOrderByYear: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-year`),
+    getTotalOrder: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/total-value`),
+    getTop3Customers: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/top-customers`),
+    getTop3Products: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/top-products`)
+  }
 };
 
 export default sellerAPI;

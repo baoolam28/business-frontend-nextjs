@@ -45,7 +45,11 @@ const buyerAPI = {
     createStore : (dataStore) => axiosClient.post(`${baseUrl}/stores`,dataStore),
 
   },
-
-}; 
-export default buyerAPI; 
+  resetPassword : {
+    sendEmail : (data) => axiosClient.put(`${baseUrl}/send-mail`, data),
+    resetPasswordEmail : (data) => axiosClient.put(`${baseUrl}/reset-password-email`, data),
+    resetPasswordPhoneNumber : (data) => axiosClient.put(`${baseUrl}/reset-password-phone`, data)
+  }
+  
+};
 

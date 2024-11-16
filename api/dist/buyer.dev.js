@@ -1,10 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
 var _axiosClient = _interopRequireDefault(require("./axiosClient"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -93,7 +88,16 @@ var buyerAPI = {
     createStore: function createStore(dataStore) {
       return _axiosClient["default"].post("".concat(baseUrl, "/stores"), dataStore);
     }
+  },
+  resetPassword: {
+    sendEmail: function sendEmail(data) {
+      return _axiosClient["default"].put("".concat(baseUrl, "/send-mail"), data);
+    },
+    resetPasswordEmail: function resetPasswordEmail(data) {
+      return _axiosClient["default"].put("".concat(baseUrl, "/reset-password-email"), data);
+    },
+    resetPasswordPhoneNumber: function resetPasswordPhoneNumber(data) {
+      return _axiosClient["default"].put("".concat(baseUrl, "/reset-password-phone"), data);
+    }
   }
 };
-var _default = buyerAPI;
-exports["default"] = _default;
