@@ -34,7 +34,7 @@ function ProductDetails({ productData }) {
       </nav>
       <div className="mt-20 w-full max-md:mt-10 max-md:max-w-full">
         <div className="flex gap-5 max-md:flex-col">
-          <ProductGallery images={productData.images} variantImage={variantImage? variantImage : null} />
+          <ProductGallery images={productData?.images} variantImage={variantImage? variantImage : null} />
           <ProductInfo productData={productData} onVariantImage={onVariantImage} />
         </div>
       </div>

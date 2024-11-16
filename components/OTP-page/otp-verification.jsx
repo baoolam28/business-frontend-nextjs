@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useCallback  } from "react"
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams  } from "next/navigation";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
 import { Input } from "../../components/ui/input"
@@ -15,18 +15,22 @@ export default function OtpVerification() {
   const [timeLeft, setTimeLeft] = useState(0);
   const [intervalId, setIntervalId] = useState(null);
   const [hasRequestedOtp, setHasRequestedOtp] = useState(false);
+  const [isResetPassword, setIsResetPassword] = useState(false);
 
+  const searchParams = useSearchParams();
   useEffect(() =>{
     const storagePhoneNumber = sessionStorage.getItem("phoneNumber")
     const storageFormData = sessionStorage.getItem("formData");
-    console.log("storagePhoneNumber", storagePhoneNumber)
+    const isReset = searchParams.get("isResetPassword") === "true";
+
+    setIsResetPassword(isReset);
     if(storagePhoneNumber){
       setPhoneNumber(storagePhoneNumber);
     }
     if (storageFormData) {
       setFormData(JSON.parse(storageFormData)); // Chuyển đổi lại thành đối tượng
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (phoneNumber && !hasRequestedOtp) {
@@ -109,12 +113,16 @@ export default function OtpVerification() {
       const response = await buyerAPI.otp.verifyOtp({phoneNumber: phoneNumber, otpCode: enteredOtp})
       console.log("Full response: ", response.data)
       if(response.statusCode === 200){
-        const registerResponse  = await buyerAPI.register.createNewUser(formData); // Giả định dữ liệu từ trang Đăng Ký
-        if(registerResponse .statusCode === 200){
-          showSuccessAlert("Thành công", "Bạn đã đăng ký thành công!");
-          router.push("/login");
+        if(isResetPassword){
+          router.push("/reset-password?isResetPassword=true")
         }else{
-          showErrorAlert("Thất bại", "Bạn đã đăng ký thất bại!");
+          const registerResponse  = await buyerAPI.register.createNewUser(formData); // Giả định dữ liệu từ trang Đăng Ký
+          if(registerResponse .statusCode === 200){
+            showSuccessAlert("Thành công", "Bạn đã đăng ký thành công!");
+            router.push("/login");
+          }else{
+            showErrorAlert("Thất bại", "Bạn đã đăng ký thất bại!");
+          }
         }
       }else{
         showErrorAlert("Thất bại", "Xác minh OTP không thành công.");
@@ -172,7 +180,7 @@ export default function OtpVerification() {
           </Button>
           <button
             className="text-blue-400 hover:text-blue-300 text-sm"
-            onClick={() => handleRequestOtp(phoneNumber)}>
+            onClick={handleRequestOtp}>
             Didn't receive code? Resend Code
           </button>
         </CardFooter>

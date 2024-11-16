@@ -3,7 +3,7 @@ import axiosClient from "./axiosClient";
 const baseUrl = "/api/buyer";
 const buyerAPI = {
   product: {
-    getAllProducts: () => axiosClient.get(`${baseUrl}/products`),
+    getAllProducts: () => axiosClient.get(`${baseUrl}/products/online`),
     getAllBestSeller: () => axiosClient.get(`${baseUrl}/products/bestseller`),
     getProductById:(id) => axiosClient.get(`${baseUrl}/products/${id}`),
     getProductDetails: (id) => axiosClient.get(`${baseUrl}/products/product-detail/${id}`),
@@ -14,19 +14,9 @@ const buyerAPI = {
     getAllSotre : () => axiosClient.get(`${baseUrl}/stores`)
   },
   cart : {
-    // Lấy thông tin giỏ hàng theo userId
     getCartByUserId: (userId) => axiosClient.get(`${baseUrl}/cart/get-by-user/${userId}`),
-
-    // Thêm sản phẩm vào giỏ hàng
     addToCart: (cartRequest) => axiosClient.post(`${baseUrl}/cart/add-to-cart`, cartRequest),
-
-    // Cập nhật sản phẩm trong giỏ hàng
-    updateCart: (cartRequest) => axiosClient.put(`${baseUrl}/cart/update-cart`, cartRequest),
-
-    // Xóa sản phẩm khỏi giỏ hàng
-    deleteProductFromCart: (cartRequest) => axiosClient.delete(`${baseUrl}/cart/delete-product`, {
-      data: cartRequest
-    })
+    updateCartByUserId: (data) => axiosClient.put(`${baseUrl}/cart`,data),
   },
 
   orderStatus : {
@@ -54,6 +44,11 @@ const buyerAPI = {
   store:{
     createStore : (dataStore) => axiosClient.post(`${baseUrl}/stores`,dataStore),
 
+  },
+  resetPassword : {
+    sendEmail : (data) => axiosClient.put(`${baseUrl}/send-mail`, data),
+    resetPasswordEmail : (data) => axiosClient.put(`${baseUrl}/reset-password-email`, data),
+    resetPasswordPhoneNumber : (data) => axiosClient.put(`${baseUrl}/reset-password-phone`, data)
   }
   
 };
