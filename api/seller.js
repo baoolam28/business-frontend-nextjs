@@ -48,12 +48,15 @@ const sellerAPI = {
 
   document: {
     createDocument: (data) => axiosClient.post(`${baseUrl}/documents`, data),
-    getDocumentByStore: (storeId) => axiosClient.get(`${baseUrl}/documents/${storeId}`),
+    getDocumentByStore: (storeId) =>
+      axiosClient.get(`${baseUrl}/documents/${storeId}`),
   },
 
   order: {
     getOrdersOnlineByStoreId: (storeId) =>
       axiosClient.get(`${baseUrl}/orders/online/${storeId}`),
+    getOderOfflineByStoreId: (storeId) =>
+      axiosClient.get(`${baseUrl}/orders/offline/${storeId}`),
     getOrderById: (orderId) => axiosClient.get(`${baseUrl}/orders/${orderId}`),
     createOrder: (orderData) =>
       axiosClient.post(`${baseUrl}/orders`, orderData),
@@ -64,6 +67,9 @@ const sellerAPI = {
       axiosClient.get(`${baseUrl}/orders/${storeId}/products`),
     updateOrderDetail: (orderData, orderId) =>
       axiosClient.put(`${baseUrl}/orders/update/${orderId}`, orderData),
+    updateOrderOnlineById: (orderId, newStatus) => 
+      axiosClient.put(`${baseUrl}/orders/online/${orderId}/status`, newStatus),
+
   },
   customer: {
     getAllCustomerByStoreId: (storeId) =>
@@ -79,20 +85,24 @@ const sellerAPI = {
     createQrCode: (qrData) => axiosClient.post(`${baseUrl}/qr/create`, qrData),
   },
   report: {
-    getOrderByDay: (storeId, startDate, endDate) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-day`,
-      {
+    getOrderByDay: (storeId, startDate, endDate) =>
+      axiosClient.get(`${baseUrl}/reports/${storeId}/by-day`, {
         params: {
           startDate: startDate,
           endDate: endDate,
-        }
-      }
-    ),
-    getOrderByMonth: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-month`),
-    getOrderByYear: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-year`),
-    getTotalOrder: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/total-value`),
-    getTop3Customers: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/top-customers`),
-    getTop3Products: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/top-products`)
-  }
+        },
+      }),
+    getOrderByMonth: (storeId) =>
+      axiosClient.get(`${baseUrl}/reports/${storeId}/by-month`),
+    getOrderByYear: (storeId) =>
+      axiosClient.get(`${baseUrl}/reports/${storeId}/by-year`),
+    getTotalOrder: (storeId) =>
+      axiosClient.get(`${baseUrl}/reports/${storeId}/total-value`),
+    getTop3Customers: (storeId) =>
+      axiosClient.get(`${baseUrl}/reports/${storeId}/top-customers`),
+    getTop3Products: (storeId) =>
+      axiosClient.get(`${baseUrl}/reports/${storeId}/top-products`),
+  },
 };
 
 export default sellerAPI;

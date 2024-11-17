@@ -121,7 +121,7 @@ useEffect(() => {
       if (!storeId) return;
   
     try {
-      const response = await sellerAPI.order.getAllOdersByStoreId(storeId);
+      const response = await sellerAPI.order.getOderOfflineByStoreId(storeId);
         if (response.statusCode === 200) {
       // Only set orders where paymentStatus is false
           setOrders(response.data.filter(order => order.paymentStatus === false));
@@ -530,7 +530,7 @@ const handleSelectOrder = (selectedOrderObj) => {
                 key={product.id}
                 className="grid grid-cols-[50px_1fr_50px] items-center gap-4">
                 <img
-                  src="/placeholder.svg"
+                  src={product.images ? product.images[0] : '/placeholder.svg'}
                   alt={product.name}
                   width={50}
                   height={50}
