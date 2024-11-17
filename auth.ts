@@ -57,11 +57,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       authorize: async (credentials) => {
         try {
           const res = await authAPI.login(credentials.email, credentials.password);
-          if (res.statusCode === 200 && res.data.userInfo) {
-            const user = res.data.userInfo;
+          if ((res as any).statusCode === 200 && res.data.userInfo) {
+            const user = (res as any).data.userInfo;
             return {
               ...user,
-              accessToken: res.data.access_token,
+              accessToken: (res as any).data.access_token,
             };
           }
           return null; // Trả về null nếu login thất bại
@@ -76,15 +76,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user, account }) {
       if (account?.provider === "google" && user) {
         // Cập nhật token sau khi đăng nhập Google
-        token = handleToken(token, user, account.provider, user.accessToken);
+        token = handleToken(token, user, account.provider, (user as any).accessToken);
       }
       if (user && account?.provider === "credentials") {
-        token = handleToken(token, user, account.provider, user.accessToken);
+        token = handleToken(token, user, account.provider, (user as any).accessToken);
       }
       return token;
     },
     async session({ session, token}) {
-      session.user = token.user;
+      (session as any).user = (token as any).user;
       return session;
     },
     async signIn({ user, account, profile }) {
@@ -93,18 +93,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       
           const googleData = getGoogleData(user, profile);
           const res = await authAPI.googleSignIn(googleData);
-          
-          if (res.statusCode === 200 && res.data) {
+          const userInfo = (res as any).data.userInfo;
+          if ((res as any).statusCode === 200 && (res as any).data) {
             // Cập nhật lại token và thông tin user từ backend trả về
-            user.accessToken = res.data.access_token;
-            user.userId = res.data.userInfo.userId;
-            user.username = res.data.userInfo.username;
-            user.fullName = res.data.userInfo.fullName;
-            user.role = res.data.userInfo.role;
-            user.active = res.data.userInfo.active;
+            (user as any).accessToken = userInfo.access_token;
+            (user as any).userId = userInfo.userId;
+            (user as any).username = userInfo.username;
+            (user as any).fullName = userInfo.fullName;
+            (user as any).role = userInfo.role;
+            (user as any).active = userInfo.active;
             return true;
           } else {
-            console.error("Google user verification failed:", res.message);
+            console.error("Google user verification failed:", (res as any).message);
             return false;
           }
         } catch (error) {

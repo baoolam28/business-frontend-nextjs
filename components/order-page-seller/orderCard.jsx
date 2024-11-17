@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import OrderDetail from "./OrderDetail"; // Ensure you import with the correct casing
+import OrderDetail from "../order-page-seller/orderDetail"; // Ensure you import with the correct casing
 import matVND from "../../utils/formatVND";
 
 export default function OrderCard({ orders, updateOrderStatus }) {

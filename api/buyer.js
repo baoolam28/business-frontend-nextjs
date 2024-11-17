@@ -7,6 +7,7 @@ const buyerAPI = {
     getAllBestSeller: () => axiosClient.get(`${baseUrl}/products/bestseller`),
     getProductById:(id) => axiosClient.get(`${baseUrl}/products/${id}`),
     getProductDetails: (id) => axiosClient.get(`${baseUrl}/products/product-detail/${id}`),
+    getProductWithReviews: () => axiosClient.get(`${baseUrl}/products/with-reviews`),
   },
   category:{
     getAllCategories: () => axiosClient.get(`${baseUrl}/categories`),

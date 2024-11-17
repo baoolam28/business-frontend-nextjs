@@ -17,9 +17,9 @@ export default function OrderDetailsComponent() {
   const [shipment, setShipment] = useState(null);
   const [address, setAddress] = useState(null);
   const [shipmentStatus, setShipmentStatus] = useState([]);
-
+  const shipmentId = searchParams.get('shipmentId');
   useEffect(() => {
-    const shipmentId = searchParams.get('shipmentId');
+    
 
     // Kiểm tra xem shipmentId đã có chưa
     if (shipmentId) {

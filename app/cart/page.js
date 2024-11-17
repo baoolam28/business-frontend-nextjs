@@ -1,4 +1,4 @@
-
+"use client"
 import React from 'react'
 import CartPageComponents from '../../components/cart-Page/CartPage'
 

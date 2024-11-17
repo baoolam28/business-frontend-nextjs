@@ -31,7 +31,7 @@ import productAPI from "../../api/seller"
 import buyerAPI from "../../api/buyer"
 import sellerAPI from "../../api/seller"
 import inventoryAPI from "../../api/inventory";
-import BarcodeScanner from "./barcodeScanner"
+import BarcodeScanner from "../component/BarcodeScanner"
 import AddCustomerDialog from "../../components/component/addCustomer"
 import inventory from "./inventory"
 import { useRouter } from 'next/navigation';
@@ -68,7 +68,8 @@ export default function sales() {
   const handleCloseDialog = () => setDialogOpen(false);
   const [unpaidOrderProducts, setUnpaidOrderProducts] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
- const [selectedOrder, setSelectedOrder] = useState("");
+  const [selectedOrder, setSelectedOrder] = useState("");
+
 
   const router = useRouter();
 
@@ -97,11 +98,30 @@ useEffect(() => {
       fetchProducts(); 
     }
 
+    const fetchQuantity = async () => {
+      if(!storeId) return;
+
+      try {
+        const response = await sellerAPI.inventory.getAllInventory(storeId);
+        if(response.statusCode === 200) {
+          setInventories(response.data);
+        } else {
+          console.error("Failed to fetch quantity: " + response.status);
+        }
+      } catch (error) {
+           console.error("Error fetching quantity: " + error);
+      }
+    };
+
+    if (storeId != null) {
+      fetchQuantity();
+    }
+
     const fetchOrders = async () => {
-  if (!storeId) return;
+      if (!storeId) return;
   
     try {
-      const response = await sellerAPI.order.getAllOdersByStoreId(storeId);
+      const response = await sellerAPI.order.getOderOfflineByStoreId(storeId);
         if (response.statusCode === 200) {
       // Only set orders where paymentStatus is false
           setOrders(response.data.filter(order => order.paymentStatus === false));
@@ -119,6 +139,7 @@ useEffect(() => {
     }
     // Gọi hàm fetchProducts
 
+
     const fetchCustomers = async () => {
       if (!storeId) return; // Nếu storeId không có, không gọi API
 
@@ -126,7 +147,7 @@ useEffect(() => {
       setError(null);
 
       try {
-        const response = await sellerAPI.customer.getAllCustomerssByStoreId(storeId);
+        const response = await sellerAPI.customer.getAllCustomerByStoreId(storeId);
         console.log("Customers Response:", response);
 
         if (response.statusCode === 200) {
@@ -167,17 +188,17 @@ useEffect(() => {
     }
   }, [selectedOrderId]); // Chạy khi selectedOrderId thay đổi
 
- // Filtered Products
-  const filteredProducts = useMemo(() => {
-    return products.filter(product => 
-      product.productName.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [products, searchTerm]);
+    const filteredProducts = useMemo(() => {
+      return products.filter(product =>
+        product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }, [products, searchTerm]);
 
-  // Handlers
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-  };
+    // Handlers
+    const handleSearch = (event) => {
+      const value = event.target.value;
+      setSearchTerm(value); // Chỉ cần cập nhật searchTerm, filteredProducts sẽ tự động cập nhật.
+    };
 
   const handleAddToCart = (product) => {
     if (cart.length === 0) {
@@ -415,11 +436,11 @@ const handleSelectOrder = (selectedOrderObj) => {
         <div className="flex items-center gap-4 mb-6">
           <div className="relative flex-1">
             <Input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="pl-10 w-full" />
+            type="text"
+            placeholder="Search products..."
+            value={searchTerm}
+            onChange={handleSearch}
+            className="pl-10 w-full" />
             <select
               id="unpaidOrders"
               value={selectedOrder}
@@ -446,13 +467,13 @@ const handleSelectOrder = (selectedOrderObj) => {
             <span className="sr-only">Scan Barcode</span>
           </Button>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {
             filteredProducts.map((product) => (
-              <Card key={product.barcode} className="group">
+              <Card key={product.barcode} className="group p-4">
                 <div className="relative">
                   <img
-                    src="/placeholder.svg"
+                    src={product ? product.images[0] : '/placeholder.svg'}
                     alt={product.productName}
                     width={200}
                     height={200}
@@ -466,19 +487,23 @@ const handleSelectOrder = (selectedOrderObj) => {
                     <span className="sr-only">Add to cart</span>
                   </Button>
                 </div>
-                <div className="flex flex-col gap-1 p-4">
-                  <div className="flex flex-row justify-between">
-                    <h3 className="font-medium">{product.productName}</h3>
-                    <span className="font-medium">Tồn kho: {inventories.map((inventory) => inventory.barcode === product.barcode ? inventory.quantityInStock : 0)}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-primary font-medium">{formatVND(product.price.toFixed(2))} </span>
-                    <span className="text-xs text-muted-foreground">{product.barcode}</span>
-                  </div>
+                <div className="flex flex-col gap-2 pt-4">
+                  <h3 className="font-medium text-lg">{product.productName}</h3>
+                  <span className="font-medium text-sm text-gray-600">
+                    Tồn kho: { 
+                      inventories.find((inventory) => inventory.barcode === product.barcode)?.quantityInStock || "Không có thông tin"
+                    }
+                  </span>
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <span className="text-primary font-medium">{formatVND(product.price.toFixed(2))}</span>
+                  <span className="text-xs text-muted-foreground">{product.barcode}</span>
                 </div>
               </Card>
-            ))}
+            ))
+          }
         </div>
+
       </div>
       <div className="w-150 bg-muted p-8 border-l">
         <div className="flex items-center justify-between mb-6">
@@ -505,7 +530,7 @@ const handleSelectOrder = (selectedOrderObj) => {
                 key={product.id}
                 className="grid grid-cols-[50px_1fr_50px] items-center gap-4">
                 <img
-                  src="/placeholder.svg"
+                  src={product.images ? product.images[0] : '/placeholder.svg'}
                   alt={product.name}
                   width={50}
                   height={50}
