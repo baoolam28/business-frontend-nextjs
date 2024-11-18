@@ -81,7 +81,7 @@ var sellerAPI = {
   },
   order: {
     getOrdersOnlineByStoreId: function getOrdersOnlineByStoreId(storeId) {
-      return _axiosClient["default"].get("".concat(baseUrl, "/orders/online/stores/").concat(storeId));
+      return _axiosClient["default"].get("".concat(baseUrl, "/orders/online/").concat(storeId));
     },
     getOrderById: function getOrderById(orderId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/orders/").concat(orderId));
@@ -130,6 +130,31 @@ var sellerAPI = {
   payment: {
     createQrCode: function createQrCode(qrData) {
       return _axiosClient["default"].post("".concat(baseUrl, "/qr/create"), qrData);
+    }
+  },
+  report: {
+    getOrderByDay: function getOrderByDay(storeId, startDate, endDate) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/reports/").concat(storeId, "/by-day"), {
+        params: {
+          startDate: startDate,
+          endDate: endDate
+        }
+      });
+    },
+    getOrderByMonth: function getOrderByMonth(storeId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/reports/").concat(storeId, "/by-month"));
+    },
+    getOrderByYear: function getOrderByYear(storeId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/reports/").concat(storeId, "/by-year"));
+    },
+    getTotalOrder: function getTotalOrder(storeId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/reports/").concat(storeId, "/total-value"));
+    },
+    getTop3Customers: function getTop3Customers(storeId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/reports/").concat(storeId, "/top-customers"));
+    },
+    getTop3Products: function getTop3Products(storeId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/reports/").concat(storeId, "/top-products"));
     }
   }
 };

@@ -51,7 +51,7 @@ const sellerAPI = {
 
   order: {
     getOrdersOnlineByStoreId: (storeId) =>
-      axiosClient.get(`${baseUrl}/orders/online/stores/${storeId}`),
+      axiosClient.get(`${baseUrl}/orders/online/${storeId}`),
     getOrderById: (orderId) => axiosClient.get(`${baseUrl}/orders/${orderId}`),
     createOrder: (orderData) =>
       axiosClient.post(`${baseUrl}/orders`, orderData),
