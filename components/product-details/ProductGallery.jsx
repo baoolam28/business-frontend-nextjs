@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-function ProductGallery({ images, variantImage }) {
+function ProductGallery({ images , variantImage }) {
   const defaultImage = 'https://shpetro.com/images/no_image.png';
   const [selectedImage, setSelectedImage] = useState(defaultImage);
   

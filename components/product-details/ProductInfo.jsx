@@ -120,9 +120,9 @@ export default function ProductInfo({ productData, onVariantImage }) {
         <div className="text-2xl font-semibold text-red-600 mb-4">
           {filteredVariant
             ? FormatAsVND(filteredVariant.price)
-            : FormatAsVND(productData.price)}
+            : FormatAsVND(productData?.price)}
         </div>
-        <p className="text-gray-600 mb-6">{productData.productDescription}</p>
+        <p className="text-gray-600 mb-6">{productData?.productDescription}</p>
         <Separator className="my-6" />
 
         {Object.keys(attributes).map((attrKey) => (
