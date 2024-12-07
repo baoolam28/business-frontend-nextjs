@@ -1,6 +1,7 @@
 "user client"
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group"
 import { Label  } from "../../components/ui/label"
+import VNPayButton from "../../components/checkout-page/vnpay-payment-bttn"
 const PaymentOptionsSection = ({ paymentMethod, setPaymentMethod }) => {
   return (
     <section className="bg-white p-6 rounded-lg shadow">
@@ -13,6 +14,9 @@ const PaymentOptionsSection = ({ paymentMethod, setPaymentMethod }) => {
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="transfer" id="transfer" />
           <Label htmlFor="transfer">Chuyển khoản ngân hàng</Label>
+        </div>
+        <div className="flex items-center space-x-2 mt-2">
+          <VNPayButton onClick={() => setPaymentMethod('VNPay')}/>
         </div>
       </RadioGroup>
       {paymentMethod === 'transfer' && (

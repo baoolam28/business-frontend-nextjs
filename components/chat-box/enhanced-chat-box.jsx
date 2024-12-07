@@ -151,10 +151,10 @@ export default function EnhancedChatBox() {
 
   return (
     <motion.div
-      className="fixed bottom-20 right-4 shadow-lg overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 z-50"
+      className="fixed bottom-10 right-4 shadow-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 z-50"
       animate={{ 
         width: isExpanded ? 400 : 56, 
-        height: isExpanded ? 600 : 56,
+        height: isExpanded ? 550 : 56,
         borderRadius: isExpanded ? 8 : 28
       }}
       transition={{ duration: 0.3, ease: "easeInOut" }}>
