@@ -20,22 +20,28 @@ To read more about using these font, please visit the Next.js documentation:
 "use client";
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link"
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "@/components/ui/breadcrumb"
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { Card, CardHeader, CardTitle , CardContent } from "@/components/ui/card"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
+import { Sheet, SheetTrigger, SheetContent } from "../../components/ui/sheet"
+import { Button } from "../../components/ui/button"
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from "../../components/ui/breadcrumb"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "../../components/ui/dropdown-menu"
+import { Card, CardHeader, CardTitle , CardContent } from "../../components/ui/card"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../../components/ui/table"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "../../components/ui/dialog";
 import Menu from "../component/menu"
 import AddSupplierDialog from "../../components/component/addSupplier"
-import { Label } from "@/components/ui/label";
+import { Label } from "../../components/ui/label";
 import supplierAPI from "../../api/supplier";
-import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "../../components/ui/textarea";
+import { Input } from "../../components/ui/input";
+import Navbar from "../component/navbar";
+import {useStore} from '../../context/StoreContext'
+import sellerAPI from "../../api/seller"
+import Pagination from './pagination'
+import { showConfirmAlert, showSuccessAlert, showErrorAlert } from "../../utils/reactSweetAlert";
+
+
 export default function Supplier() {
   const [suppliers, setSuppliers] = useState([]);
-
   const [editingSupplier, setEditingSupplier] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -45,23 +51,39 @@ export default function Supplier() {
     fax: '',
     address: ''
   });
+  const { storeId } = useStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
-    const fetchSuppliers = async () => {
-      try {
-        const response = await supplierAPI.getAllSupplier();
-        setSuppliers(response);
-      } catch (error) {
-        console.error("Failed to fetch suppliers", error);
-      }
-    };
-    
-    fetchSuppliers();
-
-  }, []);
+    if(storeId){
+      console.log("Store Id: ", storeId)
+      const fetchSuppliers = async () => {
+        try {
+          const response = await sellerAPI.supplier.getAllSuppliers(storeId);
+          console.log("Suppliers response:", response);
+          if(response.statusCode === 200){
+            console.log("Data structure:", response.data);
+            setSuppliers(response.data);
+            
+          }else {
+            console.error("Error fetching: ", response.message);
+            setSuppliers([]);
+          }
+        } catch (error) {
+          console.error("Failed to fetch suppliers", error);
+          setSuppliers([]);
+        }
+      };
+      fetchSuppliers();
+    }else {
+      console.log("storeId is null, cannot fetch suppliers.");
+    }
+  }, [storeId]);
 
   useEffect(() => {
     if (editingSupplier) {
+      console.log("Editing Supplier ID:", editingSupplier.supplierId);
       setFormData({
         supplierName: editingSupplier.supplierName || '',
         email: editingSupplier.email || '',
@@ -72,41 +94,79 @@ export default function Supplier() {
     }
   }, [editingSupplier]);
 
+  const indexOfLastSupplier = currentPage * itemsPerPage;
+  const indexOfFirstSupplier = indexOfLastSupplier - itemsPerPage;
+
+  const currentSuppliers = suppliers.slice(indexOfFirstSupplier, indexOfLastSupplier);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
   const handleSaveSupplier = async (supplierData) => {
     try {
-      if (editingSupplier) {
-        const response = await supplierAPI.updateSupplier(editingSupplier.supplierID,supplierData);
-        setSuppliers((prevSuppliers) => [...prevSuppliers, response]);
-      } else {
-        const response = await supplierAPI.createSupplier(supplierData);
-        setSuppliers((prevSuppliers) => [...prevSuppliers, response]);
-      }
-      setEditingSupplier(null);
-      setFormData({
-        supplierName: '',
-        email: '',
-        phone: '',
-        fax: '',
-        address: ''
-      });
+        if (editingSupplier) {
+          console.log("Supplier id: ", editingSupplier.supplierId);
+          const response = await sellerAPI.supplier.updateSupplier(editingSupplier.supplierId,supplierData);
+          if(response.statusCode === 200) {
+            setSuppliers((prevSuppliers) => 
+              prevSuppliers.map((supplier) =>
+                supplier.supplierId === editingSupplier.supplierId ? response.data : supplier
+              )
+            );
+            showSuccessAlert("Thành công", "Nhà cung cấp đã được update thành công.");
+          }
+          console.log("Response từ API:", response.data);
+
+        } else {
+          const response = await sellerAPI.supplier.createSupplier(supplierData);
+          if(response.statusCode === 200){
+            setSuppliers((prevSuppliers) => [...prevSuppliers, response.data]);
+            showSuccessAlert("Thành công", "Nhà cung cấp đã được thêm thành công.");
+          }
+          console.log("Response từ API:", response.data);
+          console.log('Dữ liệu nhà cung cấp:', supplierData);
+        }
+        setEditingSupplier(null);
+        setFormData({
+          supplierName: '',
+          email: '',
+          phone: '',
+          fax: '',
+          address: ''
+        });
       setIsDialogOpen(false);
     } catch (error) {
-      console.error("Error saving supplier:", error);
+      console.error("Error saving supplier:", error.response ? error.response.data : error.message);
     }
   };
 
   const handleDeleteSupplier = async (supplierId) => {
-    try {
-      await supplierAPI.deleteSupplier(supplierId);
-      setSuppliers(suppliers.filter((supplier) => supplier.supplierID !== supplierId));
-    } catch (error) {
-      console.error("deleteSupplier failed", error);
+    const result = await showConfirmAlert("Xác Nhận", "Bạn có chắc chắn muốn xóa nhà cung cấp này?");
+    if(result.isConfirmed){
+      try {
+        const response = await sellerAPI.supplier.deleteSupplier(supplierId);
+        if(response.statusCode === 200){
+          setSuppliers(suppliers.filter((supplier) => supplier.supplierId !== supplierId));
+          showSuccessAlert("Thành công", "Nhà cung cấp đã được xóa.");
+        }
+      } catch (error) {
+        console.error("deleteSupplier failed", error);
+        showErrorAlert("Lỗi", "Không thể xóa nhà cung cấp.");
+      }
     }
+    
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    handleSaveSupplier(formData);
+    console.log("Editing Supplier:", editingSupplier);
+    if (!editingSupplier || !editingSupplier.supplierId) {
+      console.log("No supplier is being edited");
+    } else{
+      handleSaveSupplier(formData);
+    }
+    setIsDialogOpen(false);
   };
 
   const handleChange = (event) => {
@@ -117,129 +177,26 @@ export default function Supplier() {
     }));
   };
 
+
+
   return (
     (<div className="flex min-h-screen w-full flex-col bg-muted/40">
       <Menu/>
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
-        <header
-          className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button size="icon" variant="outline" className="sm:hidden">
-                <PanelLeftIcon className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="sm:max-w-xs">
-              <nav className="grid gap-6 text-lg font-medium">
-                <Link
-                  href="#"
-                  className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-                  prefetch={false}>
-                  <Package2Icon className="h-5 w-5 transition-all group-hover:scale-110" />
-                  <span className="sr-only">Acme Inc</span>
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                  prefetch={false}>
-                  <UsersIcon className="h-5 w-5" />
-                  Khách Hàng
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-foreground"
-                  prefetch={false}>
-                  <UsersIcon className="h-5 w-5" />
-                  Nhà Cung Cấp
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                  prefetch={false}>
-                  <PackageIcon className="h-5 w-5" />
-                  Sản Phẩm
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                  prefetch={false}>
-                  <ShoppingCartIcon className="h-5 w-5" />
-                  Bán Hàng
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                  prefetch={false}>
-                  <LineChartIcon className="h-5 w-5" />
-                  Reports
-                </Link>
-                <Link
-                  href="#"
-                  className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-                  prefetch={false}>
-                  <SettingsIcon className="h-5 w-5" />
-                  Cài Đặt
-                </Link>
-              </nav>
-            </SheetContent>
-          </Sheet>
-          <Breadcrumb className="hidden md:flex">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="#" prefetch={false}>
-                    Nhà Cung Cấp
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Quản Lý Nhà Cung Cấp</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="relative ml-auto flex-1 md:grow-0">
-            <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search suppliers..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]" />
-          </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon" className="overflow-hidden rounded-full">
-                <img
-                  src="/placeholder.svg"
-                  width={36}
-                  height={36}
-                  alt="Avatar"
-                  className="overflow-hidden rounded-full"
-                  style={{ aspectRatio: "36/36", objectFit: "cover" }} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </header>
+        <Navbar/>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
           <Card x-chunk="dashboard-06-chunk-0">
             <CardHeader>
               <CardTitle>Quản Lý Nhà Cung Cấp</CardTitle>
               <div className="ml-auto flex items-center gap-2">
-              <AddSupplierDialog className="outline" onSave={handleSaveSupplier} />
+              <AddSupplierDialog onSave={handleSaveSupplier}  storeId={storeId}className="outline"/>
               </div>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>STT</TableHead>
                     <TableHead>Tên Nhà Cung Cấp</TableHead>
                     <TableHead className="hidden sm:table-cell">Email</TableHead>
                     <TableHead className="hidden sm:table-cell">SDT</TableHead>
@@ -251,44 +208,53 @@ export default function Supplier() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {suppliers.map((supplier) => (
-            <TableRow key={supplier.supplierID}>
-              <TableCell className="font-medium">{supplier.supplierName}</TableCell>
-              <TableCell className="hidden sm:table-cell">{supplier.email}</TableCell>
-              <TableCell className="hidden sm:table-cell">{supplier.phone}</TableCell>
-              <TableCell className="hidden md:table-cell">{supplier.fax}</TableCell>
-              <TableCell className="hidden md:table-cell">{supplier.address}</TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button aria-haspopup="true" size="icon" variant="ghost">
-                      <MoveVerticalIcon className="h-4 w-4" />
-                      <span className="sr-only">More</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => {
-                            setEditingSupplier(supplier);
-                            setIsDialogOpen(true);
+                 {currentSuppliers.map((supplier, index) => (
+                  <TableRow key={index}>
+                    <TableCell className="font-medium">{index + 1 + indexOfFirstSupplier}</TableCell>
+                    <TableCell >{supplier.supplierName}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{supplier.email}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{supplier.phone}</TableCell>
+                    <TableCell className="hidden md:table-cell">{supplier.fax}</TableCell>
+                    <TableCell className="hidden md:table-cell">{supplier.address}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoveVerticalIcon className="h-4 w-4" />
+                            <span className="sr-only">More</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() =>{ 
+                              setEditingSupplier(supplier);
+                              setIsDialogOpen(true);
                           }}>
-                      <FilePenIcon className="h-4 w-4 mr-2" />
-                      Sửa
-                      
-                      
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDeleteSupplier(supplier.supplierID)}>
-                      <TrashIcon className="h-4 w-4 mr-2" />
-                      Xóa
-                      
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
-          ))}
-
+                            <FilePenIcon className="h-4 w-4 mr-2" />
+                            Sửa
+                            
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => 
+                              handleDeleteSupplier(supplier.supplierId)
+                          }>
+                            <TrashIcon className="h-4 w-4 mr-2" />
+                            Xóa
+                            
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                 ))}
                 </TableBody>
               </Table>
+              <div className="m-3">
+                <Pagination
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={suppliers.length}
+                  onPageChange={handlePageChange}
+                />
+              </div>
             </CardContent>
           </Card>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -356,7 +322,7 @@ export default function Supplier() {
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
                     <Label htmlFor="supplierName" className="text-right">
-                      Tên nhà cung cấp
+                      Địa chỉ
                     </Label>
                     <Input
                       id="address"

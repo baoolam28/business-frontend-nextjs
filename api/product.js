@@ -3,7 +3,7 @@ import axiosClient from "./axiosClient";
 const product = {
   // Fetch all products
   getAllProduct() {
-    const url = "/products";
+    const url = "/api/buyer/products";
     return axiosClient.get(url);
   },
 

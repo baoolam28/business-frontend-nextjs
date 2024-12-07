@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "@/components/ui/select";
+import React, { useState, useEffect } from 'react';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "../../components/ui/dialog";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { Label } from "../../components/ui/label";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "../../components/ui/select";
 import AddSupplierDialog from "../../components/component/addSupplier";
 import AddCategoryDialog from "../../components/component/addCategory";
 import AddOriginDialog from "../../components/component/addOrigin";
@@ -11,20 +11,64 @@ import supplierAPI from "../../api/supplier";
 import originAPI from "../../api/origin";
 import categoryAPI from "../../api/category";
 import generateBarcode from "../../utils/GenerationBarcode";
-import BarcodeRender from "./barcodeRender";
-const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origins, setCategories, setSuppliers, setOrigins }) => {
-  const [productData, setProductData] = useState({
-    barcode: '',
-    productName: '',
-    abbreviations: '',
-    unit: '',
-    price: '',
-    categoryId: '',
-    supplierId: '',
-    originId: '',
-    createBy: '',
-  });
+import sellerAPI from '../../api/seller';
+import Image from "next/image"
+import { useUser } from "../../context/UserContext";
+import { useStore } from "../../context/StoreContext"
 
+
+
+const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origins, setCategories, setSuppliers, setOrigins, selectedData }) => {
+  const {user} = useUser();
+  const {storeId} = useStore();
+  const [productData, setProductData] = useState({});
+  const [selectedImages, setSelectedImages] = useState([]);
+
+  useEffect(() => {
+    if(selectedData){
+      setSelectedImages(selectedData.images)
+      setProductData({
+        barcode: selectedData.barcode,
+        images: [],
+        productName: selectedData.productName,
+        abbreviations: selectedData.abbreviations,
+        unit: selectedData.unit,
+        price: selectedData.price,
+        categoryId: selectedData.categoryId,
+        supplierId: selectedData.supplierId,
+        originId: selectedData.originId,
+        createBy: user?.id,
+      });
+    }
+  },[selectedData])
+
+  const handleImageChange = (e) => {
+    const files = e.target.files;
+    if (files) {
+      const filesArray = Array.from(files);
+      const imageUrls = []; // Array to hold the data URLs
+  
+      filesArray.forEach((file) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          imageUrls.push(reader.result); // Push each data URL to the array
+          // Once all images are loaded, update the state
+          if (imageUrls.length === filesArray.length) {
+            setSelectedImages(imageUrls); // Update selected images with data URLs
+            setProductData((prev) => ({ ...prev, images: filesArray })); // Update productData with files
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
+  
+
+  useEffect(() => {
+    if(user){
+      setProductData(prev => ({ ...prev,createBy: user?.id})); 
+    }
+  },[user]);
 
   const handleGenerateBarcode = () => {
     const barcode = generateBarcode.generateEAN13();
@@ -37,15 +81,63 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
   };
 
   const handleSubmit = (e) => {
+
     e.preventDefault();
-    onSave(productData);
+    
+    if(!validateProductData()){
+      
+      return
+    }
+    console.log('ProductData: ' + JSON.stringify(productData)); 
+
+    const reqData = convertToFormData(productData);
+    onSave(reqData);
     onClose();
+
   };
+
+  const validateProductData = () => {
+    if (!productData.barcode) return false;
+    // if (productData.images.length === 0) return false;
+    if (!productData.productName) return false;
+    if (!productData.unit) return false;
+    if (!productData.price || isNaN(productData.price) || productData.price <= 0) return false;
+    if (!productData.categoryId) return false;
+    if (!productData.supplierId) return false;
+    if (!productData.originId) return false;
+    if (!productData.createBy) return false;
+    if (!storeId) return false;
+    return true;
+  };
+
+  const convertToFormData = (data) => {
+    const formData = new FormData();
+    formData.append('barcode', data.barcode);
+    data.images.forEach((image, index) => {
+      formData.append(`images[${index}]`, image);
+    });
+    formData.append('productName', data.productName);
+    formData.append('abbreviations', data.abbreviations);
+    formData.append('unit', data.unit);
+    formData.append('price', data.price);
+    formData.append('categoryId', data.categoryId);
+    formData.append('supplierId', data.supplierId);
+    formData.append('originId', data.originId);
+    formData.append('createBy', data.createBy);
+    formData.append('storeId', storeId);
+
+    return formData;
+  };
+
+  
 
   const handleSaveSupplier = async (supplierData) => {
     try {
-      const response = await supplierAPI.createSupplier(supplierData);
-      setSuppliers(prev => [...prev, response]);
+      const response = await sellerAPI.supplier.createSupplier(supplierData);
+      if(response.statusCode === 200){
+        setSuppliers(prev => [...prev, response.data]);
+      }
+      
     } catch (error) {
       console.error("createSupplier failed", error);
     }
@@ -70,8 +162,8 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
   }
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px]">
+    <Dialog open={open} onOpenChange={onClose} className="">
+      <DialogContent className="fullscreen-dialog">
         <form onSubmit={handleSubmit}>
           <div className="w-full max-w-4xl mx-auto p-6 md:p-8">
             <h1 className="text-2xl font-bold mb-6">Thêm Sản Phẩm Mới</h1>
@@ -90,7 +182,10 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
                       onKeyDown={(e) => e.key === 'Enter' && e.preventDefault()}
                       required
                     />
-                    <Button variant="outline" size="icon" onClick={handleGenerateBarcode}>
+                    <Button variant="outline" size="icon" onClick={(e) => {
+                      e.preventDefault();
+                      handleGenerateBarcode();
+                    }}>
                       <BarcodeIcon className="h-5 w-5" />
                       <span className="sr-only">Generate Barcode</span>
                     </Button>
@@ -144,94 +239,100 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
                     required
                   />
                 </div>
+                
               </div>
               <div className="grid gap-4">
                 <div>
                   <Label htmlFor="categoryId">Loại hàng</Label>
-                  <div className="flex items-center gap-2">
-                    <Select
-                      id="categoryId"
-                      name="categoryId"
-                      value={productData.categoryId}
-                      onValueChange={(value) => handleChange('categoryId', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn loại hàng" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {categories.map((category) => (
-                            <SelectItem key={category.categoryId} value={category.categoryId}>
-                              {category.categoryName}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <AddCategoryDialog
-                      onSave={handleSaveCategory}
-                      buttonText=""
-                      buttonIcon={PlusIcon}
-                    />
-                  </div>
+                  <Select
+                    id="categoryId"
+                    name="categoryId"
+                    value={productData.categoryId}
+                    onValueChange={(value) => handleChange('categoryId', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn loại hàng" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {categories.map((category) => (
+                          <SelectItem key={category.categoryId} value={category.categoryId}>
+                            {category.categoryName}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  {/* <AddCategoryDialog onSave={(cat) => handleChange('categoryId', cat)} buttonText="" buttonIcon={PlusIcon} /> */}
                 </div>
                 <div>
                   <Label htmlFor="supplierId">Nhà cung cấp</Label>
-                  <div className="flex items-center gap-2">
-                    <Select
-                      id="supplierId"
-                      name="supplierId"
-                      value={productData.supplierId}
-                      onValueChange={(value) => handleChange('supplierId', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn nhà cung cấp" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {suppliers.map((supplier) => (
-                            <SelectItem key={supplier.supplierId} value={supplier.supplierId}>
-                              {supplier.supplierName}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <AddSupplierDialog
-                      onSave={handleSaveSupplier}
-                      buttonText=""
-                      buttonIcon={PlusIcon}
-                    />
-                  </div>
+                  <Select
+                    id="supplierId"
+                    name="supplierId"
+                    value={productData.supplierId}
+                    onValueChange={(value) => handleChange('supplierId', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn nhà cung cấp" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {suppliers.map((supplier) => (
+                          <SelectItem key={supplier.supplierId} value={supplier.supplierId}>
+                            {supplier.supplierName}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <AddSupplierDialog onSave={(sup) => handleChange('supplierId', sup)} buttonText="" buttonIcon={PlusIcon} storeId={storeId} />
                 </div>
                 <div>
                   <Label htmlFor="originId">Quốc Gia</Label>
-                  <div className="flex items-center gap-2">
-                    <Select
-                      id="originId"
-                      name="originId"
-                      value={productData.originId}
-                      onValueChange={(value) => handleChange('originId', value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Chọn quốc gia" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {origins.map((origin) => (
-                            <SelectItem key={origin.originId} value={origin.originId}>
-                              {origin.originName}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <AddOriginDialog
-                      onSave={handleSaveOrigin}
-                      buttonText=""
-                      buttonIcon={PlusIcon}
-                    />
-                  </div>
+                  <Select
+                    id="originId"
+                    name="originId"
+                    value={productData.originId}
+                    onValueChange={(value) => handleChange('originId', value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Chọn quốc gia" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {origins.map((origin) => (
+                          <SelectItem key={origin.originId} value={origin.originId}>
+                            {origin.originName}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  {/* <AddOriginDialog onSave={(ori) => handleChange('originId', ori)} buttonText="" buttonIcon={PlusIcon} /> */}
+                </div>
+                <div>
+                  <Label htmlFor="productImage">Hình ảnh sản phẩm</Label>
+                  <Input
+                    id="productImage"
+                    name="productImage"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
+                  />
+                  {selectedImages.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {selectedImages.map((image, index) => (
+                        <img
+                          key={index}
+                          src={image}
+                          alt={`Hình ảnh sản phẩm ${index + 1}`}
+                          className="h-20 w-20 rounded-lg"
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -239,7 +340,10 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
           <DialogFooter>
             <div className="flex justify-end mt-6">
               <DialogClose>
-                <Button variant="outline" className="mr-2">Cancel</Button>
+                <Button 
+                onClick={(e) => e.preventDefault()}
+                variant="outline" 
+                className="mr-2">Cancel</Button>
               </DialogClose>
               <Button type="submit">Save Product</Button>
             </div>
@@ -248,6 +352,7 @@ const AddProductDialog = ({ open, onClose, onSave, categories, suppliers, origin
       </DialogContent>
     </Dialog>
   );
+
 };
 
 function BarcodeIcon(props) {

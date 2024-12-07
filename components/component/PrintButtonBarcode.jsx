@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import ReactToPrint from 'react-to-print';
-import BarcodePagePrinter from './BarcodePagePrinter';
+import BarcodePagePrinter from '../../components/component/barcodePagePrinter';
 
 const PrintButton = ({ contentPrinter }) => {
   // Create a ref to the BarcodePagePrinter component

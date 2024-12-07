@@ -23,18 +23,103 @@ To read more about using these font, please visit the Next.js documentation:
 - App Directory: https://nextjs.org/docs/app/building-your-application/optimizing/fonts
 - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
 **/
+"use client"
+import React, { useState, useEffect } from "react"
 import Link from "next/link"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
+import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card"
+import { Label } from "../../components/ui/label"
+import { Input } from "../../components/ui/input"
+import { Button } from "../../components/ui/button"
+import { Textarea } from "../../components/ui/textarea"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../../components/ui/table"
 import Menu from "../component/menu"
-export default function paymentView() {
+import { useSearchParams } from 'next/navigation'
+import orderAPI from '../../api/order'
+import formatVND from "../../utils/formatVND"
+import sellerAPI from "../../api/seller"
+
+export default function PaymentView() { // Đổi tên hàm theo quy ước PascalCase
+
+  const [order, setOrder] = useState(null); // Khởi tạo order là null
+  const [paymentMethod, setPaymentMethod] = useState('');
+  const [paymentAmount, setPaymentAmount] = useState(0);
+  const [error, setError] = useState(null); // Thêm state error
+  const [loading, setLoading] = useState(true); // Thêm state loading
+
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('orderId');
+  console.log("orderId: ", orderId);
+
+  useEffect(() => {
+    if (orderId) {
+      const fetchOrder = async () => {
+        try {
+          const response = await sellerAPI.order.getOrderById(orderId);
+          console.log("response: ", response);
+
+          if (response.statusCode === 200) {
+            setOrder(response.data);
+            console.log("Order data: ", response.data);
+          } else {
+            console.error("Không thể lấy đơn hàng:", response.status);
+            setError("Không thể lấy đơn hàng. Vui lòng thử lại.");
+          }
+        } catch (err) {
+          console.error("Lỗi khi lấy đơn hàng:", err);
+          setError("Đã xảy ra lỗi khi lấy đơn hàng. Vui lòng thử lại.");
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchOrder();
+    } else {
+      setError("Không tìm thấy orderId trong URL.");
+      setLoading(false);
+    }
+  }, [orderId]);
+
+  useEffect(() => {
+    if (order && order.orderDetails) {
+      let payAmount = 0;
+      order.orderDetails.forEach((detail) => {
+        payAmount += detail.price * detail.quantity;
+      });
+      setPaymentAmount(payAmount);
+    }
+  }, [order]);
+
+  async function handlePayment(orderId) {
+    try {
+      const response = await sellerAPI.order.updateOrder(orderId);
+      if (response.statusCode === 200) {
+        alert("Thanh toán thành công!");
+        // Có thể chuyển hướng hoặc cập nhật trạng thái đơn hàng
+      } else {
+        console.error("Thanh toán thất bại:", response.status);
+        alert("Thanh toán thất bại. Vui lòng thử lại.");
+      }
+    } catch (err) {
+      console.error("Lỗi khi thanh toán:", err);
+      alert("Đã xảy ra lỗi khi thanh toán. Vui lòng thử lại.");
+    }
+  }
+
+  if (loading) {
+    return <p>Đang tải...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
+  if (!order) {
+    return <p>Không tìm thấy đơn hàng.</p>;
+  }
+
   return (
-    (<div className="flex min-h-screen flex-col bg-muted/40">
-      <Menu/>
+    <div className="flex min-h-screen flex-col bg-muted/40">
+      <Menu />
       <main className="flex-1 p-4 sm:p-6 md:grid md:grid-cols-2 md:gap-8 ml-10">
         <div className="space-y-6">
           <Card>
@@ -47,15 +132,15 @@ export default function paymentView() {
                 <div className="flex items-center gap-2">
                   <Label htmlFor="cash-amount">Khách đưa</Label>
                   <Input id="cash-amount" type="number" placeholder="Amount" className="flex-1" />
-                  <Label htmlFor="cash-amount">Thối lại</Label>
-                  <Input type="number" placeholder="Change" className="flex-1" readOnly/>
+                  <Label htmlFor="change-amount">Thối lại</Label>
+                  <Input id="change-amount" type="number" placeholder="Change" className="flex-1" readOnly />
                 </div>
               </div>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => handlePayment(orderId)}>
                 <BanknoteIcon className="h-5 w-5 mr-2" />
                 Pay with VNPay
               </Button>
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => handlePayment(orderId)}>
                 <QrCodeIcon className="h-5 w-5 mr-2" />
                 Pay with QR Code
               </Button>
@@ -65,56 +150,58 @@ export default function paymentView() {
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Hóa Đơn | </CardTitle>
+              <CardTitle>Hóa Đơn | {order.orderId}</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-4">
               <div className="grid gap-2">
                 <Label htmlFor="customer-name">Tên khách hàng</Label>
-                <Input id="customer-name"  readOnly  />
+                <Input id="customer-name" value={order.customerName || ''} readOnly />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="customer-phone">Số điện thoại</Label>
-                <Input id="customer-phone"  readOnly />
+                <Input id="customer-phone" value={order.customerPhone || ''} readOnly />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="customer-email">Email</Label>
-                <Input id="customer-email" type="email"  readOnly  />
+                <Input id="customer-email" value={order.customerEmail || ''} type="email" readOnly />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="customer-address">Địa chỉ</Label>
-                <Textarea id="customer-address"  rows={3} readOnly />
+                <Textarea id="customer-address" value={order.customerAddress || ''} rows={3} readOnly />
               </div>
               <div className="grid gap-2">
-
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Tên SP</TableHead>
-                      <TableHead>số lượng</TableHead>
-                      <TableHead>giá</TableHead>
+                      <TableHead>Số lượng</TableHead>
+                      <TableHead>Giá</TableHead>
                       <TableHead>Tổng</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    <TableRow>
-                      <TableCell>Acme Widgets</TableCell>
-                      <TableCell>2</TableCell>
-                      <TableCell>VND</TableCell>
-                      <TableCell>VND</TableCell>
-                    </TableRow>
+                    {
+                      order.orderDetails.map((detail) => (
+                        <TableRow key={detail.productId}>
+                          <TableCell>{detail.name}</TableCell>
+                          <TableCell>{detail.quantity}</TableCell>
+                          <TableCell>{formatVND(detail.price)}</TableCell>
+                          <TableCell>{formatVND(detail.quantity * detail.price)}</TableCell>
+                        </TableRow>
+                      ))
+                    }
                   </TableBody>
                 </Table>
-                <div className="flex items-center justify-between">
-                  <span className="font-medium">Tổng:</span>
-                  <span className="font-medium">VND</span>
+                <div className="flex items-center justify-between mt-4">
+                  <span className="font-medium">Tổng: {formatVND(paymentAmount)}</span>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
       </main>
-    </div>)
-  );
+    </div>
+  )
 }
 
 function BanknoteIcon(props) {

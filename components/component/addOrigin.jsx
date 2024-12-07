@@ -1,8 +1,8 @@
 "use client";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 
 const AddOriginDialog = ({ onSave, buttonText = "Thêm quốc gia", buttonIcon: ButtonIcon }) => {
   const handleSubmit = (event) => {

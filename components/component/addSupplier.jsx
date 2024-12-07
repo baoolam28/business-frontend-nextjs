@@ -1,20 +1,27 @@
 "use client";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Label } from "../../components/ui/label";
+import { Textarea } from "../../components/ui/textarea";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "../../components/ui/dialog";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
-const AddSupplierDialog = ({ onSave, buttonText = "Thêm nhà cung cấp", buttonIcon: ButtonIcon }) => {
+const AddSupplierDialog = ({ onSave, buttonText = "Thêm nhà cung cấp", buttonIcon: ButtonIcon , storeId}) => {
   const handleSubmit = (event) => {
     event.preventDefault();
     const supplierData = {
+      storeId: storeId,
       supplierName: event.target.supplierName.value,
       email: event.target.email.value,
       phone: event.target.phone.value,
       fax: event.target.fax.value,
       address: event.target.address.value,
     };
+    if (!supplierData.storeId) {
+      console.error("storeId không hợp lệ:", supplierData.storeId);
+      return; // Ngăn không cho gửi dữ liệu nếu storeId không hợp lệ
+    }
+    console.log("Dữ liệu nhà cung cấp:", supplierData)
     onSave(supplierData);
   };
 

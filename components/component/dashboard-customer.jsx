@@ -20,20 +20,23 @@ To read more about using these font, please visit the Next.js documentation:
 "use client"
 
 import { useState , useEffect} from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table"
-import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { ChartTooltipContent, ChartTooltip, ChartContainer } from "@/components/ui/chart"
+import { Button } from "../../components/ui/button"
+import { Card, CardHeader, CardTitle, CardContent } from "../../components/ui/card"
+import { Separator } from "../../components/ui/separator"
+import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "../../components/ui/table"
+import { Dialog, DialogContent, DialogFooter } from "../../components/ui/dialog";
+import { Label } from "../../components/ui/label"
+import { Input } from "../../components/ui/input"
+import { ChartTooltipContent, ChartTooltip, ChartContainer } from "../../components/ui/chart"
 import { Pie, PieChart, CartesianGrid, XAxis, Line, LineChart } from "recharts"
-import { DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "@/components/ui/dialog"
+import { DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogClose } from "../../components/ui/dialog"
 import Menu from "../component/menu"
-import customerAPI from "../../api/customer"
-import ReportAPI from "../../api/report"
+import SellerAPI from "../../api/seller"
+import Navbar from "../component/navbar";
+import { useStore } from "../../context/StoreContext"
 export default   function dashboardCustomer() {
+  const { storeId } = useStore();
+  const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState([])
   const [showModal, setShowModal] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState(null)
@@ -45,8 +48,10 @@ export default   function dashboardCustomer() {
 
   const fetchCustomers = async () => {
     try {
-      const response = await customerAPI.getAllCustomers()
-      setCustomers(response)
+      const response = await SellerAPI.customer.getAllCustomerByStoreId(storeId);
+      if(response.statusCode === 200) {
+        setCustomers(response.data)
+      }
     } catch (error) {
       console.error('Error fetching customers:', error)
     }
@@ -67,9 +72,11 @@ export default   function dashboardCustomer() {
   }
 
   useEffect(() => {
-    fetchCustomers()
-    fetchOrderReports()
-  }, [])
+    if(storeId){
+      fetchCustomers()
+      // fetchOrderReports()
+    }
+  }, [storeId])
 
   const handleCreateCustomer = () => {
     setSelectedCustomer(null)
@@ -83,7 +90,7 @@ export default   function dashboardCustomer() {
 
   const handleDeleteCustomer = async (id) => {
     try {
-      await customerAPI.deleteCustomer(id)
+      await SellerAPI.customer.deleteCustomer(id)
       setCustomers(customers.filter((customer) => customer.customerId !== id))
     } catch (error) {
       console.error('Error deleting customer:', error)
@@ -125,7 +132,9 @@ export default   function dashboardCustomer() {
     
     (<div className="flex min-h-screen w-full flex-col bg-muted/40 ">
       <Menu/>
-      
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+        <Navbar/>
+      </div>
       <main className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14 ml-5">
         <header className="bg-primary text-primary-foreground py-4 px-8">
         <div className="flex items-center justify-between">
@@ -136,6 +145,41 @@ export default   function dashboardCustomer() {
             </Button>
         </div>
       </header>
+      <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">Customers</h2>
+              <Button onClick={handleCreateCustomer}>
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                  Create Customer
+              </Button>
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Adress</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {customers.map((customer) => (
+                <TableRow key={customer.customerId}>
+                  <TableCell>{customer.name}</TableCell>
+                  <TableCell>{customer.email}</TableCell>
+                  <TableCell>{customer.phone}</TableCell>
+                  <TableCell>{customer.address}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleEditCustomer(customer)}><FilePenIcon className="mr-2 h-4 w-4" /></Button>
+                    <Button onClick={() => handleDeleteCustomer(customer.customerId)}><TrashIcon className="mr-2 h-4 w-4" /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+
+          </Table>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
@@ -182,41 +226,7 @@ export default   function dashboardCustomer() {
           </Card>
         </div>
         <Separator className="my-6" />
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Customers</h2>
-              <Button onClick={handleCreateCustomer}>
-                  <PlusIcon className="mr-2 h-4 w-4" />
-                  Create Customer
-              </Button>
-          </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Adress</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {customers.map((customer) => (
-                <TableRow key={customer.customerId}>
-                  <TableCell>{customer.name}</TableCell>
-                  <TableCell>{customer.email}</TableCell>
-                  <TableCell>{customer.phone}</TableCell>
-                  <TableCell>{customer.address}</TableCell>
-                  <TableCell>
-                    <Button onClick={() => handleEditCustomer(customer)}><FilePenIcon className="mr-2 h-4 w-4" /></Button>
-                    <Button onClick={() => handleDeleteCustomer(customer.customerId)}><TrashIcon className="mr-2 h-4 w-4" /></Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-
-          </Table>
-        </div>
+        
       </main>
        {showModal && (
         <Dialog open={showModal} onOpenChange={setShowModal}>

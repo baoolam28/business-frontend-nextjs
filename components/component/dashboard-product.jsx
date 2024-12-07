@@ -25,16 +25,16 @@ import {
   TabsList,
   TabsTrigger,
   TabsContent,
-} from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
+} from "../../components/ui/tabs";
+import { Button } from "../../components/ui/button";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/accordion";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+} from "../../components/ui/accordion";
+import { Label } from "../../components/ui/label";
+import { Checkbox } from "../../components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -42,7 +42,7 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+} from "../../components/ui/dropdown-menu";
 import {
   Table,
   TableHeader,
@@ -50,117 +50,143 @@ import {
   TableHead,
   TableBody,
   TableCell,
-} from "@/components/ui/table";
+} from "../../components/ui/table";
 import Menu from "../component/menu";
 import BarcodePrinter from "../component/barcode-printer"
+import ProductsOnline from "../component/dashboard-product-online"
 import Document from "../component/document";
-import productAPI from "../../api/product";
-import inventoryAPI from "../../api/inventory";
-import supplierAPI from "../../api/supplier";
-import originAPI from "../../api/origin";
-import categoryAPI from "../../api/category";
 import AddProductDialog from "../../components/component/addProduct"
-
+import formatVND from "../../utils/formatVND";
+import SellerAPI from "../../api/seller";
+import { useStore } from '../../context/StoreContext';
+import Navbar from "../component/navbar"
+import Pagination from "../../components/component/pagination"
+import Loading from "../../components/component/loading-lottie"
+import Animation from "../../utils/lottie-animations/astronot.json"
+import { showErrorAlert, showSuccessAlert } from "../../utils/reactSweetAlert"
 export default function DashboardProduct() {
+  const { storeId } = useStore();
+
   const [filters, setFilters] = useState({
     category: [],
     origin: [],
     supplier: [],
   });
 
-  
-
   const [dialogOpen, setDialogOpen] = useState(false);
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
 
-
   const [sortBy, setSortBy] = useState("price-asc");
-  const [products, setProducts] = useState([]);
+  const [productsOffline, setProductsOffline] = useState([]);
+  const [productsOnline, setProductsOnline] = useState([]);
   const [inventories, setInventories] = useState([]);
   const [categories, setCategories] = useState([]);
   const [origins, setOrigins] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
+  const [selectedProduct, setSelectedProduct] = useState(null);
+
+
+
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
+
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchProductsOffline = async () => {
       try {
-        const response = await productAPI.getAllProduct();
-        setProducts(response);
+        const response = await SellerAPI.product.getProductsOffline(storeId);
+        if (response.statusCode === 200) {
+          setProductsOffline(response.data);
+        }
       } catch (error) {
-        setError("Error fetching products. Please try again.");
-        console.error("Error fetching products:", error);
+        console.error("Error fetching productsOffline:", error);
       } finally {
         setLoading(false);
       }
     };
 
+    const fetchProductsOnline = async () => {
+      try {
+        const response = await SellerAPI.product.getProductsOnline(storeId);
+        console.log('products online: ',response)
+        if (response.statusCode === 200) {
+          setProductsOnline(response.data);
+        }
+      } catch (error) {
+        console.error("Error fetching productOnline:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
     const fetchOrigins = async () => {
       try {
-        const response = await originAPI.getAllOrigin();
-        setOrigins(response);
+        const response = await SellerAPI.origin.getAllOrigins();
+        
+        if (response.statusCode === 200) {
+          setOrigins(response.data);
+        }
       } catch (error) {
         console.error("Failed to fetch origins", error);
       }
-    }
+    };
+
     const fetchCategories = async () => {
       try {
-        const response = await categoryAPI.getAllCategory();
-        
-        setCategories(response);
-        
+        const response = await SellerAPI.category.getAllCategories();
+        if (response.statusCode === 200) {
+          setCategories(response.data);
+        }
       } catch (error) {
         console.error("Failed to fetch categories", error);
       }
-    }
+    };
 
     const fetchSuppliers = async () => {
       try {
-        const response = await supplierAPI.getAllSupplier();
-        setSuppliers(response);
+        const response = await SellerAPI.supplier.getAllSuppliers(storeId);
+        if (response.statusCode === 200) {
+          setSuppliers(response.data);
+        }
       } catch (error) {
         console.error("Failed to fetch suppliers", error);
       }
-    }
+    };
 
     const fetchInventories = async () => {
       try {
-        const response = await inventoryAPI.getAllInventory();
-        setInventories(response);
-        
+        const response = await SellerAPI.inventory.getAllInventory(storeId);
+        if (response.statusCode === 200) {
+          console.log("Inventories: " + JSON.stringify(response.data));
+          setInventories(response.data);
+        }
       } catch (error) {
         console.error("Failed to fetch inventories", error);
       }
+    };
+
+    if (storeId != null) {
+      fetchProductsOffline();
+      fetchProductsOnline();
+      fetchOrigins();
+      fetchCategories();
+      fetchSuppliers();
+      fetchInventories();
     }
-
-    fetchProducts();
-    fetchOrigins();
-    fetchCategories();
-    fetchSuppliers();
-    fetchInventories();
-
-  }, []);
-
-  
+  }, [storeId]);
 
   const filteredProducts = useMemo(() => {
-    let result = products;
+    let result = productsOffline;
     if (filters.category.length > 0) {
-      result = result.filter((product) =>
-        filters.category.includes(product.categoryName)
-      );
+      result = result.filter(product => filters.category.includes(product.categoryName));
     }
     if (filters.origin.length > 0) {
-      result = result.filter((product) =>
-        filters.origin.includes(product.originName)
-      );
+      result = result.filter(product => filters.origin.includes(product.originName));
     }
     if (filters.supplier.length > 0) {
-      result = result.filter((product) =>
-        filters.supplier.includes(product.supplierName)
-      );
+      result = result.filter(product => filters.supplier.includes(product.supplierName));
     }
     switch (sortBy) {
       case "price-asc":
@@ -170,13 +196,26 @@ export default function DashboardProduct() {
       default:
         return result;
     }
-  }, [filters, sortBy, products]);
+  }, [filters, sortBy, productsOffline]);
+
+  // Tính toán số trang
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+  // Lấy các sản phẩm trên trang hiện tại
+  const currentProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+  }, [currentPage, filteredProducts, itemsPerPage]);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handleFilterChange = (type, value) => {
-    setFilters((prevFilters) => ({
+    setFilters(prevFilters => ({
       ...prevFilters,
       [type]: prevFilters[type].includes(value)
-        ? prevFilters[type].filter((item) => item !== value)
+        ? prevFilters[type].filter(item => item !== value)
         : [...prevFilters[type], value],
     }));
   };
@@ -185,21 +224,81 @@ export default function DashboardProduct() {
     setSortBy(value);
   };
 
-  
+
 
   const handleSaveProduct = async (productData) => {
-    
-    try {
-      const response = await productAPI.createProduct(productData);
-      setProducts((prev) => [...prev, response]);
-    } catch (error) {
-      console.log('create product error: ', error);
+    setLoading(true);
+    if(selectedProduct){
+      updateProduct(productData);
+    }else{
+      createProduct(productData);
     }
     
   };
 
+  const createProduct = async (productData) => {
+    try {
+      const response = await SellerAPI.product.createProductOffline(productData);
+      if(response.statusCode === 201) {
+        setProductsOffline(prev => [...prev, response.data]);
+        showSuccessAlert("Thêm sản phẩm mới","Thêm sản phẩm mới thành công")
+      }else{
+        showErrorAlert("Thêm sản phẩm mới", "Có lỗi xảy ra khi thêm sản phẩm")
+      }
+    } catch (error) {
+      console.log('create product error: ', error);
+      showErrorAlert("Lỗi", "Có lỗi xảy ra khi thêm sản phẩm.");
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  const updateProduct = async (productData) => {
+    try {
+      const response = await SellerAPI.product.updateProductOffline(productData);
+      if(response.statusCode === 200) {
+        setProductsOffline((prev) => 
+            prev.map((product) => 
+                product.productId === response.data.productId ? response.data : product
+            )
+        );
+
+        showSuccessAlert("Cập nhật sản phẩm","Cập nhật sản phẩm thành công")
+      }else{
+        showErrorAlert("Cập nhật sản phẩm", "Có lỗi xảy ra khi cập nhật sản phẩm")
+      }
+    } catch (error) {
+      console.log('update product error: ', error);
+      showErrorAlert("Lỗi", "Có lỗi xảy ra khi cập nhật sản phẩm.");
+    }finally{
+      setLoading(false);
+    }
+  }
+
+  const handleDeleteProduct = async (data) => {
+    setLoading(true);
+    try {
+      const response = await SellerAPI.product.deleteProductOffline(data);
+      if(response.statusCode === 200) {
+        setProductsOffline((prev) =>
+            prev.filter((product) => product.productId !== response.data.productId)
+        );
+
+        showSuccessAlert("Xóa sản phẩm","Xóa sản phẩm thành công!")
+      }else{
+        showErrorAlert("Xóa sản phẩm","Có lỗi xảy ra khi xóa sản phẩm!")
+      }
+    } catch (error) {
+      console.log('update product error: ', error);
+      showErrorAlert("Xóa sản phẩm","Có lỗi xảy ra khi xóa sản phẩm!");
+    }finally{
+      setLoading(false);
+    }
+  }
+
+
   if (loading) {
-    return <p>Loading products...</p>;
+    return <Loading animation={Animation}/>;
   }
 
   if (error) {
@@ -209,7 +308,9 @@ export default function DashboardProduct() {
   return (
     <div className="flex min-h-screen w-full flex-col bg-muted/40">
       <Menu />
-
+      <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
+        <Navbar/>
+      </div>
       <div className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14">
         <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
           <div className="flex items-center justify-between">
@@ -217,17 +318,21 @@ export default function DashboardProduct() {
           </div>
         </header>
         <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-          <Tabs defaultValue="products" className="w-full">
+          <Tabs defaultValue="productsOffline" className="w-full">
             <TabsList className="flex items-center justify-between border-b">
-              <TabsTrigger value="products">Sản Phẩm</TabsTrigger>
+              <TabsTrigger value="productsOffline">Sản Phẩm Offline</TabsTrigger>
+              <TabsTrigger value="productOnline">Sản Phẩm Online</TabsTrigger>
               <TabsTrigger value="printer">In Mã Vạch</TabsTrigger>
               <TabsTrigger value="imports">Nhập Hàng</TabsTrigger>
             </TabsList>
-            <TabsContent value="products" className="py-8">
+            <TabsContent value="productsOffline" className="py-8">
               <div className="flex items-center justify-between">
                 <h1 className="text-2xl font-bold">Kho sản phẩm</h1>
                 
-                <Button onClick={handleOpenDialog}>Thêm sản phẩm</Button>
+                <Button onClick={() => {
+                  setDialogOpen(true);
+                  setSelectedProduct(null);
+                }}>Thêm sản phẩm</Button>
                   <AddProductDialog
                     open={dialogOpen}
                     onClose={handleCloseDialog}
@@ -238,6 +343,7 @@ export default function DashboardProduct() {
                     setCategories={setCategories}
                     setSuppliers={setSuppliers}
                     setOrigins={setOrigins}
+                    selectedData={selectedProduct}
                   />
                 
               </div>
@@ -247,7 +353,7 @@ export default function DashboardProduct() {
                     <Accordion type="single" collapsible>
                       <AccordionItem value="category">
                         <AccordionTrigger className="text-base">
-                          Loại hàng
+                          Loại hàng 
                         </AccordionTrigger>
                         <AccordionContent>
                           <div className="grid gap-2">
@@ -359,43 +465,66 @@ export default function DashboardProduct() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredProducts.length === 0 ? (
+                    {currentProducts.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={9}>
                           Không có sản phẩm nào.
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredProducts.map((product) => (
+                      currentProducts.map((product) => (
                         <TableRow key={product.id}>
                           <TableCell>{product.productName}</TableCell>
                           <TableCell>{product.barcode}</TableCell>
-                          <TableCell>{product.price}</TableCell>
+                          <TableCell>{formatVND(product.price)}</TableCell>
                           <TableCell>
-                            {inventories.map((inventory) => inventory.barcode === product.barcode ? inventory.quantityInStock : null)}
+                            {inventories.length !== 0 ? inventories.map((inventory) => inventory.barcode === product.barcode ? inventory.quantityInStock : 0) : 0}
                           </TableCell>
                           <TableCell>{product.categoryName}</TableCell>
                           <TableCell>{product.supplierName}</TableCell>
                           <TableCell>{product.originName}</TableCell>
                           <TableCell>
+                          <div className="flex gap-2">
                             <img
-                              src={product.image}
-                              alt={product.productName}
-                              className="h-10 w-10 rounded-lg"  
-                            />
+                              src={product.images ? product.images[0] : 'https://via.placeholder.com/40'}
+                              className="h-10 w-10 rounded-lg"                                 
+                             />
+
+
+                          </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex gap-2">
-                              <Button variant="outline">Sửa</Button>
-                              <Button variant="destructive">Xóa</Button>
+                              <Button 
+                              onClick={() => {
+                                setDialogOpen(true);
+                                setSelectedProduct(product);
+                              }}
+                              variant="outline">Sửa</Button>
+                              <Button 
+                              onClick={() => {
+                                handleDeleteProduct(product.productId);
+                              }}
+                              variant="destructive">Xóa</Button>
                             </div>
                           </TableCell>
                         </TableRow>
                       ))
                     )}
+                    <div className="m-3">
+                      <Pagination
+                        currentPage={currentPage}
+                        itemsPerPage={itemsPerPage}
+                        totalItems={productsOffline.length}
+                        onPageChange={handlePageChange}
+                      />
+                    </div>
                   </TableBody>
                 </Table>
               </div>
+            </TabsContent>
+            <TabsContent value="productOnline" className="py-8">
+              <ProductsOnline productsOnline={productsOnline}/>
             </TabsContent>
             <TabsContent value="printer" className="py-8">
               <BarcodePrinter/>

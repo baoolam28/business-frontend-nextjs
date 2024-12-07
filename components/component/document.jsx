@@ -24,18 +24,25 @@ To read more about using these font, please visit the Next.js documentation:
 - Pages Directory: https://nextjs.org/docs/pages/building-your-application/optimizing/fonts
 **/
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar";
-import { Toggle } from "@/components/ui/toggle"
-import categoryAPI from "../../api/document";
-import productAPI from "../../api/product";
-import BarcodeScanner from './barcodeScanner';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "../../components/ui/card"
+import { Label } from "../../components/ui/label"
+import { Input } from "../../components/ui/input"
+import { Popover, PopoverTrigger, PopoverContent } from "../../components/ui/popover"
+import { Button } from "../../components/ui/button"
+import { Calendar } from "../../components/ui/calendar";
+import { Toggle } from "../../components/ui/toggle"
+import SellerAPI from "../../api/seller";
+import BarcodeScanner from '../../components/component/BarcodeScanner';
+import formatVND from "../../utils/formatVND";
+import Loading from "../../components/component/loading-lottie"
+import Animation from "../../utils/lottie-animations/astronot.json"
+import { useStore } from "../../context/StoreContext"
+import { useUser } from "../../context/UserContext"
+import { showErrorAlert, showSuccessAlert } from '../../utils/reactSweetAlert';
 export default function document() {
-
+  const { storeId } = useStore();
+  const { user } = useUser();
+  const [loading, setLoading] =useState(true)
   const [documentDetails, setDocumentDetails] = useState([]);
   const [selectedDate, setSelectedDate] = useState(null);
   const [totalAmount, setTotalAmount] = useState(0);
@@ -53,15 +60,24 @@ export default function document() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await productAPI.getAllProduct();
-        setProducts(response);
+        const response = await SellerAPI.product.getProductsOffline(storeId);
+        if(response.statusCode === 200) {
+          console.log("Product offline: " + JSON.stringify(response.data))
+          setProducts(response.data);
+        }
       } catch (error) {
         console.error("Error fetching products:", error);
+      }finally{
+        setLoading(false)
       }
     }
 
-    fetchProducts();
-  },[]);
+    if(storeId && user){
+      fetchProducts();
+    }
+
+    
+  },[storeId, user]);
 
   useEffect(() => {
     setTotalAmount(() => {
@@ -96,7 +112,6 @@ export default function document() {
 
   const handleDateSelect = (date) => {
     setSelectedDate(date);
-    console.log('Selected date:', date);
   };
 
   const getDocumentData = (e) => {
@@ -114,6 +129,7 @@ export default function document() {
       ...rest
     }))
     const docData = {
+      storeId: storeId,
       docNumberOne      : docNumberOne,
       date              : date,
       docNumberTwo      : docNumberTwo,
@@ -125,18 +141,25 @@ export default function document() {
       paymentPercentage : paymentPercentage,
       paymentStatus     : paymentStatus,
       documentDetails   : documentDetailsData,
+      createBy: user.id
     }
 
     return docData;
   }
 
   const createDocument = async (docData) => {
+    setLoading(true);
     try {
-      const response = await categoryAPI.createDocument(docData);
-      clearForm();
-      console.log("Document created successfully:", response);
+      const response = await SellerAPI.document.createDocument(docData);
+      if(response.statusCode){
+        clearForm();
+        showSuccessAlert("Nhập kho","Nhập kho thành công");
+      }
     } catch (error) {
       console.error("Error creating document:", error);
+      showErrorAlert("Nhập kho","Có lỗi xảy ra khi nhập kho!");
+    }finally{
+      setLoading(false)
     }
   }
 
@@ -161,7 +184,7 @@ export default function document() {
     for (let detail of documentDetails) {
       const foundProduct = products.find(product => product.barcode === detail.barcode);
       if (!foundProduct) {
-        alert(`Product ${detail.productName} with barcode ${detail.barcode} not found! Please check your inputs.`);
+        showErrorAlert("Nhập kho",`Sản phẩm ${detail.productName} với barcode ${detail.barcode} không tìm thấy! kiểm tra sản phẩm nhập vào!.`);
         return; 
       }
     }
@@ -178,30 +201,60 @@ export default function document() {
 
   const handleValidBarcode = async (barcode) => {
     try {
-      // Check if the barcode is already in documentDetails
-      const existingProductIndex = documentDetails.findIndex((product) => product.barcode === barcode);
+        // Check if the barcode is in the products list
+        const exitsProduct = products.find(product => product.barcode === barcode);
+        
+        console.log("exitsProduct", exitsProduct);
 
-      if (existingProductIndex !== -1) {
-        // Barcode exists, so increase the quantity of the existing product
-        const updatedDocumentDetails = [...documentDetails];
-        updatedDocumentDetails[existingProductIndex].quantity += 1;
-        updatedDocumentDetails[existingProductIndex].total = updatedDocumentDetails[existingProductIndex].quantity * updatedDocumentDetails[existingProductIndex].price;
-        setDocumentDetails(updatedDocumentDetails);
-      } else {
-        // Barcode does not exist, so add the new product
-        const response = await productAPI.getProductById(barcode);
-        const productName = response.productName;
-        const price = response.price; // Assuming price is part of the product API response
-        setDocumentDetails([...documentDetails, { barcode: barcode, productName: productName, quantity: 1, price: price, total: price }]);
-      }
+        if (exitsProduct) {
+            const prodId = exitsProduct.productId;
+            const price = exitsProduct.price;
+            const productName = exitsProduct.productName;
+            const barcode = exitsProduct.barcode;
+            setDocumentDetails((prev) => {
+                // Check if product is already in documentDetails
+                const existingDetail = prev.find(detail => detail.productId === prodId);
+
+                if (existingDetail) {
+                    // Increment quantity if product already exists in documentDetails
+                    return prev.map(detail =>
+                        detail.productId === prodId
+                            ? { 
+                                ...detail, 
+                                quantity: detail.quantity + 1,
+                                total: (detail.quantity + 1) * price 
+                              }
+                            : detail
+                    );
+                } else {
+                    // Add new product to documentDetails if it doesn't exist
+                    return [
+                        ...prev,
+                        {
+                            productId: prodId,
+                            productName: productName,
+                            barcode: barcode,
+                            quantity: 1,
+                            price: price,
+                            total: price
+                        }
+                    ];
+                }
+            });
+        }
     } catch (error) {
-      console.error('Product not found:', barcode);
+        console.error('Product not found:', barcode);
     }
-  }
+};
+
 
   const handleCancel = () => {
     clearForm();
   };
+
+  if(loading){
+    return <Loading animation={Animation} />;
+  }
 
   return (
     (<Card className="w-full">
@@ -213,7 +266,7 @@ export default function document() {
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="docNumberOne">Số Tài Liệu Một</Label>
-            <Input id="docNumberOne" name="docNumberOne" placeholder="Nhập số tài liệu" ref={docNumberOneRef}/>
+            <Input id="docNumberOne" name="docNumberOne" placeholder="Nhập số tài liệu" ref={docNumberOneRef} required/>
           </div>
           <div className="space-y-2">
             <Label htmlFor="date">Ngày</Label>
@@ -233,21 +286,21 @@ export default function document() {
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="docNumberTwo">Số Tài Liệu Hai</Label>
-            <Input id ="docNumberTwo" name="docNumberTwo" placeholder="Nhập số tài liệu" ref={docNumberTwoRef}/>
+            <Input id ="docNumberTwo" name="docNumberTwo" placeholder="Nhập số tài liệu" ref={docNumberTwoRef} required/>
           </div>
           <div className="space-y-2">
             <Label htmlFor="companyId">ID Công Ty</Label>
-            <Input id="companyId" name="companyId" placeholder="Nhập ID công ty" ref={companyIdRef}/>
+            <Input id="companyId" name="companyId" placeholder="Nhập ID công ty" ref={companyIdRef} required/>
           </div>
         </div>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="representOne">Người Đại Diện Một</Label>
-            <Input id="representOne" name="representOne" placeholder="Nhập tên người đại diện" ref={representOneRef}/>
+            <Input id="representOne" name="representOne" placeholder="Nhập tên người đại diện" ref={representOneRef} required/>
           </div>
           <div className="space-y-2">
             <Label htmlFor="representTwo">Người Đại Diện Hai</Label>
-            <Input id="representTwo" name="representTwo" placeholder="Nhập tên người đại diện" ref={representTwoRef}/>
+            <Input id="representTwo" name="representTwo" placeholder="Nhập tên người đại diện" ref={representTwoRef} required/>
           </div>
         </div>
         <div className="grid md:grid-cols-3 gap-4">
