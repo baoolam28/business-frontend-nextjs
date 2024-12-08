@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import Header from "../../components/component/Header";
 import ProductDetails from "./ProductDetails";
 import RelatedProducts from "./RelatedProducts";
+import AllReviewProduct from "../../components/review-page/AllReview"
 import Footer from "./Footer";
 import BuyerAPI from "../../api/buyer";
 import { useSearchParams } from 'next/navigation'
@@ -55,7 +56,7 @@ function ProductPage() {
   }
 
   return (
-    <div className="flex overflow-hidden flex-col bg-white">
+    <div className="flex overflow-hidden flex-col bg-gray-50">
       <Header />
       <div className="flex justify-center items-center flex-1">
         <main>
@@ -63,6 +64,7 @@ function ProductPage() {
           <RelatedProducts />
         </main>
       </div>
+      <AllReviewProduct productId={id}/>
       <Footer />
     </div>
   );

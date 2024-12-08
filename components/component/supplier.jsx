@@ -36,6 +36,7 @@ import { Input } from "../../components/ui/input";
 import Navbar from "../component/navbar";
 import {useStore} from '../../context/StoreContext'
 import sellerAPI from "../../api/seller"
+import Pagination from './pagination'
 import { showConfirmAlert, showSuccessAlert, showErrorAlert } from "../../utils/reactSweetAlert";
 
 
@@ -51,6 +52,8 @@ export default function Supplier() {
     address: ''
   });
   const { storeId } = useStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     if(storeId){
@@ -90,6 +93,15 @@ export default function Supplier() {
       });
     }
   }, [editingSupplier]);
+
+  const indexOfLastSupplier = currentPage * itemsPerPage;
+  const indexOfFirstSupplier = indexOfLastSupplier - itemsPerPage;
+
+  const currentSuppliers = suppliers.slice(indexOfFirstSupplier, indexOfLastSupplier);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
 
   const handleSaveSupplier = async (supplierData) => {
     try {
@@ -145,7 +157,6 @@ export default function Supplier() {
     }
     
   };
-  
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -185,6 +196,7 @@ export default function Supplier() {
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>STT</TableHead>
                     <TableHead>Tên Nhà Cung Cấp</TableHead>
                     <TableHead className="hidden sm:table-cell">Email</TableHead>
                     <TableHead className="hidden sm:table-cell">SDT</TableHead>
@@ -196,46 +208,53 @@ export default function Supplier() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                 {suppliers.map((supplier, index) => (
+                 {currentSuppliers.map((supplier, index) => (
                   <TableRow key={index}>
-              <TableCell className="font-medium">{supplier.supplierName}</TableCell>
-              <TableCell className="hidden sm:table-cell">{supplier.email}</TableCell>
-              <TableCell className="hidden sm:table-cell">{supplier.phone}</TableCell>
-              <TableCell className="hidden md:table-cell">{supplier.fax}</TableCell>
-              <TableCell className="hidden md:table-cell">{supplier.address}</TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button aria-haspopup="true" size="icon" variant="ghost">
-                      <MoveVerticalIcon className="h-4 w-4" />
-                      <span className="sr-only">More</span>
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() =>{ 
-                        setEditingSupplier(supplier);
-                        setIsDialogOpen(true);
-                    }}>
-                      <FilePenIcon className="h-4 w-4 mr-2" />
-                      Sửa
-                      
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => 
-                        handleDeleteSupplier(supplier.supplierId)
-                    }>
-                      <TrashIcon className="h-4 w-4 mr-2" />
-                      Xóa
-                      
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </TableCell>
-            </TableRow>
+                    <TableCell className="font-medium">{index + 1 + indexOfFirstSupplier}</TableCell>
+                    <TableCell >{supplier.supplierName}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{supplier.email}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{supplier.phone}</TableCell>
+                    <TableCell className="hidden md:table-cell">{supplier.fax}</TableCell>
+                    <TableCell className="hidden md:table-cell">{supplier.address}</TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button aria-haspopup="true" size="icon" variant="ghost">
+                            <MoveVerticalIcon className="h-4 w-4" />
+                            <span className="sr-only">More</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() =>{ 
+                              setEditingSupplier(supplier);
+                              setIsDialogOpen(true);
+                          }}>
+                            <FilePenIcon className="h-4 w-4 mr-2" />
+                            Sửa
+                            
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => 
+                              handleDeleteSupplier(supplier.supplierId)
+                          }>
+                            <TrashIcon className="h-4 w-4 mr-2" />
+                            Xóa
+                            
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
                  ))}
-            
-
                 </TableBody>
               </Table>
+              <div className="m-3">
+                <Pagination
+                  currentPage={currentPage}
+                  itemsPerPage={itemsPerPage}
+                  totalItems={suppliers.length}
+                  onPageChange={handlePageChange}
+                />
+              </div>
             </CardContent>
           </Card>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
