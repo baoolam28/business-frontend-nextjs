@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import formatVND from "../../utils/formatVND"
 import QrCodeCard  from "../../components/component/qrCodeCard"
 import sellerAPI from "../../api/seller"
-// import PaymentAPI from "../../api/payment"
+import PaymentSuccess from "../../components/component/payment-success"
 
 
 export default function Component() {
@@ -37,7 +37,7 @@ export default function Component() {
 
           if (response.statusCode === 200) {
 
-            if(response && response.paymentStatus){
+            if(response.data && response.data.paymentStatus){
               setIsPayment(true);
               return;
             }
@@ -120,7 +120,7 @@ const GeneratePaymentData = (amount, addInfo) => {
 
   const generateDataFromInvoice = (invoice) => {
       const amount = invoice.orderDetails.reduce((acc, item) => acc + (item.quantity * item.price), 0);
-      const addInfo = `HD: ${invoice.orderId} - tổng: ${amount}`;
+      const addInfo = invoice.orderId;
       const paymentData = GeneratePaymentData(amount, addInfo);
       setSubtotal(amount);
       setQrData(paymentData);

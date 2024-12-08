@@ -34,11 +34,25 @@ export default async function middleware(req) {
   const userRole = token?.role; // Lấy vai trò của người dùng từ token
   const pathname = req.nextUrl.pathname;
 
+
   // Xác định nếu đường dẫn yêu cầu là trang đăng nhập hoặc đăng ký
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
 
   // Nếu trang không yêu cầu đăng nhập
   const isPublicPage = publicPaths.some((path) => pathname.startsWith(path));
+
+
+
+  const allowedOrigin = 'http://localhost:8080'; // Thay bằng địa chỉ của backend hoặc frontend khác
+
+  const origin = req.headers.get('origin');
+  if (origin && origin === allowedOrigin) {
+    return NextResponse.next()
+      .headers.set('Access-Control-Allow-Origin', origin)
+      .headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+      .headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  }
+
 
   // Nếu trang yêu cầu là public, không cần kiểm tra xác thực
   if (isPublicPage) {

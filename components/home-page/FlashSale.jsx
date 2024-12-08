@@ -23,7 +23,7 @@ const FlashSale = () => {
       const response = await BuyerAPI.product.getAllProducts();
       if (response.statusCode === 200) {
         return response.data.map((product) => ({
-          id: product.productId,
+          id: product.productId || '',
           name: product.productName,
           discount: 0,
           currentPrice: product.price,
