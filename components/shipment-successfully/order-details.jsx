@@ -14,6 +14,7 @@ import formatAsVND from '../../utils/formatVND'
 export default function OrderDetailsComponent() {
 
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [shipment, setShipment] = useState(null);
   const [address, setAddress] = useState(null);
   const [shipmentStatus, setShipmentStatus] = useState([]);
@@ -116,6 +117,9 @@ export default function OrderDetailsComponent() {
         return faBox;
     }
   };
+  const handReviewProduct = (productDetailId) => {
+      router.push(`/review?productDetailId=${productDetailId}`)
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -158,7 +162,8 @@ export default function OrderDetailsComponent() {
         </div>
 
       {/* Action Buttons */}
-      <div className="flex gap-4 mb-6">
+      {shipment && shipment.orderOnlineDetails.map((detail, detailIndex) =>(
+        <div key={detailIndex} className="flex gap-4 mb-6">
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 flex items-center">
           <FontAwesomeIcon icon={faRedo} className="mr-2" />
@@ -169,8 +174,16 @@ export default function OrderDetailsComponent() {
           <FontAwesomeIcon icon={faComments} className="mr-2" />
           Liên Hệ Người Bán
         </button>
+        <button
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 flex items-center"
+          onClick = {() => handReviewProduct(detail.productDetailId)} >
+          <FontAwesomeIcon icon={faComments} className="mr-2" />
+          Xác nhận đơn hàng
+        </button>
       </div>
-      {/* Shipping Address */}
+      ))}
+      
+      {/* Shipping Address bị lỗi 404 */} 
       {address && (
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Địa chỉ nhận hàng</h2>
@@ -208,7 +221,17 @@ export default function OrderDetailsComponent() {
                 className="rounded" />
               <div>
                 <h3 className="font-medium text-sm mb-1">{detail.productName}</h3>
-                <p className="text-sm text-gray-500">Phân loại: {detail.attributes.color}, {detail.attributes.size}</p>
+                <div className="mt-2 text-sm text-gray-700">
+                      {Object.entries(detail.attributes).map(([key, value]) => (
+                        <div
+                          key={key}
+                          className="inline-block mr-2 mb-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs"
+                        >
+                          <strong className="font-semibold text-gray-800">{key}:</strong>
+                          <span className="ml-1 text-gray-600">{value}</span>
+                        </div>
+                      ))}
+                </div>
                 <p className="text-sm text-gray-500">x{detail.quantity}</p>
               </div>
             </div>

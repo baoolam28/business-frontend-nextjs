@@ -50,6 +50,16 @@ const buyerAPI = {
     sendEmail : (data) => axiosClient.put(`${baseUrl}/send-mail`, data),
     resetPasswordEmail : (data) => axiosClient.put(`${baseUrl}/reset-password-email`, data),
     resetPasswordPhoneNumber : (data) => axiosClient.put(`${baseUrl}/reset-password-phone`, data)
+  },
+  review : {
+    getAllReviewProduct : (productId) => axiosClient.get(`${baseUrl}/reviews/allReviews/${productId}`),
+    getAllReviews : (productId, rating) => axiosClient.get(`${baseUrl}/reviews/products/${productId}?rating=${rating}`),
+    getProductDetail : (productDetailId) => axiosClient.get(`${baseUrl}/reviews/${productDetailId}`),
+    getReview : (productDetailId, userId) => axiosClient.get(`${baseUrl}/reviews/review?productDetailId=${productDetailId}&userId=${userId}`),
+    createNewReview : (productDetailId, reviewData) => axiosClient.post(`${baseUrl}/reviews/newReview/${productDetailId}`, reviewData),
+    updateReview : (reviewId, data) => axiosClient.put(`${baseUrl}/reviews/update-review/${reviewId}`, data),
+    updateLikeCount : (reviewId) => axiosClient.put(`${baseUrl}/reviews`, {reviewId}),
+    deleteReview : (reviewId) => axiosClient.delete(`${baseUrl}/reviews`, {reviewId})
   }
   
 };
