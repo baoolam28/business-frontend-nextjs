@@ -179,7 +179,7 @@ export default function ReviewPage({ productId }) {
                                     variant="outline"
                                     className="mt-4 text-gray-500 text-sm hover:bg-gray-100"
                                 >
-                                    ❤️ {review.likeCount} Likes
+                                    ❤️ {review.likeCount}
                                 </Button>
                             </div>
                         ))

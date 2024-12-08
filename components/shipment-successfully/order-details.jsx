@@ -221,7 +221,17 @@ export default function OrderDetailsComponent() {
                 className="rounded" />
               <div>
                 <h3 className="font-medium text-sm mb-1">{detail.productName}</h3>
-                <p className="text-sm text-gray-500">Phân loại: {detail.attributes.color} - {detail.attributes.size}</p>
+                <div className="mt-2 text-sm text-gray-700">
+                      {Object.entries(detail.attributes).map(([key, value]) => (
+                        <div
+                          key={key}
+                          className="inline-block mr-2 mb-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs"
+                        >
+                          <strong className="font-semibold text-gray-800">{key}:</strong>
+                          <span className="ml-1 text-gray-600">{value}</span>
+                        </div>
+                      ))}
+                </div>
                 <p className="text-sm text-gray-500">x{detail.quantity}</p>
               </div>
             </div>
