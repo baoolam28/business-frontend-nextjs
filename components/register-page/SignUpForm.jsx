@@ -87,13 +87,14 @@ export default function SignUpForm() {
           <div className="flex flex-row gap-8 bg-white rounded-lg shadow-lg max-w-5xl w-full max-md:flex-col">
             {/* Image Section */}
             <section className="w-1/2 max-md:w-full">
-              <Image
+              <img
                 loading="lazy"
-                src="/placeholder.svg"
+                src="https://www.rvsmedia.co.uk/wp-content/uploads/2023/02/Apparel-Industry_Article_2.jpg
+"
                 alt="Sign up illustration"
                 width={800}
                 height={600}
-                className="object-cover w-full h-full rounded-l-lg"
+                className="object-full w-full h-full rounded-l-lg"
               />
             </section>
       

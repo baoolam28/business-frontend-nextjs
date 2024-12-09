@@ -70,7 +70,7 @@ const Orders = () => {
 
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
-            const response = await OrderAPI.order.updateOrderById(orderId, newStatus);
+            const response = await OrderAPI.order.updateOrderOnlineById(orderId, newStatus);
             console.log(`Order ${orderId} status updated to ${newStatus}`);
 
             // Optionally update the local state immediately

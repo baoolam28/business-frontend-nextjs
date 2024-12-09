@@ -596,7 +596,7 @@ const handleVariantFormSubmit = () => {
       <Menu/>
       <div className="header fixed top-0 left-14 right-0 bg-white shadow transition-all duration-300 ease-in-out z-10" id="header">
         <div className="flex items-center justify-between p-4">
-          <a href="#" className="text-gray-600 text-sm flex items-center hover:text-blue-500 transition">
+          <a href="/store/product" className="text-gray-600 text-sm flex items-center hover:text-blue-500 transition">
             <ChevronLeft className="mr-2 h-4 w-4" />
             Quản lý Sản phẩm
           </a>

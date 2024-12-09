@@ -1,14 +1,16 @@
 import React from 'react'
 import Category from '../../components/home-page/Category'
-export const metadata = {
-  title: 'Category',
-  description: 'This is a description for My Custom Site',
-};
-
+import { Suspense } from "react";
+import Loading from "../../components/component/loading-lottie";
+import Animation from "../../utils/lottie-animations/astronot.json";
 export default function () {
   return (
-    <div>
-        <Category/>
-    </div>
-  )
+    <>
+      <div>
+        <Suspense fallback={<Loading animation={Animation} />}>
+          <Category />
+        </Suspense>
+      </div>
+    </>
+  );
 }

@@ -1,14 +1,14 @@
 import React from 'react'
 import CheckoutPage from "../../components/checkout-page/checkout-page"
-export const metadata = {
-  title: 'Checkout-online',
-  description: 'This is a description for My Custom Site',
-};
-
+import { Suspense } from "react";
+import Loading from "../../components/component/loading-lottie";
+import Animation from "../../utils/lottie-animations/astronot.json";
 export default function page() {
   return (
     <div>
-      <CheckoutPage/>
+      <Suspense fallback={<Loading animation={Animation} />}>
+        <CheckoutPage />
+      </Suspense>
     </div>
   )
 }

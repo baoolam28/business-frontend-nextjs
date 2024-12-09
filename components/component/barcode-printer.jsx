@@ -24,9 +24,9 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLab
 import { Button } from '../../components/ui/button';
 import { Checkbox } from '../../components/ui/checkbox';
 import SellerAPI from '../../api/seller';
-import BarcodeRender from './barcodeRender';
-import BarcodePagePrinter from './BarcodePagePrinter';
-import PrintButton from './PrintButtonBarcode';
+import BarcodeRender from '../../components/component/barcodeRender';
+import BarcodePagePrinter from '../../components/component/barcodePagePrinter';
+import PrintButton from '../../components/component/PrintButtonBarcode';
 import { useStore } from '../../context/StoreContext';
 export default function BarcodePrinter() {
   const { storeId } = useStore();

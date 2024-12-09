@@ -87,7 +87,7 @@ export default function CheckoutPageComponent() {
       return sum + (item.price * item.quantity);
     }, 0) || 0;
 
-    const orderOnlineDetailRequests = data?.map((item) => ({
+    const orderOnlineDetailRequests = data?.map((item, index) => ({
       storeId: item.storeId,
       productDetailId: item.productDetailId,
       quantity: item.quantity,
@@ -123,13 +123,13 @@ export default function CheckoutPageComponent() {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* <Header /> */}
-      <header className="bg-white shadow">
+      <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
           <ShoppingBag className="h-8 w-8 text-orange-500 mr-3" />
           <h1 className="text-2xl font-bold text-gray-900">Thanh Toán</h1>
         </div>
-      </header>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           <ShippingAddressSection
             selectedAddress={selectedAddress}
@@ -143,7 +143,7 @@ export default function CheckoutPageComponent() {
           <PaymentOptionsSection paymentMethod={paymentMethod} setPaymentMethod={setPaymentMethod} />
           <OrderSummary orderData={orderData} fee={fee} totalPrice={totalPrice} />
         </div>
-      </main>
+      </div>
       <AddressSelectionDialog
         isOpen={isAddressDialogOpen}
         setIsOpen={setIsAddressDialogOpen}

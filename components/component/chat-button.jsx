@@ -3,6 +3,7 @@ import React from 'react';
 import { useUser } from "../../context/UserContext"
 import { findChat, createChat } from "../../utils/chatApi"
 import {useChatContext} from "../../context/chatContext"
+import BuyerAPI from "../../api/buyer"
 const ContactSellerButton = ({ buttonText, customClass, storeId }) => {
 
     const { setIsExpanded } = useChatContext();
@@ -26,13 +27,20 @@ const ContactSellerButton = ({ buttonText, customClass, storeId }) => {
 
         if(!user || !storeId) return null;
 
-        const exitsChat = await findChat(user.id, storeId);
+        const storeRes = await BuyerAPI.store.getStoreByStoreId(storeId);
+
+        if(!storeRes) return null;
+
+        const sellerId = storeRes.data.storeManagerId;
+        
+
+        const exitsChat = await findChat(user.id, sellerId);
 
         if(exitsChat) {
             return exitsChat;
         }
 
-        const newChat = await createChat(user.id, storeId);
+        const newChat = await createChat(user.id, sellerId);
 
         return newChat;
     };

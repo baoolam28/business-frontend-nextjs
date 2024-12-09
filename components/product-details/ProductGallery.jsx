@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-function ProductGallery({ images, variantImage }) {
+function ProductGallery({ images , variantImage }) {
   const defaultImage = 'https://shpetro.com/images/no_image.png';
   const [selectedImage, setSelectedImage] = useState(defaultImage);
   
@@ -14,8 +14,9 @@ function ProductGallery({ images, variantImage }) {
 
       <div className="flex w-full gap-4">
         {/* Vertical thumbnails to the left of the main image */}
-        <div className="flex flex-col gap-2  max-md:hidden">
-          {images.slice(0,3).map((image, index) => (
+        <div className="flex flex-col gap-2 max-md:hidden">
+          {Array.isArray(images) &&
+            images.slice(0,3).map((image, index) => (
             <div
               key={index}
               className={`flex overflow-hidden justify-center items-center p-1 rounded cursor-pointer border ${
@@ -45,7 +46,8 @@ function ProductGallery({ images, variantImage }) {
       </div>
       {/* Horizontal thumbnails above the main image */}
       <div className="flex gap-2 mb-4 justify-start max-md:flex-wrap">
-        {images.slice(3).map((image, index) => (
+        {Array.isArray(images) &&
+          images.slice(3).map((image, index) => (
           <div
             key={index}
             className={`flex overflow-hidden p-1 rounded cursor-pointer border ${
