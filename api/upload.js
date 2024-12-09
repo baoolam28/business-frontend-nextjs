@@ -1,11 +1,7 @@
-import cloudinary from "../utils/cloudinary";
+import axiosClient from "./axiosClient";
+const baseUrl = "/api/images";
+const image = {
+  uploadImage: (data) => axiosClient.post(`${baseUrl}/upload`,data)
+}
 
-const upload = async (image) => {
-    const res = await cloudinary.v2.uploader.upload(image, {
-      folder: "ecommerce_images",
-    });
-
-    return res;
-};
-
-export default upload;
+export default image;

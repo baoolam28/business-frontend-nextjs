@@ -11,7 +11,7 @@ const roleAccess = {
 };
 
 // Đường dẫn không yêu cầu đăng nhập
-const publicPaths = ["/home-page", "/about", "/contact"]; // Thêm đường dẫn cần thiết
+const publicPaths = ["/home-page", "/about", "/contact","register"]; // Thêm đường dẫn cần thiết
 
 const redirectTo = (role) => {
     switch (role) {
@@ -40,18 +40,6 @@ export default async function middleware(req) {
 
   // Nếu trang không yêu cầu đăng nhập
   const isPublicPage = publicPaths.some((path) => pathname.startsWith(path));
-
-
-
-  const allowedOrigin = 'http://localhost:8080'; // Thay bằng địa chỉ của backend hoặc frontend khác
-
-  const origin = req.headers.get('origin');
-  if (origin && origin === allowedOrigin) {
-    return NextResponse.next()
-      .headers.set('Access-Control-Allow-Origin', origin)
-      .headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-      .headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  }
 
 
   // Nếu trang yêu cầu là public, không cần kiểm tra xác thực

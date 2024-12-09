@@ -213,8 +213,8 @@ export default function OrderDetailsComponent() {
         { shipment && (
           shipment.orderOnlineDetails.map((detail, detailIndex) => (
             <div key={detailIndex} className="flex space-x-4 items-center mb-4">
-              <Image
-                src="/placeholder.svg"
+              <img 
+                src={detail.image? detail.image : "/placeholder.svg"}
                 alt="Product"
                 width={80}
                 height={80}

@@ -129,7 +129,7 @@ export default function OrderPage() {
               <div className="space-y-4">
                 {/* Thông tin sản phẩm */}
                 <div className="flex items-start">
-                  <Image
+                  <img
                     src={selectedProduct?.image || "/placeholder.svg"}
                     alt="Product"
                     width={60}  // hoặc kích thước bạn muốn
@@ -234,7 +234,7 @@ export default function OrderPage() {
           <Card key={index} className="w-full mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardHeader className="flex justify-between items-start border-b pb-4 relative">
               <div className="flex items-center space-x-4">
-                <Image
+                <img
                   src="/placeholder.svg"
                   alt="Store Logo"
                   width={40}
@@ -274,8 +274,8 @@ export default function OrderPage() {
             {shipment.orderOnlineDetails.map((detail, detailIndex) =>(
               <div key={detailIndex} className="flex justify-between items-start mb-4">
                 <div className="flex space-x-4">
-                  <Image
-                    src="/placeholder.svg"
+                  <img
+                    src={detail.image? detail.image : "/placeholder.svg"}
                     alt="Product"
                     width={80}
                     height={80}
@@ -293,7 +293,7 @@ export default function OrderPage() {
                             </div>
                           ))}
                     </div>
-                    <p className="text-sm text-gray-500">x{detail.quantity}</p>
+                    <p className="text-sm text-gray-500">SL: {detail.quantity}</p>
                   </div>
                 </div>
                 <div className="text-right">
