@@ -13,6 +13,7 @@ import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, startOfYear, en
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import sellerAPI from '../../api/seller';
 import {useStore} from "../../context/StoreContext"; 
+import {showSuccessAlert} from "../../utils/reactSweetAlert"
 
 
 
@@ -469,7 +470,7 @@ const chartData =
                         } else {
                           console.error("userId không hợp lệ cho nhân viên", staff);
                         }
-                        alert('Xoá nhân viên thành công')
+                        showSuccessAlert("Xoá nhân viên", "Xoá thành công")
                         window.location.reload();
                       }}
                     >
@@ -537,7 +538,7 @@ const chartData =
                     setPhoneNumber('');
                     setFullName('');
                     setEmail('');
-                    alert('Thêm nhân viên thành công');
+                    showSuccessAlert("Thêm nhân viên", "thêm thành công")
                     window.location.reload();
                   }}  
                   style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', fontSize: '16px', cursor: 'pointer', transition: 'background-color 0.3s' }}
