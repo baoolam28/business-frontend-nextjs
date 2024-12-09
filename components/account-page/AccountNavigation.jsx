@@ -9,11 +9,11 @@ const AccountNavigation = () => {
       <div className="flex flex-col items-start text-base font-medium text-black">
         <h2 className="text-lg font-bold mb-4">Manage My Account</h2>
         <div className="flex flex-col mt-4">
-          <a href="#" className="text-red-500 hover:underline transition duration-200">
+          <a href="/account" className="text-red-500 hover:underline transition duration-200">
             My Profile
           </a>
-          <a href="#" className="mt-2 opacity-50 hover:opacity-100 transition duration-200">
-            Address Book
+          <a href="/changes-pass" className="mt-2 text-red-500 hover:underline transition duration-200">
+            Changes Password
           </a>
           <a href="#" className="mt-2 opacity-50 hover:opacity-100 transition duration-200">
             My Payment Options

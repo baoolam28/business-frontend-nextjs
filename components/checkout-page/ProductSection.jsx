@@ -31,14 +31,17 @@ export default function ProductSection({data}) {
         />
         <div className="flex-grow">
           <h3 className="font-semibold">{item.productName}</h3>
-          <p className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500">
             {Object.entries(item.attributes).map(([key, value]) => (
-              <div key={key} className="inline-block mr-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs">
+              <span
+                key={key}
+                className="inline-block mr-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs"
+              >
                 <strong className="font-semibold text-gray-800">{key}:</strong>
                 <span className="ml-1 text-gray-600">{value}</span>
-              </div>        
+              </span>
             ))}
-          </p>
+          </div>
           <p className="font-semibold mt-2">{FormatVND(item.price)}</p>
         </div>
         <div className="text-right">

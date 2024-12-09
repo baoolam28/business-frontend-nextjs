@@ -32,7 +32,7 @@ import { Button } from "../../components/ui/button"
 import { Calendar } from "../../components/ui/calendar";
 import { Toggle } from "../../components/ui/toggle"
 import SellerAPI from "../../api/seller";
-import BarcodeScanner from './barcodeScanner';
+import BarcodeScanner from '../../components/component/BarcodeScanner';
 import formatVND from "../../utils/formatVND";
 import Loading from "../../components/component/loading-lottie"
 import Animation from "../../utils/lottie-animations/astronot.json"

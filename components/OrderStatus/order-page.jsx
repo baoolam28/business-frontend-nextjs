@@ -9,13 +9,20 @@ import { useUser } from '../../context/UserContext'
 import buyerAPI from '../../api/buyer'
 import formatAsVND from '../../utils/formatVND'
 import Link from 'next/link'
-
+import { Star } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "../../components/ui/dropdown-menu"
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "../../components/ui/dialog";
 
 export default function OrderPage() {
 
   const { user } = useUser();
   const [shipments, setShipments] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('Tất cả');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isReview, setIsReview] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [reviewData, setReviewData] = useState(null);
   
   useEffect(() =>{  
     if(user && user.id){
@@ -31,14 +38,13 @@ export default function OrderPage() {
           }else {
             console.error("Error fetching order: ", response.message);
           }
-         
         }catch(error){
           console.log("Error fetching order: ", error);
         }
     }
     fetchOrder()
     }
-  }, [ user])
+  }, [ user ])
 
 
 
@@ -80,6 +86,115 @@ export default function OrderPage() {
     }
   };
 
+  const handleOpenDialog = () => {
+    setIsOpen(true);
+  };
+
+  const fetchReview = async (productDetailId) => {
+    try {
+      const reviewResponse = await buyerAPI.review.getReview(productDetailId, user.id);
+      if(reviewResponse.statusCode === 200) {
+        setReviewData(reviewResponse.data)
+      }else{
+        setReviewData(null);
+      }
+    } catch (error) {
+     
+    }
+  }
+
+  const showReview = (detail) => {
+    handleOpenDialog();
+    fetchReview(detail.productDetailId);
+    setSelectedProduct(detail);
+  }
+
+  const handleCloseDialog = () => {
+    setIsOpen(false); // Đóng dialog
+    setReviewData(null);
+  };
+
+  const ProductReviewDialog = ({ selectedProduct, handleCloseDialog }) => {
+
+    return (
+      <>
+        {selectedProduct && (
+          <Dialog open={isOpen} onOpenChange={() => setIsOpen(!isOpen)}>
+            <DialogContent aria-describedby="dialog-description">
+              <p id="dialog-description" className="sr-only">Mô tả về đánh giá sản phẩm.</p>
+              <DialogHeader>
+                <DialogTitle>Đánh giá sản phẩm</DialogTitle>
+              </DialogHeader>
+  
+              <div className="space-y-4">
+                {/* Thông tin sản phẩm */}
+                <div className="flex items-start">
+                  <img
+                    src={selectedProduct?.image || "/placeholder.svg"}
+                    alt="Product"
+                    width={60}  // hoặc kích thước bạn muốn
+                    height={60}
+                    className="w-16 h-16 rounded-lg object-cover mr-4" />
+                  <div>
+                    <h3 className="font-medium text-sm">{selectedProduct?.productName}</h3>
+                    {Object.entries(selectedProduct?.attributes).map(([key, value]) => (
+                      <div
+                        key={key}
+                        className="inline-block mr-2 mb-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs"
+                      >
+                        <strong className="font-semibold text-gray-800">{key}:</strong>
+                        <span className="ml-1 text-gray-600">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+  
+                {/* Đánh giá */}
+                {reviewData ? 
+                  (
+                    <div className="space-y-2">
+                      <Avatar>
+                        <AvatarImage src={reviewData.imageUser || "/placeholder.svg"} />
+                      </Avatar>
+                      <div className="font-medium">{reviewData.username}</div>
+                      <div className="flex gap-1">
+                        {[...Array(reviewData.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-red-500 text-red-500" />
+                        ))}
+                      </div>
+                      <div className="space-y-2 mb-4">
+                        <div className="flex gap-2">
+                          <span className="text-gray-600">Chất lượng sản phẩm:</span>
+                          <span>{reviewData.comment}</span>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-500">
+                        {reviewData.reviewDate}
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      chua co danh gia
+                    </div>
+                  )
+                }
+               
+              </div>
+  
+              <DialogFooter>
+                <Button variant="outline" onClick={handleCloseDialog}>
+                  Đóng
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        )
+          
+        }
+      </>
+    );
+  };
+
 
   return (
     <div className="min-h-screen flex justify-center items-start w-full">
@@ -119,7 +234,7 @@ export default function OrderPage() {
           <Card key={index} className="w-full mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardHeader className="flex justify-between items-start border-b pb-4 relative">
               <div className="flex items-center space-x-4">
-                <Image
+                <img
                   src="/placeholder.svg"
                   alt="Store Logo"
                   width={40}
@@ -159,16 +274,26 @@ export default function OrderPage() {
             {shipment.orderOnlineDetails.map((detail, detailIndex) =>(
               <div key={detailIndex} className="flex justify-between items-start mb-4">
                 <div className="flex space-x-4">
-                  <Image
-                    src="/placeholder.svg"
+                  <img
+                    src={detail.image? detail.image : "/placeholder.svg"}
                     alt="Product"
                     width={80}
                     height={80}
                     className="rounded" />
                   <div>
                     <h3 className="font-medium text-sm mb-1">{detail.productName}</h3>
-                    <p className="text-sm text-gray-500">Phân loại: {detail.attributes.color}, {detail.attributes.size}</p>
-                    <p className="text-sm text-gray-500">x{detail.quantity}</p>
+                    <div className="mt-2 text-sm text-gray-700">
+                          {Object.entries(detail.attributes).map(([key, value]) => (
+                            <div
+                              key={key}
+                              className="inline-block mr-2 mb-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs"
+                            >
+                              <strong className="font-semibold text-gray-800">{key}:</strong>
+                              <span className="ml-1 text-gray-600">{value}</span>
+                            </div>
+                          ))}
+                    </div>
+                    <p className="text-sm text-gray-500">SL: {detail.quantity}</p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -210,6 +335,20 @@ export default function OrderPage() {
                   onClick={() => alert('Contacting the seller!')}>  
                   Liên Hệ Người Bán
                 </Button>
+
+                <div className="space-y-2">
+                  {shipment.orderOnlineDetails.map((detail, index) => (
+                    <Button
+                      key={index}
+                      onClick={() => showReview(detail)}
+                      variant="outline"
+                      size="sm"
+                      className="hover:bg-gray-100">
+                        Xem Đánh Giá Shop
+                    </Button>
+                  ))}
+                </div>
+                
               </div>
             </CardFooter>
         
@@ -221,6 +360,11 @@ export default function OrderPage() {
         
         </main>
       </div>
+      {/* Dialog hiển thị đánh giá sản phẩm */}
+      <ProductReviewDialog
+        selectedProduct={selectedProduct}
+        handleCloseDialog={handleCloseDialog}
+      />
     </div>
   );
 }

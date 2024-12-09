@@ -109,6 +109,7 @@ export const sendMessage = async (chatId, messageData) => {
 // Function to get user by ID
 export const getUserById = async (userId) => {
   try {
+    console.log("userId: ", userId);
     const userRef = ref(database, `users/${userId}`);
     const snapshot = await get(userRef);
 

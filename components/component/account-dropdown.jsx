@@ -1,15 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import  React ,{useEffect, useState} from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../../components/ui/dropdown-menu";
 import { User, Settings, LogOut } from 'lucide-react';
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import userAPI from "../../api/auth";
 
 export default function UserDropdown({ user }) {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const [userData, setUserData] = useState(null);
 
   const onProfileClick = () => {
     router.push('/account');
@@ -23,6 +25,32 @@ export default function UserDropdown({ user }) {
     });
   };
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!user || !user.id) {
+        console.error("User ID is missing");
+        return;
+      }
+      // console.log("Fetching user data for user ID:", user.id);
+
+      try {
+        const response = await userAPI.user.getInfoUser(user.id);
+        if (response.statusCode === 200) {
+          setUserData(response.data);
+          console.log("User data:", response.data);
+        } else {
+          console.error("Error fetching user data:", response.statusText);
+        }
+      } catch (error) {
+        console.error("Error connecting to API:", error);
+      }
+    };
+
+    if (user && user.id) {
+      fetchUserData();
+    }
+  }, [user]); // Thêm user vào dependencies
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -31,7 +59,7 @@ export default function UserDropdown({ user }) {
           onMouseEnter={() => setIsOpen(true)}
           onMouseLeave={() => setIsOpen(false)}
         >
-          <AvatarImage src={user?.image || "/placeholder.svg"} alt="User avatar" />
+          <AvatarImage src={userData?.imageName || "/placeholder.svg"} alt="User avatar" />
           <AvatarFallback>{user?.initials || "JD"}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
@@ -45,7 +73,7 @@ export default function UserDropdown({ user }) {
           {/* Ensuring the image stays circular */}
           <div className="h-12 w-12 rounded-full overflow-hidden">
             <img 
-              src={user?.image || "/placeholder.svg"} 
+              src={userData?.imageName || "/placeholder.svg"} 
               alt="User profile" 
               className="h-full w-full object-cover rounded-full" 
             />

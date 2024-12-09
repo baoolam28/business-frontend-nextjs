@@ -12,13 +12,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function OrderCancellation() {
 
-    const { user } = useUser();
+  const { user } = useUser();
   const searchParams = useSearchParams();
   const [shipment, setShipment] = useState(null);
-
+  const shipmentId = searchParams.get('shipmentId');  
 
   useEffect(() => {
-    const shipmentId = searchParams.get('shipmentId');
+    
     console.log("shipmentId: ", shipmentId); 
     // Kiểm tra xem shipmentId đã có chưa
     if (shipmentId) {

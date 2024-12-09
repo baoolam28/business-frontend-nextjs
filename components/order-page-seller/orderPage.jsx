@@ -39,6 +39,7 @@ const Orders = () => {
             const response = await sellerAPI.order.getOrdersOnlineByStoreId(storeId);
             if (response.statusCode === 200) {
                 setOrders(response.data);
+                console.log(response.data)
             } else {
                 console.warn(`Received status code: ${response.status}`);
             }
@@ -69,7 +70,7 @@ const Orders = () => {
 
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
-            const response = await OrderAPI.order.updateOrderById(orderId, newStatus);
+            const response = await OrderAPI.order.updateOrderOnlineById(orderId, newStatus);
             console.log(`Order ${orderId} status updated to ${newStatus}`);
 
             // Optionally update the local state immediately
@@ -107,15 +108,7 @@ const Orders = () => {
                     <div className="p-4">
                         <div className="p-6 bg-gray-50 min-h-screen">
                             <div className="flex justify-between items-center mb-4">
-                                <h1 className="text-2xl font-bold">Orders</h1>
-                                <div className="flex space-x-2">
-                                    <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md flex items-center">
-                                        <i className="fas fa-download mr-2"></i> Export All
-                                    </button>
-                                    <button className="px-4 py-2 bg-blue-500 text-white rounded-md flex items-center">
-                                        <i className="fas fa-plus mr-2"></i> Create Order
-                                    </button>
-                                </div>
+                                <h1 className="text-2xl font-bold">Trạng thái đơn hàng</h1>
                             </div>
                             <div className="flex space-x-4 mb-4">
                                 <button className="px-4 py-2 bg-blue-100 text-blue-700 rounded-md" onClick={() => setSelectedStatus('')}>
@@ -144,12 +137,6 @@ const Orders = () => {
                             </button>
                             </div>
                             <div className="flex justify-between">
-                                <div className="flex items-center space-x-2">
-                                    <button className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md">Select All</button>
-                                    <button className="px-4 py-2 bg-yellow-100 text-yellow-700 rounded-md flex items-center">
-                                        <i className="fas fa-print mr-2"></i> Print
-                                    </button>
-                                </div>
                                 {/* Nút Giao hàng loạt chỉ hiển thị khi status là 'DANG_DONG_GOI' */}
                                 {selectedStatus === 'DANG_DONG_GOI' && (
                                     <button className="px-4 py-2 bg-green-600 text-white rounded-md flex items-center"  onClick={handleBulkDelivery}>
