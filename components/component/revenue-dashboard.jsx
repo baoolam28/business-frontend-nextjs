@@ -13,6 +13,9 @@ import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, startOfYear, en
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import sellerAPI from '../../api/seller';
 import {useStore} from "../../context/StoreContext"; 
+import {showSuccessAlert} from "../../utils/reactSweetAlert"
+
+
 
 
 export default function RevenueDashboardComponent() {
@@ -30,6 +33,13 @@ export default function RevenueDashboardComponent() {
   const [totalOrder, setTotalOrder] = useState([])
   const [customersData, setCustomersData] = useState([])
   const [productsData, setProductsData] = useState([])
+const [isAddingStaff, setIsAddingStaff] = useState(false);
+  const [username, setUsername] = useState('');
+const [password, setPassword] = useState('');
+const [phoneNumber, setPhoneNumber] = useState('');
+const [fullName, setFullName] = useState('');
+const [email, setEmail] = useState('');
+const [staffs, setStaffs] = useState([])
 
         // Hàm xử lý khi chọn ngày
   const handleDateSelect = (newDateRange) => {
@@ -40,6 +50,51 @@ export default function RevenueDashboardComponent() {
         setActiveFilter('custom');
       }
     };
+
+  const handleAddStaff = async () => {
+    const staffData = {
+      username: username,
+      password: password,
+      phoneNumber: phoneNumber,
+      fullName: fullName,
+      email: email,
+      storeId : storeId
+    };
+
+    try {
+      const response = await sellerAPI.auth.createNewStaff(staffData);
+      if (response.statusCode === 200) {
+        // Xử lý khi thêm nhân viên thành công
+        alert('Thêm nhân viên thành công!');
+        setIsAddingStaff(false); // Đóng form
+      } else {
+        alert('Có lỗi xảy ra khi thêm nhân viên');
+      }
+    } catch (error) {
+      console.error('Lỗi khi thêm nhân viên:', error);
+      alert('Lỗi khi thêm nhân viên. Vui lòng thử lại.');
+    }
+  };
+
+const handleDelete = async (userId) => {
+  try {
+    console.log("Gọi API xóa nhân viên với userId:", userId); // Log userId
+    const response = await sellerAPI.auth.deleteStaff(userId);
+    
+    console.log("Kết quả trả về từ API:", response); // Log toàn bộ kết quả trả về
+    if (response.statusCode === 200) { // Kiểm tra mã trạng thái HTTP trả về
+      setStaffs(staffs.filter((staff) => staff.userId !== userId));
+    } else {
+      console.error("Có lỗi xảy ra khi xóa nhân viên", response);
+    }
+  } catch (error) {
+    console.error("Có lỗi xảy ra khi xóa nhân viên:", error);
+  }
+};
+
+
+
+
 
   
 const fetchReportDataByDay = async (startDate, endDate) => {
@@ -149,6 +204,29 @@ const fetchProducts = async () => {
   }
 }
 
+const fetchStaffs = async () => {
+  try {
+    const response = await sellerAPI.auth.getAllStaffByStoreId(storeId);
+
+    if (response.statusCode === 200 && Array.isArray(response.data)) {
+      // Lấy và định dạng lại chỉ với fullName và phoneNumber
+      const formattedStaffs = response.data.map((staff) => ({
+        fullName: staff.fullName,
+        phoneNumber: staff.phoneNumber,
+        userId: staff.userId
+      }));
+
+      console.log(response.data); 
+      setStaffs(formattedStaffs); 
+    } else {
+      console.error("Invalid data format or no data available.");
+    }
+  } catch (error) {
+    console.error("Error fetching staff data:", error);
+  }
+};
+
+
 
 useEffect(() => {
   if (!storeId) return;
@@ -193,6 +271,7 @@ useEffect(() => {
   }
 
   if (storeId) {
+    fetchStaffs();
     fetchReportTotal();
     fetchCustomers();
     fetchProducts();
@@ -230,14 +309,16 @@ const chartData =
     );
   };
 
+  
+
   return (
     (<div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-      <h1 className="text-4xl font-bold text-gray-800 mb-8">Revenue Dashboard</h1>
+      <h1 className="text-4xl font-bold text-gray-800 mb-8">Bảng điều khiển doanh thu</h1>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>Revenue Overview</CardTitle>
-            <CardDescription>View revenue trends over time</CardDescription>
+            <CardTitle>Bảng điều khiển doanh thu</CardTitle>
+            <CardDescription>Xem xu hướng doanh thu theo thời gian</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex justify-between items-center mb-4">
@@ -245,17 +326,17 @@ const chartData =
                 <Button
                   variant={activeFilter === 'day' ? 'default' : 'outline'}
                   onClick={() => { setActiveFilter('day'); setDateRange(undefined); }}>
-                  Today
+                  Ngày hôm nay
                 </Button>
                 <Button
                   variant={activeFilter === 'month' ? 'default' : 'outline'}
                   onClick={() => { setActiveFilter('month'); setDateRange(undefined); }}>
-                  This Month
+                  Tháng này
                 </Button>
                 <Button
                   variant={activeFilter === 'year' ? 'default' : 'outline'}
                   onClick={() => { setActiveFilter('year'); setDateRange(undefined); }}>
-                  This Year
+                  Năm nay
                 </Button>
                  <Popover>
       <PopoverTrigger asChild>
@@ -274,7 +355,7 @@ const chartData =
               format(dateRange.from, 'LLL dd, y')
             )
           ) : (
-            <span>Pick a date range</span>
+            <span>Chọn ngày</span>
           )}
         </Button>
       </PopoverTrigger>
@@ -295,8 +376,8 @@ const chartData =
                   <SelectValue placeholder="Select chart type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="line">Line Chart</SelectItem>
-                  <SelectItem value="bar">Bar Chart</SelectItem>
+                  <SelectItem value="line">Biều đồ đường</SelectItem>
+                  <SelectItem value="bar">Biểu đồ cột</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -306,8 +387,8 @@ const chartData =
 
         <Card>
           <CardHeader>
-            <CardTitle>Top Selling Products</CardTitle>
-            <CardDescription>Best performers this month</CardDescription>
+            <CardTitle>Sản phẩm được mua nhiều</CardTitle>
+            <CardDescription>Sản phấm bán chạy nhất</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -315,21 +396,21 @@ const chartData =
                 <div key={index} className="flex items-center space-x-4">
                   <div>
                     <h3 className="font-semibold">{product.name}</h3>
-                    <p className="text-sm text-gray-500">{product.sold} units sold</p>
+                    <p className="text-sm text-gray-500">{product.sold} đã bán</p>
                   </div>
                 </div>
               ))}
             </div>
             <Button variant="link" className="mt-4">
-              View More <ArrowRight className="ml-2 h-4 w-4" />
+              Xem thêm <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </CardContent>
         </Card>
 
         <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>Top Customers</CardTitle>
-            <CardDescription>Based on number of purchases</CardDescription>
+            <CardTitle>Khách hàng mua nhiều nhất</CardTitle>
+            <CardDescription>Số lượng khách hàng mua</CardDescription>
           </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -338,7 +419,7 @@ const chartData =
                 <div className="flex items-center space-x-4">
                   <div>
                     <h3 className="font-semibold">{customer.name}</h3>
-                    <p className="text-sm text-gray-500">{customer.orders} orders</p>
+                    <p className="text-sm text-gray-500">{customer.orders} đơn</p>
                   </div>
                 </div>
                 <Badge variant={customer.rank}>{customer.rank}</Badge>
@@ -350,7 +431,7 @@ const chartData =
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            <CardTitle className="text-sm font-medium">Tổng doanh thu của cửa hàng</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -371,12 +452,103 @@ const chartData =
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
+            <CardTitle className="text-sm font-medium">Danh sách nhân viên</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12,234</div>
-            <p className="text-xs text-muted-foreground">+19% from last month</p>
+            {/* Hiển thị danh sách nhân viên */}
+                <div className="space-y-2">
+                 {staffs.map((staff, index) => (
+                  <div key={index} className="flex justify-between text-sm font-medium">
+                    <span>{staff.fullName}</span>
+                    <span>{staff.phoneNumber}</span>
+                    <button
+                      onClick={() => {
+                        console.log("Kiểm tra userId:", staff.userId); // Kiểm tra giá trị userId
+                        if (staff.userId) {
+                          handleDelete(staff.userId);
+                        } else {
+                          console.error("userId không hợp lệ cho nhân viên", staff);
+                        }
+                        showSuccessAlert("Xoá nhân viên", "Xoá thành công")
+                        window.location.reload();
+                      }}
+                    >
+                      Xóa
+                    </button>
+                  </div>
+                ))}
+
+              </div>
+            </CardContent>
+          </Card>
+         {/* New card to add staff */}
+           <Card>
+          <CardHeader>
+            <CardTitle>Thêm Nhân Viên</CardTitle>
+            <CardDescription>Click vào để thêm nhân viên mới</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!isAddingStaff ? (
+              <Button onClick={() => setIsAddingStaff(true)} variant="default">
+                Thêm Nhân Viên
+              </Button>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px', margin: '0 auto', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+                <input
+                  type="text"
+                  placeholder="Nhập username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
+                />
+                <input
+                  type="password"
+                  placeholder="Nhập mật khẩu"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
+                />
+                <input
+                  type="text"
+                  placeholder="Nhập số điện thoại"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
+                />
+                <input
+                  type="text"
+                  placeholder="Nhập tên đầy đủ"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
+                />
+                <input
+                  type="email"
+                  placeholder="Nhập email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '16px', width: '100%', boxSizing: 'border-box' }}
+                />
+                <Button 
+                  onClick={() => {
+                    handleAddStaff(); 
+                    setUsername('');
+                    setPassword('');
+                    setPhoneNumber('');
+                    setFullName('');
+                    setEmail('');
+                    showSuccessAlert("Thêm nhân viên", "thêm thành công")
+                    window.location.reload();
+                  }}  
+                  style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', fontSize: '16px', cursor: 'pointer', transition: 'background-color 0.3s' }}
+                  onMouseOver={(e) => e.target.style.backgroundColor = '#45a049'}
+                  onMouseOut={(e) => e.target.style.backgroundColor = '#4CAF50'}
+                >
+                  Thêm nhân viên
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
