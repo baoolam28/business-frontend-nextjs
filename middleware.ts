@@ -11,7 +11,7 @@ const roleAccess = {
 };
 
 // Đường dẫn không yêu cầu đăng nhập
-const publicPaths = ["/home-page", "/about", "/contact"]; // Thêm đường dẫn cần thiết
+const publicPaths = ["/home-page", "/about", "/contact","register"]; // Thêm đường dẫn cần thiết
 
 const redirectTo = (role) => {
     switch (role) {
@@ -34,11 +34,13 @@ export default async function middleware(req) {
   const userRole = token?.role; // Lấy vai trò của người dùng từ token
   const pathname = req.nextUrl.pathname;
 
+
   // Xác định nếu đường dẫn yêu cầu là trang đăng nhập hoặc đăng ký
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
 
   // Nếu trang không yêu cầu đăng nhập
   const isPublicPage = publicPaths.some((path) => pathname.startsWith(path));
+
 
   // Nếu trang yêu cầu là public, không cần kiểm tra xác thực
   if (isPublicPage) {

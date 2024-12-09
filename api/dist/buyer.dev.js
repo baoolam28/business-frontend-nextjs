@@ -1,12 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports["default"] = void 0;
-
-var _domain = require("domain");
-
 var _axiosClient = _interopRequireDefault(require("./axiosClient"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
@@ -15,7 +8,7 @@ var baseUrl = "/api/buyer";
 var buyerAPI = {
   product: {
     getAllProducts: function getAllProducts() {
-      return _axiosClient["default"].get("".concat(baseUrl, "/products"));
+      return _axiosClient["default"].get("".concat(baseUrl, "/products/online"));
     },
     getAllBestSeller: function getAllBestSeller() {
       return _axiosClient["default"].get("".concat(baseUrl, "/products/bestseller"));
@@ -39,28 +32,30 @@ var buyerAPI = {
     }
   },
   cart: {
-    // Lấy thông tin giỏ hàng theo userId
     getCartByUserId: function getCartByUserId(userId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/cart/get-by-user/").concat(userId));
     },
-    // Thêm sản phẩm vào giỏ hàng
     addToCart: function addToCart(cartRequest) {
       return _axiosClient["default"].post("".concat(baseUrl, "/cart/add-to-cart"), cartRequest);
     },
-    // Cập nhật sản phẩm trong giỏ hàng
-    updateCart: function updateCart(cartRequest) {
-      return _axiosClient["default"].put("".concat(baseUrl, "/cart/update-cart"), cartRequest);
+    updateCartByUserId: function updateCartByUserId(data) {
+      return _axiosClient["default"].put("".concat(baseUrl, "/cart"), data);
+    }
+  },
+  orderStatus: {
+    getAllOrderStatus: function getAllOrderStatus(userId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/purchase/orderOnline/").concat(userId));
     },
-    // Xóa sản phẩm khỏi giỏ hàng
-    deleteProductFromCart: function deleteProductFromCart(cartRequest) {
-      return _axiosClient["default"]["delete"]("".concat(baseUrl, "/cart/delete-product"), {
-        data: cartRequest
-      });
+    getShipment: function getShipment(shipmentId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/purchase/").concat(shipmentId));
     }
   },
   shippingAddress: {
     getShippingAddressByUserId: function getShippingAddressByUserId(userId) {
       return _axiosClient["default"].get("".concat(baseUrl, "/shipping-addresses/").concat(userId));
+    },
+    getAddressById: function getAddressById(addressId) {
+      return _axiosClient["default"].get("".concat(baseUrl, "/shipping-addresses/address/").concat(addressId));
     },
     createShippingAddressByUserId: function createShippingAddressByUserId(data) {
       return _axiosClient["default"].post("".concat(baseUrl, "/shipping-addresses"), data);
@@ -74,11 +69,35 @@ var buyerAPI = {
       return _axiosClient["default"].post("".concat(baseUrl, "/ordersOnline"), data);
     }
   },
+  register: {
+    createNewUser: function createNewUser(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/register"), data);
+    }
+  },
+  otp: {
+    sendOtp: function sendOtp(phoneNumber) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/send-otp"), {
+        phoneNumber: phoneNumber
+      });
+    },
+    verifyOtp: function verifyOtp(data) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/verify-otp"), data);
+    }
+  },
   store: {
     createStore: function createStore(dataStore) {
       return _axiosClient["default"].post("".concat(baseUrl, "/stores"), dataStore);
     }
+  },
+  resetPassword: {
+    sendEmail: function sendEmail(data) {
+      return _axiosClient["default"].put("".concat(baseUrl, "/send-mail"), data);
+    },
+    resetPasswordEmail: function resetPasswordEmail(data) {
+      return _axiosClient["default"].put("".concat(baseUrl, "/reset-password-email"), data);
+    },
+    resetPasswordPhoneNumber: function resetPasswordPhoneNumber(data) {
+      return _axiosClient["default"].put("".concat(baseUrl, "/reset-password-phone"), data);
+    }
   }
 };
-var _default = buyerAPI;
-exports["default"] = _default;

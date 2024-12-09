@@ -274,7 +274,7 @@ export default function OrderPage() {
               <div key={detailIndex} className="flex justify-between items-start mb-4">
                 <div className="flex space-x-4">
                   <img
-                    src={detail.image||"/placeholder.svg"}
+                    src={detail.image? detail.image : "/placeholder.svg"}
                     alt="Product"
                     width={80}
                     height={80}
@@ -292,7 +292,7 @@ export default function OrderPage() {
                             </div>
                           ))}
                     </div>
-                    <p className="text-sm text-gray-500">x{detail.quantity}</p>
+                    <p className="text-sm text-gray-500">SL: {detail.quantity}</p>
                   </div>
                 </div>
                 <div className="text-right">

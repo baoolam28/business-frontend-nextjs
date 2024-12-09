@@ -1,61 +1,62 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import ProductCard from "./ProductCard";
 import BuyerAPI from "../../api/buyer";
 import { motion, AnimatePresence } from "framer-motion";
 
 const FlashSale = () => {
-  const [flashSaleProducts, setFlashSaleProducts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const itemsPerPage = 4;
   const fallbackImage = "https://via.placeholder.com/150";
   const [direction, setDirection] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(true);
+  const [autoSlideActive, setAutoSlideActive] = useState(true);
   const autoSlideInterval = useRef(null);
+  const autoSlideTimeout = useRef(null);
 
-  // Fetch products on mount
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await BuyerAPI.product.getAllProducts();
-        if (response.statusCode === 200) {
-          const filteredProducts = response.data.map((product) => ({
-            id: product.productId,
-            name: product.productName,
-            discount: 0,
-            currentPrice: product.price,
-            originalPrice: "100",
-            rating: 4.5,
-            reviews: 65,
-            image: fallbackImage,
-          }));
-          setFlashSaleProducts(filteredProducts);
-        }
-      } catch (error) {
-        console.error("Error fetching products:", error);
+  // Fetch products using React Query
+  const { data: flashSaleProducts = [], isLoading, error } = useQuery({
+    queryKey: ["flashSaleProducts"],
+    queryFn: async () => {
+      const response = await BuyerAPI.product.getAllProducts();
+      if (response.statusCode === 200) {
+        return response.data.map((product) => ({
+          id: product.productId || '',
+          name: product.productName,
+          discount: 0,
+          currentPrice: product.price,
+          originalPrice: "100",
+          rating: product.rating || 0,
+          reviews: product.totalReviews || 0,
+          image: product.images ? product.images[0] : fallbackImage,
+        }));
+      } else {
+        throw new Error("Failed to fetch products");
       }
-    };
-    fetchProducts();
-  }, []);
+    },
+    cacheTime: 1000 * 60 * 10, // Cache for 10 minutes
+    staleTime: 1000 * 60 * 10,
+    refetchOnWindowFocus: false, // Prevent refetching on window focus
+  });
 
-  // Auto-slide every 3 seconds
   useEffect(() => {
-    if (flashSaleProducts.length > 0) {
+    if (flashSaleProducts.length > 0 && autoSlideActive) {
       startAutoSlide(); // Start auto-slide on mount
       return () => stopAutoSlide(); // Cleanup on unmount
     }
-  }, [flashSaleProducts.length]);
+  }, [flashSaleProducts.length, autoSlideActive]);
 
-  // Start the auto-slide interval
   const startAutoSlide = () => {
     if (autoSlideInterval.current) return; // Prevent creating multiple intervals
     autoSlideInterval.current = setInterval(() => {
-      handleManualNavigation(1); // Move to the next slide
-    }, 3000); // 3000ms = 3 seconds
+      if (autoSlideActive) {
+        handleManualNavigation(1); // Move to the next slide
+      }
+    }, 2000); // 3000ms = 3 seconds
   };
 
-  // Stop the auto-slide interval
   const stopAutoSlide = () => {
     if (autoSlideInterval.current) {
       clearInterval(autoSlideInterval.current);
@@ -63,22 +64,29 @@ const FlashSale = () => {
     }
   };
 
-  // Manual slide navigation
+  const resetAutoSlide = () => {
+    setAutoSlideActive(false);
+    if (autoSlideTimeout.current) clearTimeout(autoSlideTimeout.current);
+    autoSlideTimeout.current = setTimeout(() => {
+      setAutoSlideActive(true);
+    }, 5000); // 10 seconds
+  };
+
   const handleManualNavigation = (dir) => {
-    if (isAnimating) return; // Prevent multiple animations
+    resetAutoSlide(); // Stop auto-slide and reset timeout
+    if (!isAnimating) return; // Prevent multiple animations
     setDirection(dir);
     setIsAnimating(true); // Disable navigation while animating
 
     setCurrentIndex((prevIndex) => {
-      if (dir === 1) {
-        return prevIndex + itemsPerPage >= flashSaleProducts.length
-          ? 0
-          : prevIndex + itemsPerPage;
-      }
-      return prevIndex - itemsPerPage < 0
-        ? Math.max(flashSaleProducts.length - itemsPerPage, 0)
-        : prevIndex - itemsPerPage;
+      const newIndex = dir === 1
+        ? (prevIndex + itemsPerPage >= flashSaleProducts.length ? 0 : prevIndex + itemsPerPage)
+        : (prevIndex - itemsPerPage < 0 ? Math.max(flashSaleProducts.length - itemsPerPage, 0) : prevIndex - itemsPerPage);
+
+      return newIndex;
     });
+
+    
   };
 
   const displayedProducts = flashSaleProducts.slice(
@@ -88,27 +96,28 @@ const FlashSale = () => {
 
   const slideVariants = {
     enter: (direction) => ({
-      x: direction > 0 ? 300 : -300,
+      x: direction > 0 ? 300 : -300, // Slide from left or right
       opacity: 0,
-      scale: 0.8,
     }),
     center: {
       x: 0,
       opacity: 1,
-      scale: 1,
       transition: {
-        duration: 0.5, // Smoother and controlled transition
+        duration: 0.5,
       },
     },
     exit: (direction) => ({
-      x: direction < 0 ? 300 : -300,
+      x: direction < 0 ? 300 : -300, // Slide out to left or right
       opacity: 0,
-      scale: 0.8,
       transition: {
-        duration: 0.3, // Exit faster
+        duration: 0.3,
       },
     }),
   };
+
+  if (isLoading) return <p>Loading products...</p>;
+  if (error) return <p>Error loading products: {error.message}</p>;
+  if (flashSaleProducts.length === 0) return <p>No products available.</p>;
 
   return (
     <section className="flex flex-col items-center self-center mt-10 w-full max-w-[1305px] max-md:max-w-full">
@@ -135,26 +144,34 @@ const FlashSale = () => {
         custom={direction}
         onExitComplete={() => setIsAnimating(false)} // Enable navigation after animation
       >
-        <motion.div
-          key={currentIndex}
-          custom={direction}
-          variants={slideVariants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          className="flex gap-8 items-start mt-10 max-md:max-w-full"
-        >
-          {displayedProducts.map((product, index) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 0 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <ProductCard {...product} />
-            </motion.div>
-          ))}
-        </motion.div>
+        <div style={{ height: "450px", overflow: "hidden", position: "relative" }}>
+          <motion.div
+            key={currentIndex}
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            style={{
+              display: "flex",
+              gap: "2rem",
+              alignItems: "center",
+              marginTop: "2.5rem",
+              maxWidth: "100%",
+            }}
+          >
+            {displayedProducts.map((product, index) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <ProductCard {...product} />
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
       </AnimatePresence>
 
       <div className="flex gap-2 items-start mt-5">
@@ -162,7 +179,6 @@ const FlashSale = () => {
           aria-label="Previous"
           className="focus:outline-none transform transition-transform duration-300 hover:scale-110"
           onClick={() => handleManualNavigation(-1)}
-          disabled={isAnimating} // Disable button during animation
         >
           <img
             loading="lazy"
@@ -175,7 +191,6 @@ const FlashSale = () => {
           aria-label="Next"
           className="focus:outline-none transform transition-transform duration-300 hover:scale-110"
           onClick={() => handleManualNavigation(1)}
-          disabled={isAnimating} // Disable button during animation
         >
           <img
             loading="lazy"

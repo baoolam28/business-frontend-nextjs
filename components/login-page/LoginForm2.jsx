@@ -41,9 +41,9 @@ export default function LoginPage() {
       <main className="flex justify-center items-center min-h-screen bg-white p-8">
         <div className="flex flex-row gap-8 bg-white rounded-lg shadow-lg max-w-5xl w-full max-md:flex-col">
           <section className="w-1/2 max-md:w-full">
-            <Image
+            <img
               loading="lazy"
-              src="/placeholder.svg"
+              src="https://media.vneconomy.vn/images/upload/2024/04/13/ecommerce-fevad-2023.jpg"
               alt="Login illustration"
               width={800}
               height={600}

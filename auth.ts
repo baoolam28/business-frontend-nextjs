@@ -13,6 +13,7 @@ const handleToken = (token, user, provider, accessToken) => {
       username: user.username || user.email,
       fullName: user.fullName || user.name,
       image: user.image || null,
+      role: user.role ? user.role.match(/roleName=([A-Z_]+)/)?.[1] : null,
       active: user.active !== undefined ? user.active : true,
     };
     token.role = user.role ? user.role.match(/roleName=([A-Z_]+)/)?.[1] : null;
@@ -27,6 +28,7 @@ const handleToken = (token, user, provider, accessToken) => {
       username: user.username,
       fullName: user.fullName,
       phoneNumber: user.phoneNumber,
+      role: user.role ? user.role.match(/roleName=([A-Z_]+)/)?.[1] : null,
       active: user.active,
     };
   }

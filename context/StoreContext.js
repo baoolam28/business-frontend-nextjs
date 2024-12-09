@@ -15,9 +15,12 @@ export const StoreProvider = ({ children }) => {
   useEffect(() => {
    
     if (user && user.id) {
-      console.log("Current userId:", user.id);      
+      
+      if(user.role == "" || user.role == ""){
+        return
+      }
+      
       async function fetchStore() {
-        console.log("get storeID" );
         try {
           const res = await sellerAPI.store.getStoreByUserId(user.id);
           if(res.statusCode === 200) {

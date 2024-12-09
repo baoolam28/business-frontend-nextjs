@@ -8,27 +8,30 @@ import { Label } from "../../components/ui/label";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../../components/ui/card";
-import {  Star, MapPin ,Store } from "lucide-react";
+import { Star, MapPin, Store } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
-
+import dynamic from 'next/dynamic'
 const Category = () => {
   const searchParams = useSearchParams();
-  const categoryId = searchParams.get("id"); 
+  const categoryId = searchParams.get("id");
   const [products, setProducts] = useState([]); 
   const [loading, setLoading] = useState(true); 
   const [sortOrder, setSortOrder] = useState("asc"); 
   const [selectedStore, setSelectedStore] = useState(""); 
   const [stores, setStores] = useState([]);
   const [selectedRating, setSelectedRating] = useState(0); 
+
+
+
   useEffect(() => {
     const fetchStores = async () => {
       try {
-        const response = await buyerAPI.category.getAllSotre(); 
+        const response = await buyerAPI.category.getAllSotre();
         if (response.statusCode === 200 && response.data) {
           setStores(response.data);
         } else {
@@ -39,29 +42,22 @@ const Category = () => {
       }
     };
 
-    fetchStores(); 
+    fetchStores();
   }, []);
-
-
-  const handlePriceChange = ({values , number},[]) => {
-    setMinPrice(values[0])
-    setMaxPrice(values[1])
-  }
 
   useEffect(() => {
     const fetchProductsByCategory = async () => {
       try {
-        const response = await buyerAPI.category.getProductByCategory(categoryId); 
+        const response = await buyerAPI.category.getProductByCategory(categoryId);
         if (response.statusCode === 200) {
-          setProducts(response.data); 
-          console.log(response.data)
+          setProducts(response.data);
         } else {
           console.error("Failed to fetch products:", response.status);
         }
       } catch (error) {
         console.error("Error fetching products:", error);
       } finally {
-        setLoading(false); 
+        setLoading(false);
       }
     };
 
@@ -69,12 +65,9 @@ const Category = () => {
       fetchProductsByCategory();
     } else {
       console.error("No categoryId found.");
+      setLoading(false);
     }
-  }, [categoryId]);
-
-  if (loading) {
-    return <p>Loading products...</p>; 
-  }
+  }, [categoryId]); 
 
   const sortProducts = (order) => {
     const sortedProducts = [...products].sort((a, b) => {
@@ -90,8 +83,16 @@ const Category = () => {
   };
 
   const handleRatingClick = (rating) => {
-    setSelectedRating(rating); // Cập nhật rating được chọn
+    setSelectedRating(rating);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <h4>Loading products...</h4>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -105,101 +106,98 @@ const Category = () => {
                 <h2 className="text-lg font-semibold mb-2">Search</h2>
                 <Input type="text" placeholder="Search products..." />
               </div>
-                <h3 className="mb-2">Lọc theo cửa hàng</h3>
-                <select
-                  className="py-2 px-4 border rounded"
-                  value={selectedStore}
-                  onChange={(e) => filterByStore(e.target.value)}
-                >
-                  <option value="">Chọn cửa hàng</option>
-                  {stores.map((store) => (
-                    <option key={store.id} value={store.storeName}>{store.storeName}</option>
-                  ))}
-                </select>
-
+              <h3 className="mb-2">Filter by Store</h3>
+              <select
+                className="py-2 px-4 border rounded"
+                value={selectedStore}
+                onChange={(e) => filterByStore(e.target.value)}
+              >
+                <option value="">Select Store</option>
+                {stores.map((store) => (
+                  <option key={store.storeId} value={store.storeName}>
+                    {store.storeName}
+                  </option>
+                ))}
+              </select>
               <div>
-                <h2 className="text-lg font-semibold mb-2">Price Range</h2>   
-                  {/* Dropdown sắp xếp theo giá */}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button>Sắp xếp: {sortOrder === "asc" ? "Giá tăng dần" : "Giá giảm dần"}</Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => sortProducts("asc")}>Giá tăng dần</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => sortProducts("desc")}>Giá giảm dần</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                <h2 className="text-lg font-semibold mb-2">Sort by Price</h2>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button>Sort: {sortOrder === "asc" ? "Low to High" : "High to Low"}</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem onClick={() => sortProducts("asc")}>Low to High</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => sortProducts("desc")}>High to Low</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               <div>
                 <h2 className="text-lg font-semibold mb-2">Rating</h2>
                 <div className="flex items-center">
-                  {[1, 2, 3, 4, 5].map((rating, index) => (
-                    <div key={rating} onClick={() => handleRatingClick(rating)} className="cursor-pointer">
-                      <Star key={index} className={`w-5 h-5 ${rating <= selectedRating ? 'text-yellow-400' : 'text-gray-400'} fill-current`} />
-                    </div>
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <Star
+                      key={rating}
+                      className={`w-5 h-5 cursor-pointer ${
+                        rating <= selectedRating ? "text-yellow-400" : "text-gray-400"
+                      }`}
+                      onClick={() => handleRatingClick(rating)}
+                    />
                   ))}
                   <span className="ml-2">& Up</span>
                 </div>
               </div>
-
-              <div>
-                <h2 className="text-lg font-semibold mb-2">Location</h2>
-                <Input type="text" placeholder="Enter location..." />
-              </div>
-
               <Button className="w-full bg-primary hover:bg-primary/90">Apply Filters</Button>
             </CardContent>
           </Card>
         </div>
-
         {/* Product List */}
         <div className="w-full md:w-[78%] p-4">
-          {/* Danh sách sản phẩm */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.filter((product) => (!selectedStore || product.storeName === selectedStore) &&
-                                          (selectedRating === 0 || product.rating >= selectedRating) ).map((product, index) => (
-              <Card key={index} className="overflow-hidden transition-shadow hover:shadow-lg">
-                <CardHeader className="p-0">
-                  <div className="h-48 bg-gray-200">
-                    <img
-                      src={product.imageUrl || `/placeholder.svg?height=192&width=384`}
-                      alt={product.productName}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <CardTitle className="text-lg mb-2">{product.productName}</CardTitle>
-                  <p className="text-sm text-muted-foreground mb-2">{product.price} VND</p>
-                  <div className="flex items-center mb-2">
-                    {[...Array(5)].map((_, index) => (
-                      <Star
-                        key={index}
-                        className={`w-4 h-4 ${index < (product.rating || 0) ? "text-yellow-400 fill-current" : "text-gray-300"}`}
+            {products
+              .filter(
+                (product) =>
+                  (!selectedStore || product.storeName === selectedStore) &&
+                  (selectedRating === 0 || product.rating >= selectedRating)
+              )
+              .map((product) => (
+                <Card key={product.productId} className="overflow-hidden transition-shadow hover:shadow-lg">
+                  <CardHeader className="p-0">
+                    <div className="h-48 bg-gray-200">
+                      <img
+                        src={product.images ? product.images[0] : `/placeholder.svg?height=192&width=384`}
+                        alt={product.productName}
+                        className="w-full h-full object-cover"
                       />
-                    ))}
-                    <span className="ml-2 text-sm text-muted-foreground">({product.totalReviews || "0.0"})</span>
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground mb-1">
-                    <MapPin className="w-4 h-4 mr-1" /> {/* Icon vị trí nằm trước địa chỉ */}
-                    <span className="ml-2 text-sm">{product.pickupAddress || "Địa chỉ không xác định"}</span>
-                  </div>
-                  <div className="flex items-center text-sm text-muted-foreground">
-                    <Store className="w-4 h-4 mr-1" />  
-                    <span className="font-semibold text-gray-800">{product.storeName}</span> {/* Tên cửa hàng */}
-                  </div>
-                </CardContent>
-                <CardFooter className="p-4">
-                  <Button className="w-full">Thêm vào giỏ hàng</Button>
-                </CardFooter>
-              </Card>
-            ))}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <CardTitle className="text-lg mb-2">{product.productName}</CardTitle>
+                    <h4 className="text-sm text-muted-foreground mb-2">{product.price} VND</h4>
+                    <div className="flex items-center mb-2">
+                      {[...Array(5)].map((_, index) => (
+                        <Star
+                          key={index}
+                          className={`w-4 h-4 ${
+                            index < (product.rating || 0) ? "text-yellow-400 fill-current" : "text-gray-300"
+                          }`}
+                        />
+                      ))}
+                      <span className="ml-2 text-sm text-muted-foreground">({product.totalReviews || "0.0"})</span>
+                    </div>
+                  </CardContent>
+                  <CardFooter className="p-4">
+                    <a href={`/prductDetail?id=${product.productId}`} className="w-full">
+                      <Button className="w-full">View Details</Button>
+                    </a>
+                  </CardFooter>
+                </Card>
+              ))}
           </div>
         </div>
-      </div>  
+      </div>
       <Footer />
     </div>
   );
 };
 
-export default Category;
+export default dynamic(() => Promise.resolve(Category),{ssr: false});
