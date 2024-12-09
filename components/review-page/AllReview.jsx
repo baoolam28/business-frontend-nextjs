@@ -162,7 +162,7 @@ export default function ReviewPage({ productId }) {
                                     <div className="grid grid-cols-5 gap-4">
                                         {review.imageUrls?.map((imageUrl, i) => (
                                             <div key={i} className="relative rounded-lg overflow-hidden bg-gray-200 h-24">
-                                                <Image
+                                                <img
                                                     src={imageUrl || "/placeholder.svg"}
                                                     alt={`Review image ${i + 1}`}
                                                     fill

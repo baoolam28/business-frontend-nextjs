@@ -56,6 +56,7 @@ const buyerAPI = {
     getAllReviews : (productId, rating) => axiosClient.get(`${baseUrl}/reviews/products/${productId}?rating=${rating}`),
     getProductDetail : (productDetailId) => axiosClient.get(`${baseUrl}/reviews/${productDetailId}`),
     getReview : (productDetailId, userId) => axiosClient.get(`${baseUrl}/reviews/review?productDetailId=${productDetailId}&userId=${userId}`),
+    checkIfReviewed : (productDetailId, userId) => axiosClient.get(`${baseUrl}/reviews/is-reviewed?productDetailId=${productDetailId}&userId=${userId}`),
     createNewReview : (productDetailId, reviewData) => axiosClient.post(`${baseUrl}/reviews/newReview/${productDetailId}`, reviewData),
     updateReview : (reviewId, data) => axiosClient.put(`${baseUrl}/reviews/update-review/${reviewId}`, data),
     updateLikeCount : (reviewId) => axiosClient.put(`${baseUrl}/reviews`, {reviewId}),

@@ -70,9 +70,11 @@ export default function ProductReviewPage() {
       console.log("Review data to send:", reviewData);
       const response = await buyerAPI.review.createNewReview(productDetailId, reviewData);
       if (response.statusCode === 200) {
-        console.log("Review submitted successfully:", response.data);
-        router.push('/shipmentSuccessfully'); 
+        console.log("Review submitted successfully:", response.data); 
         showSuccessAlert("Thành công", "Đã xác nhận sản phẩm thành công");
+
+        const shipmentId = searchParams.get('shipmentId');
+        router.push(`/shipmentSuccessfully?shipmentId=${shipmentId}`);
       }
     } catch (error) {
       console.error("Error submitting review:", error);
