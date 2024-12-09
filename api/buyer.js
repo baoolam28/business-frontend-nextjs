@@ -1,4 +1,4 @@
-import { create } from "domain";
+
 import axiosClient from "./axiosClient";
 const baseUrl = "/api/buyer";
 const buyerAPI = {
@@ -95,4 +95,3 @@ const buyerAPI = {
   },
 };
 
-export default buyerAPI;

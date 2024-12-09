@@ -53,6 +53,7 @@
     "quagga": "^0.12.1",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
+    "react-helmet": "^6.1.0",
     "react-lottie": "^1.2.4",
     "react-router-dom": "^6.26.2",
     "react-to-print": "^2.15.1",

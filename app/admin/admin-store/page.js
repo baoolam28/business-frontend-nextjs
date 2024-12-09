@@ -1,15 +1,15 @@
 import React from 'react'
-import RegisterPage from "../../components/register-page/SignUpPage"
+import AdminStore from "../../../components/admin-store/user-management-page"
 
 export const metadata = {
-  title: 'Register',
+  title: 'Admin Store' ,
   description: 'This is a description for My Custom Site',
 };
 
-export default function Register() {
+export default function Contact() {
   return (
     <div>
-        <RegisterPage/>
+       <AdminStore />
     </div>
   )
 }

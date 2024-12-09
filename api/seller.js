@@ -42,8 +42,6 @@ const sellerAPI = {
   store: {
     getStoreByUserId: (userId) =>
       axiosClient.get(`${baseUrl}/store/by-user/${userId}`),
-    getAllOrderByStoreId: (storeId) =>
-      axiosClient.get(`${baseUrl}/orders-online/stores/${storeId}`),
   },
 
   document: {

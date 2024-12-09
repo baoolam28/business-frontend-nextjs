@@ -10,20 +10,28 @@ function Story() {
         <div className="flex flex-col w-[43%] max-md:ml-0 max-md:w-full">
           <div className="flex flex-col self-stretch my-auto max-md:mt-10 max-md:max-w-full">
             <h2 className="text-6xl font-semibold leading-none text-justify text-black tracking-[3.24px] max-md:text-4xl">
-              Our Story
+              Trang web của chúng tôi 
             </h2>
             <div className="flex flex-col mt-10 max-w-full text-base leading-7 text-black w-[525px]">
               <p className="max-md:max-w-full">
-                Launced in 2015, Exclusive is South Asia's premier online
-                shopping makterplace with an active presense in Bangladesh.
-                Supported by wide range of tailored marketing, data and service
-                solutions, Exclusive has 10,500 sallers and 300 brands and
-                serves 3 millioons customers across the region.
+                <p className="">về người mua</p>
+                Được xuất hiện vào năm 2024 , chúng tôi luôn muốn mang lại cho người dùng trải nghiệp tốt nhất
+                về việc mua hàng hóa online. Hiện nay già trẻ lớn bé ai cũng muốn mua hàng nhanh chóng thuận tiện
+                , mua những món đồ hữu ích cho cá nhân nhưng các cửa hàng gần nhà không ai bán ,
+                và trang web được xuất hiện khi nhu cầu người dùng quá lớn , ai cũng có thể mua hàng hóa cho riêng mình
+                bất kể dù gần hay xa xôi. 
               </p>
               <p className="mt-6 max-md:max-w-full">
-                Exclusive has more than 1 Million products to offer, growing at
-                a very fast. Exclusive offers a diverse assotment in categories
-                ranging from consumer.
+                <p className="">Về người bán</p>
+                Chúng tôi luôn muốn các mặt hàng đa dạng , nên người bán có thể đăng ký các hủ tục
+                online , bán hàng online , đa dạng hàng hóa , cung cấp và nhu cầu người dùng hợp lý 
+                chúng tôi muốn trang web của mình thành một cái chợ online 
+              </p>
+              <p className="mt-6 max-md:max-w-full">
+                <p className="">Về chúng tôi</p>
+                  Trang web đầu tay chúng em làm còn sai sót nhiều , cũng là tâm huyết của cả nhóm đặt biệt là trưởng nhóm 
+                  , vì là trang web đầu tay có thể gọi chỉnh chu , chúng em mong các quý thầy cô thông cảm và góp ý cho chúng
+                  em lấy kinh nghiệm cho các chặng đường sau này. 
               </p>
             </div>
           </div>
