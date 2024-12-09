@@ -88,19 +88,20 @@ const sellerAPI = {
         params: {
           startDate: startDate,
           endDate: endDate,
-        },
-      }),
-    getOrderByMonth: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/by-month`),
-    getOrderByYear: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/by-year`),
-    getTotalOrder: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/total-value`),
-    getTop3Customers: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/top-customers`),
-    getTop3Products: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/top-products`),
+        }
+      }
+    ),
+    getOrderByMonth: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-month`),
+    getOrderByYear: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-year`),
+    getTotalOrder: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/total-value`),
+    getTop3Customers: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/top-customers`),
+    getTop3Products: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/top-products`)
   },
+  auth: {
+    getAllStaffByStoreId: (storeId) => axiosClient.get(`${baseUrl}/auth/${storeId}`),
+    createNewStaff: (staffData) => axiosClient.post(`${baseUrl}/auth`, staffData),
+    deleteStaff: (userId) => axiosClient.delete(`${baseUrl}/auth/${userId}`)
+  }
 };
 
 export default sellerAPI;
