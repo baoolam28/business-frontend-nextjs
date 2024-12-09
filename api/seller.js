@@ -92,6 +92,11 @@ const sellerAPI = {
     getTotalOrder: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/total-value`),
     getTop3Customers: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/top-customers`),
     getTop3Products: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/top-products`)
+  },
+  auth: {
+    getAllStaffByStoreId: (storeId) => axiosClient.get(`${baseUrl}/auth/${storeId}`),
+    createNewStaff: (staffData) => axiosClient.post(`${baseUrl}/auth`, staffData),
+    deleteStaff: (userId) => axiosClient.delete(`${baseUrl}/auth/${userId}`)
   }
 };
 
