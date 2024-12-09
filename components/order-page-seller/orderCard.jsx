@@ -23,6 +23,7 @@ export default function OrderCard({ orders, updateOrderStatus }) {
   };
 
   const handleViewDetails = (order) => {
+    console.log("order: " + JSON.stringify(order))
     setSelectedOrder(order); // Set the selected order
   };
 
@@ -133,7 +134,7 @@ export default function OrderCard({ orders, updateOrderStatus }) {
       ) : (
         <p>Không có đơn hàng nào</p>
       )}
-      {selectedOrder && <OrderDetail order={selectedOrder} />} {/* Render OrderDetail if selectedOrder is not null */}
+      {selectedOrder && <OrderDetail order={selectedOrder} onCloseDetail={() => setSelectedOrder(null)} />} {/* Render OrderDetail if selectedOrder is not null */}
     </>
   );
 }

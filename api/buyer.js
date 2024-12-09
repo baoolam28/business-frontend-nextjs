@@ -95,3 +95,4 @@ const buyerAPI = {
   },
 };
 
+export default buyerAPI;
