@@ -39,7 +39,7 @@ const Orders = () => {
             const response = await sellerAPI.order.getOrdersOnlineByStoreId(storeId);
             if (response.statusCode === 200) {
                 setOrders(response.data);
-                console.log(response.data)
+                console.log("Order response: " +JSON.stringify(response));
             } else {
                 console.warn(`Received status code: ${response.status}`);
             }
@@ -51,7 +51,10 @@ const Orders = () => {
     const handleBulkDelivery = async () => {
         try {
             const orderIds = Array.from(selectedOrders); // Lấy mảng ID của các đơn hàng đã chọn
-            const response = await OrderAPI.order.udateOrderByStoreID(storeId, 'DANG_GIAO_HANG');
+            const data = {
+                status: 'DANG_GIAO_HANG'
+            }
+            const response = await OrderAPI.order.updateOrderByStoreID(storeId, data);
     
             if (response.statusCode === 200) { // Kiểm tra mã trạng thái
                 console.log(`Bulk delivery status updated for orders: ${orderIds}`);
@@ -70,8 +73,11 @@ const Orders = () => {
 
     const updateOrderStatus = async (orderId, newStatus) => {
         try {
-            const response = await OrderAPI.order.updateOrderOnlineById(orderId, newStatus);
-            console.log(`Order ${orderId} status updated to ${newStatus}`);
+            const data = {
+                status: newStatus
+            }
+            const response = await OrderAPI.order.updateOrderOnlineById(orderId, data);
+            
 
             // Optionally update the local state immediately
             setOrders((prevOrders) =>
