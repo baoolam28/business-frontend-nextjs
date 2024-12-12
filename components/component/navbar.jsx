@@ -8,14 +8,17 @@ import { Input } from "../../components/ui/input";
 import { useUser } from "../../context/UserContext";
 import IconButton from "./IconButton";
 import AccountDropdown from "./account-dropdown";
-
+import { User } from 'lucide-react'
+import { useStore } from "../../context/StoreContext";
 
 export default function Header() {
-  const  user  = useUser();
+  const  {user}  = useUser();
+  const {store} = useStore();
+  console.log('store',store)
   return (  
-    <header
-          className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-          <Sheet>
+    <div className="mb-10">
+      <div className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
+        <Sheet>
             <SheetTrigger asChild>
               <Button size="icon" variant="outline" className="sm:hidden">
                 <PanelLeftIcon className="h-5 w-5" />
@@ -76,39 +79,33 @@ export default function Header() {
               </nav>
             </SheetContent>
           </Sheet>
-          <Breadcrumb className="hidden md:flex">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="#" prefetch={false}>
-                    Nhà Cung Cấp
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Quản Lý Nhà Cung Cấp</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="relative ml-auto flex-1 md:grow-0">
-            <SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search suppliers..."
-              className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]" />
-          </div>
+      </div>
+      <div className="fixed z-29 top-0 left-0 right-0 w-full flex justify-between items-center bg-blue-900 p-4 rounded pl-20">
+        <div className="flex items-center space-x-2">
+          <img
+            src={store? store.storeImage : '"/placeholder.svg"'}
+            alt="Store Logo"
+            width={40}
+            height={40}
+            className="rounded"
+          />
+          <h1 className="text-white text-xl font-bold">{store? store.storeName : ''}</h1>
+        </div>
+        <div>
           {user ? ( // Nếu có thông tin user thì hiển thị dropdown
-              <AccountDropdown user={user} />
-            ) : ( // Nếu chưa có user thì hiển thị nút đăng nhập
-              <a href="/login">
-                <IconButton
-                  src="https://cdn.builder.io/api/v1/image/assets/TEMP/505a01368e57ac667ecd551fd161eb3fa8202cee72841e5b11d9f712055e4607?placeholderIfAbsent=true&apiKey=907845159c31450ca87b5b226dbf1f02"
-                  alt="User profile"
-                />
-              </a>
-            )}
-        </header>
+            <AccountDropdown user={user} />
+          ) : ( // Nếu chưa có user thì hiển thị nút đăng nhập
+            <a href="/login">
+              <IconButton
+                src="https://cdn.builder.io/api/v1/image/assets/TEMP/505a01368e57ac667ecd551fd161eb3fa8202cee72841e5b11d9f712055e4607?placeholderIfAbsent=true&apiKey=907845159c31450ca87b5b226dbf1f02"
+                alt="User profile"
+              />
+            </a>
+          )}
+        </div>
+      </div>
+
+    </div>
   )
 }
 

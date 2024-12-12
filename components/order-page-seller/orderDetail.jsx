@@ -41,7 +41,7 @@ export default function orderDetail({order, onCloseDetail}) {
                                             <div key={index} className="flex items-center">
                                             <img src={item?.imageUrl || "https://placehold.co/60x60"} alt={item.productName} className="w-16 h-16 rounded mr-4" />
                                             <div className="flex-1">
-                                                <div className="font-bold">{item.productName}</div>
+                                                <div className="font-bold">{item.productName? item.productName : ''}</div>
                                                 <div className="text-sm text-gray-500">Giá: <a href="#" className="text-blue-500">{item.price}</a></div>
                                                 <div className="text-sm text-gray-500">Số lượng: {item.quantity}</div>
                                             </div>

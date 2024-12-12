@@ -5,7 +5,7 @@ function ProductGallery({ images , variantImage }) {
   const [selectedImage, setSelectedImage] = useState(defaultImage);
   
   useEffect(() => {
-    setSelectedImage(images[0] || defaultImage);
+    setSelectedImage(images ? images[0] : defaultImage);
   },[images])
 
   return (

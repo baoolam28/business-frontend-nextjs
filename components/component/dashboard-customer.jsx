@@ -136,7 +136,7 @@ export default   function dashboardCustomer() {
         <Navbar/>
       </div>
       <main className="flex flex-col sm:gap-4 sm:py-4 sm:pl-14 ml-5">
-        <header className="bg-primary text-primary-foreground py-4 px-8">
+        {/* <header className="bg-primary text-primary-foreground py-4 px-8">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Customer Admin</h1>
             <Button onClick={handleCreateCustomer}>
@@ -144,23 +144,22 @@ export default   function dashboardCustomer() {
                   Create Customer
             </Button>
         </div>
-      </header>
+      </header> */}
       <div>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Customers</h2>
               <Button onClick={handleCreateCustomer}>
                   <PlusIcon className="mr-2 h-4 w-4" />
-                  Create Customer
+                  Thêm khách hàng
               </Button>
           </div>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
+                <TableHead>Tên</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Adress</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead>Điện thoại</TableHead>
+                <TableHead>Địa chỉ</TableHead>
+                <TableHead>chức năng</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
