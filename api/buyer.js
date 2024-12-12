@@ -85,9 +85,9 @@ const buyerAPI = {
       axiosClient.get(
         `${baseUrl}/reviews/is-reviewed?productDetailId=${productDetailId}&userId=${userId}`
       ),  
-    createNewReview: (productDetailId, reviewData) =>
+    createNewReview: (reviewData) =>
       axiosClient.post(
-        `${baseUrl}/reviews/newReview/${productDetailId}`,
+        `${baseUrl}/reviews/newReview`,
         reviewData
       ),
     updateReview: (reviewId, data) =>

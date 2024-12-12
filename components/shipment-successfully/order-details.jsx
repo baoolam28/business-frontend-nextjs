@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { Button } from "../ui/button"; 
 import buyerAPI from '../../api/buyer'
 import formatAsVND from '../../utils/formatVND'
+import { format } from "date-fns";
 
 export default function OrderDetailsComponent() {
 
@@ -142,6 +143,10 @@ export default function OrderDetailsComponent() {
   const handReviewProduct = (productDetailId) => {
       router.push(`/review?productDetailId=${productDetailId}&shipmentId=${shipment.shipmentId}`)
   }
+  const formatDate = (date) => {
+    if (!date) return "";
+    return format(new Date(date), "dd/MM/yyyy HH:mm"); // Định dạng: Ngày/Tháng/Năm Giờ:Phút
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -176,7 +181,7 @@ export default function OrderDetailsComponent() {
                 </div>
                 <div className="text-center">
                   <p className="font-semibold">{status.text}</p>
-                  <p className="text-sm text-gray-500">{status.time}</p>
+                  <p className="text-sm text-gray-500">{formatDate(status.time)}</p>
                 </div>
               </div>
             ))}
@@ -258,7 +263,7 @@ export default function OrderDetailsComponent() {
                         </div>
                       ))}
                 </div>
-                <p className="text-sm text-gray-500">x{detail.quantity}</p>
+                <p className="text-sm text-gray-500">SL: {detail.quantity}</p>
               </div>
             </div>
         )))}
