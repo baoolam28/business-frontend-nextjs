@@ -1,27 +1,26 @@
 import React, { useState, useEffect, use } from 'react'
-import './App.css';
-import { UploaderComponent } from '@syncfusion/ej2-react-inputs';
 import { StarIcon, CameraIcon, ExclamationTriangleIcon } from '@heroicons/react/24/solid'
 import { useRouter, useSearchParams } from 'next/navigation';
 import buyerAPI from '../../api/buyer'
 import {useUser} from '../../context/UserContext'
 import formatAsVND from '../../utils/formatVND'
 import { showErrorAlert, showSuccessAlert } from "../../utils/reactSweetAlert"
-
+import { Label } from "../../components/ui/label";
+import { Input } from "../../components/ui/input";
 export default function ProductReviewPage() {
   const [comment, setComment] = useState('');
   const [rating, setRating] = useState(0);
   const [imageUrls, setImageUrls] = useState([]);
   const [productDetail, setProductDetail] = useState({});
-
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [imagesFile, setImagesFile] = useState([]);
   const { user } = useUser();
   const userId = user ? user.id : null;
   const searchParams = useSearchParams();
   const router = useRouter();
   const productDetailId = searchParams.get('productDetailId');
 
-  console.log("productDetailId:", productDetailId);
-  console.log("userId:", userId);
+  
   useEffect(() => {
     if(productDetailId){
       const fetchProductDetail = async () => {
@@ -59,31 +58,61 @@ export default function ProductReviewPage() {
       alert('Không tìm thấy ID sản phẩm hoặc ID người dùng.');
       return;
     }
+    const reviewData = new FormData();
+    reviewData.append("userId", userId);
+    reviewData.append("rating", rating);
+    reviewData.append("comment", comment);
+    if (imagesFile && Array.isArray(imagesFile)) {
+      
+      imagesFile.forEach((image, index) => {
+        reviewData.append(`images[${index}]`, image);
+        console.log("apended ",image)
+      });
+    } 
+    reviewData.append("productDetailId", productDetailId);
 
-    const reviewData = {
-      userId,
-      rating,
-      comment,
-      imageUrls,
-    };
+    console.log("file selected: ", JSON.stringify(imagesFile));
+    
     try {
       console.log("Review data to send:", reviewData);
-      const response = await buyerAPI.review.createNewReview(productDetailId, reviewData);
+      const response = await buyerAPI.review.createNewReview(reviewData);
       if (response.statusCode === 200) {
-        console.log("Review submitted successfully:", response.data);
-        router.push('/shipmentSuccessfully'); 
+        console.log("Review submitted successfully:", response.data); 
         showSuccessAlert("Thành công", "Đã xác nhận sản phẩm thành công");
+
+        const shipmentId = searchParams.get('shipmentId');
+        router.push(`/shipmentSuccessfully?shipmentId=${shipmentId}`);
       }
     } catch (error) {
       console.error("Error submitting review:", error);
     }
   };
 
-  const path = {
-    removeUrl: 'https://services.syncfusion.com/react/production/api/FileUploader/Remove',
-    saveUrl: 'https://services.syncfusion.com/react/production/api/FileUploader/Save',
-    chunkSize: 102400
-  }
+  
+
+  const handleImageChange = (e) => {
+    const files = e.target.files;
+    if (files) {
+      
+      const filesArray = Array.from(files);
+      setImagesFile(filesArray);
+      const imageUrls = []; // Array to hold the data URLs
+      
+      filesArray.forEach((file) => {
+        
+        
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          imageUrls.push(reader.result); // Push each data URL to the array
+          // Once all images are loaded, update the state
+          if (imageUrls.length === filesArray.length) {
+            setSelectedImages(imageUrls); // Update selected images with data URLs
+          }
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  };
 
 
   return (
@@ -169,15 +198,30 @@ export default function ProductReviewPage() {
               Cần thêm 50 ký tự và 1 hình ảnh để nhận 100 Shopee Xu.
             </p>
           </div> */}
-          <div >
-            <UploaderComponent asyncSettings={path} 
-              multiple={true}
-              autoUpload={true}
-              sequentialUpload={true}
-              directoryUpload={false}
-              allowedExtensions=".jpg, .svg, .png, .mp4"
-              >
-            </UploaderComponent>
+          <div>
+            <Label htmlFor="productImage">
+              Chọn hình ảnh
+            </Label>
+            <Input
+              id="productImage"
+              name="productImage"
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+            />
+            {selectedImages.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {selectedImages.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt={`Hình ảnh sản phẩm ${index + 1}`}
+                    className="h-20 w-20 rounded-lg"
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

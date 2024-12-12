@@ -13,6 +13,7 @@ import { Star } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "../../components/ui/dropdown-menu"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "../../components/ui/dialog";
+import { format } from "date-fns";
 
 export default function OrderPage() {
 
@@ -20,7 +21,6 @@ export default function OrderPage() {
   const [shipments, setShipments] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('Tất cả');
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [isReview, setIsReview] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [reviewData, setReviewData] = useState(null);
   
@@ -95,6 +95,7 @@ export default function OrderPage() {
       const reviewResponse = await buyerAPI.review.getReview(productDetailId, user.id);
       if(reviewResponse.statusCode === 200) {
         setReviewData(reviewResponse.data)
+        console.log("review response",reviewResponse.data)
       }else{
         setReviewData(null);
       }
@@ -108,6 +109,11 @@ export default function OrderPage() {
     fetchReview(detail.productDetailId);
     setSelectedProduct(detail);
   }
+
+  const formatDate = (date) => {
+    if (!date) return "";
+    return format(new Date(date), "dd/MM/yyyy HH:mm"); // Định dạng: Ngày/Tháng/Năm Giờ:Phút
+  };
 
   const handleCloseDialog = () => {
     setIsOpen(false); // Đóng dialog
@@ -164,17 +170,32 @@ export default function OrderPage() {
                       </div>
                       <div className="space-y-2 mb-4">
                         <div className="flex gap-2">
-                          <span className="text-gray-600">Chất lượng sản phẩm:</span>
+                          {/* <span className="text-gray-600">Chất lượng sản phẩm:</span> */}
                           <span>{reviewData.comment}</span>
                         </div>
                       </div>
                       <div className="text-sm text-gray-500">
-                        {reviewData.reviewDate}
+                        {formatDate(reviewData.reviewDate)}
                       </div>
+
+                      {reviewData.images?.length > 0 &&(
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                              {reviewData.images?.map((imageUrl, i) => (
+                                  <div key={i} className="relative rounded-lg overflow-hidden bg-gray-200 aspect-w-1 aspect-h-1">
+                                      <img
+                                          src={imageUrl || "/placeholder.svg"}
+                                          alt={`Review image ${i + 1}`}
+                                          fill
+                                          className="object-cover w-full h-full"
+                                      />
+                                  </div>
+                              ))}
+                          </div>
+                      )}
                     </div>
                   ) : (
-                    <div>
-                      chua co danh gia
+                    <div className="text-gray-500">
+                      Sản phẩm chưa được đánh giá!
                     </div>
                   )
                 }
@@ -235,7 +256,7 @@ export default function OrderPage() {
             <CardHeader className="flex justify-between items-start border-b pb-4 relative">
               <div className="flex items-center space-x-4">
                 <img
-                  src="/placeholder.svg"
+                  src={shipment.image||"/placeholder.svg"}
                   alt="Store Logo"
                   width={40}
                   height={40}

@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import Image from "next/image"
 import buyerAPI from "../../api/buyer";
 import Pagination from "../../components/component/pagination";
+import { format } from "date-fns";
 
 export default function ReviewPage({ productId }) {
 
@@ -73,6 +74,11 @@ export default function ReviewPage({ productId }) {
       setCurrentPage(page);
       window.scrollTo({ top: 1320, behavior: 'smooth' });
     };
+
+    const formatDate = (date) => {
+        if (!date) return "";
+        return format(new Date(date), "dd/MM/yyyy HH:mm"); // Định dạng: Ngày/Tháng/Năm Giờ:Phút
+    };
     
     return(
        ( <div className="flex justify-center py-12">
@@ -134,7 +140,7 @@ export default function ReviewPage({ productId }) {
                                             <Star key={i} className="w-5 h-5 fill-red-500 text-red-500" />
                                             ))}
                                         </div>
-                                        <div className="text-sm text-gray-500">{review.reviewDate} | 
+                                        <div className="text-sm text-gray-500">{formatDate(review.reviewDate)} | 
                                             Phân loại hàng:     
                                             {Object.entries(review.attributes).map(([key, value]) => (
                                             <div
@@ -158,15 +164,15 @@ export default function ReviewPage({ productId }) {
                                 <div className="text-gray-700 text-base mb-4">{review.comment}</div>
 
                                 {/* Review images */}
-                                {review.imageUrls?.length > 0 &&(
-                                    <div className="grid grid-cols-5 gap-4">
-                                        {review.imageUrls?.map((imageUrl, i) => (
-                                            <div key={i} className="relative rounded-lg overflow-hidden bg-gray-200 h-24">
-                                                <Image
+                                {review.images?.length > 0 &&(
+                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                                        {review.images?.map((imageUrl, i) => (
+                                            <div key={i} className="relative rounded-lg overflow-hidden bg-gray-200 aspect-w-1 aspect-h-1">
+                                                <img
                                                     src={imageUrl || "/placeholder.svg"}
                                                     alt={`Review image ${i + 1}`}
                                                     fill
-                                                    className="object-cover"
+                                                    className="object-cover w-full h-full"
                                                 />
                                             </div>
                                         ))}
