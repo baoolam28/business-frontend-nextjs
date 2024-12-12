@@ -16,6 +16,10 @@ import {
   DropdownMenuTrigger,
 } from "../../components/ui/dropdown-menu";
 import dynamic from 'next/dynamic'
+import Loading from "../../components/component/loading-lottie"
+import Animation from "../../utils/lottie-animations/rocket.json"
+import FormatAsVND from "../../utils/formatVND"
+import CategoryBrowse from "../../components/home-page/CategoryBrowse";
 const Category = () => {
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("id");
@@ -89,7 +93,7 @@ const Category = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
-        <h4>Loading products...</h4>
+        <Loading animation={Animation}/>
       </div>
     );
   }
@@ -97,22 +101,27 @@ const Category = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
+      <div className="flex flex-col items-center w-full" >
+        <CategoryBrowse/>
+      </div>
+      
       <div className="container mx-auto mt-4 flex">
+        
         {/* Sidebar */}
         <div className="w-full md:w-[22%] space-y-6 md:sticky md:top-4 self-start md:pr-2">
           <Card className="shadow-lg rounded-lg">
             <CardContent className="p-6 space-y-6">
               <div>
-                <h2 className="text-lg font-semibold mb-2">Search</h2>
-                <Input type="text" placeholder="Search products..." />
+                <h2 className="text-lg font-semibold mb-2">Tìm kiếm</h2>
+                <Input type="text" placeholder="tìm kiếm sản phẩm...." />
               </div>
-              <h3 className="mb-2">Filter by Store</h3>
+              <h2 className="text-lg font-semibold mb-2">Duyệt theo cửa hàng</h2>
               <select
                 className="py-2 px-4 border rounded"
                 value={selectedStore}
                 onChange={(e) => filterByStore(e.target.value)}
               >
-                <option value="">Select Store</option>
+                <option value="">Cửa hàng</option>
                 {stores.map((store) => (
                   <option key={store.storeId} value={store.storeName}>
                     {store.storeName}
@@ -120,19 +129,19 @@ const Category = () => {
                 ))}
               </select>
               <div>
-                <h2 className="text-lg font-semibold mb-2">Sort by Price</h2>
+                <h2 className="text-lg font-semibold mb-2">Duyệt theo giá</h2>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button>Sort: {sortOrder === "asc" ? "Low to High" : "High to Low"}</Button>
+                    <Button>Giá: {sortOrder === "asc" ? "Thấp đến cao" : "Cao đến thấp"}</Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => sortProducts("asc")}>Low to High</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => sortProducts("desc")}>High to Low</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => sortProducts("asc")}>Thấp đến cao</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => sortProducts("desc")}>Cao đến thấp</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
               <div>
-                <h2 className="text-lg font-semibold mb-2">Rating</h2>
+                <h2 className="text-lg font-semibold mb-2">Số sao</h2>
                 <div className="flex items-center">
                   {[1, 2, 3, 4, 5].map((rating) => (
                     <Star
@@ -143,10 +152,8 @@ const Category = () => {
                       onClick={() => handleRatingClick(rating)}
                     />
                   ))}
-                  <span className="ml-2">& Up</span>
                 </div>
               </div>
-              <Button className="w-full bg-primary hover:bg-primary/90">Apply Filters</Button>
             </CardContent>
           </Card>
         </div>
@@ -172,12 +179,12 @@ const Category = () => {
                   </CardHeader>
                   <CardContent className="p-4">
                     <CardTitle className="text-lg mb-2">{product.productName}</CardTitle>
-                    <h4 className="text-sm text-muted-foreground mb-2">{product.price} VND</h4>
+                    <h4 className="text-lg text-red-500 mb-2">{FormatAsVND(product.price)}</h4>
                     <div className="flex items-center mb-2">
                       {[...Array(5)].map((_, index) => (
                         <Star
                           key={index}
-                          className={`w-4 h-4 ${
+                          className={`w-5 h-5 ${
                             index < (product.rating || 0) ? "text-yellow-400 fill-current" : "text-gray-300"
                           }`}
                         />
@@ -187,7 +194,7 @@ const Category = () => {
                   </CardContent>
                   <CardFooter className="p-4">
                     <a href={`/prductDetail?id=${product.productId}`} className="w-full">
-                      <Button className="w-full">View Details</Button>
+                      <Button className="w-full">Xem sản phẩm</Button>
                     </a>
                   </CardFooter>
                 </Card>

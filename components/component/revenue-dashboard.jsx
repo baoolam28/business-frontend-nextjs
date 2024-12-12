@@ -14,6 +14,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, R
 import sellerAPI from '../../api/seller';
 import {useStore} from "../../context/StoreContext"; 
 import {showSuccessAlert} from "../../utils/reactSweetAlert"
+import Menu from "../component/menu";
 
 
 
@@ -28,6 +29,7 @@ export default function RevenueDashboardComponent() {
   const { storeId } = useStore();
   const [dateRange, setDateRange] = useState(null) // trạng thái lưu trữ phạm vi ngày đã chọn
   const [reportData, setReportData] = useState([])
+  const [dayData, setDayData] = useState([])
   const [monthData, setMonthData] = useState([])
   const [yearData, setYearData] = useState([])
   const [totalOrder, setTotalOrder] = useState([])
@@ -62,7 +64,7 @@ const [staffs, setStaffs] = useState([])
     };
 
     try {
-      const response = await sellerAPI.auth.createNewStaff(staffData);
+const response = await sellerAPI.auth.createNewStaff(staffData);
       if (response.statusCode === 200) {
         // Xử lý khi thêm nhân viên thành công
         alert('Thêm nhân viên thành công!');
@@ -116,22 +118,39 @@ const fetchReportDataByDay = async (startDate, endDate) => {
   }
 };
 
+const fetchReportDataByToday = async () => {
+  try {
+    const response = await sellerAPI.report.getOrderByToday(storeId);
+    if(response.statusCode === 200) {
+      const formattedData = response.data.map(item => ({
+        revenue: item[0]
+      }));
+
+      setDayData(formattedData);
+      console.log("Today data: ", JSON.stringify(formattedData));
+    } 
+  } catch (error) {
+    console.log("Error fetching report data", error);
+  }
+}
+
+
 const fetchReportDataByMonth = async () => {
   try {
     const response = await sellerAPI.report.getOrderByMonth(storeId);
     if (response.statusCode === 200) {
-     const formattedData = response.data.map(item => ({
-        date: `${item[0]}-${item[1]}-${item[2]}`,  // Định dạng date theo dạng 'yyyy-MM-dd' (năm-tháng-ngày)
-        revenue: item[3],                          // Doanh thu của ngày đó           // Doanh thu
+      const formattedData = response.data.map(item => ({
+        date: item[0],           // Tháng
+        revenue: item[1],         // Doanh thu
       }));
+
       setMonthData(formattedData);
       console.log("Month Data:", JSON.stringify(formattedData));
     }
   } catch (error) {
     console.error("Error fetching report data", error);
-     
   }
-}
+};
 
 
 const fetchReportDataByYear = async () => {
@@ -140,7 +159,7 @@ const fetchReportDataByYear = async () => {
     if (response.statusCode === 200) {
 
     const formattedData = response.data.map(item => ({
-        date: `${item[0]}-${item[1]}`,  // Định dạng date theo dạng 'yyyy-MM' (năm-tháng)
+date: `${item[0]}-${item[1]}`,  // Định dạng date theo dạng 'yyyy-MM' (năm-tháng)
         revenue: item[2],               // Tổng doanh thu trong tháng
       }));
       setYearData(formattedData);
@@ -236,14 +255,7 @@ useEffect(() => {
 
   switch (activeFilter) {
    case 'day':
-    const isToday = startOfDay(now).getTime() === startOfDay(new Date()).getTime();
-    start = startOfDay(now);
-    end = endOfDay(now);
-  
-    if (isToday) {
-    // Truyền start và end vào hàm fetchReportDataByDay
-      fetchReportDataByDay(start, end);
-    }
+      fetchReportDataByToday();
       break;
     case 'month':
       fetchReportDataByMonth();
@@ -259,7 +271,7 @@ useEffect(() => {
         start = startOfMonth(now);
         end = endOfMonth(now);
       }
-      break;
+break;
     default:
       console.error("Active filter không hợp lệ:", activeFilter);
       return; // Dừng lại nếu filter không hợp lệ
@@ -271,6 +283,7 @@ useEffect(() => {
   }
 
   if (storeId) {
+    fetchReportDataByToday();
     fetchStaffs();
     fetchReportTotal();
     fetchCustomers();
@@ -288,7 +301,7 @@ const chartData =
     : activeFilter === 'year' 
     ? yearData 
     : activeFilter === 'day' 
-    ? revenueData 
+    ? dayData
     : null;
 
 
@@ -312,7 +325,9 @@ const chartData =
   
 
   return (
-    (<div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
+<div className="flex w-fit h-fit flex-col bg-muted/40 ml-8 p-4">
+      <Menu/>
+      (<div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
       <h1 className="text-4xl font-bold text-gray-800 mb-8">Bảng điều khiển doanh thu</h1>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         <Card className="col-span-2">
@@ -345,7 +360,7 @@ const chartData =
           className="w-[300px] justify-start text-left font-normal"
           onClick={() => setActiveFilter('custom')}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+<CalendarIcon className="mr-2 h-4 w-4" />
           {dateRange?.from ? (
             dateRange.to ? (
               <>
@@ -425,7 +440,7 @@ const chartData =
                 <Badge variant={customer.rank}>{customer.rank}</Badge>
               </div>
             ))}
-          </div>
+</div>
         </CardContent>
         </Card>
 
@@ -494,7 +509,7 @@ const chartData =
                 Thêm Nhân Viên
               </Button>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px', margin: '0 auto', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+<div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px', margin: '0 auto', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
                 <input
                   type="text"
                   placeholder="Nhập username"
@@ -548,10 +563,11 @@ const chartData =
                   Thêm nhân viên
                 </Button>
               </div>
-            )}
+)}
           </CardContent>
         </Card>
       </div>
     </div>)
+    </div>
   );
 }
