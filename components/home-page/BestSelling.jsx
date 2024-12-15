@@ -70,12 +70,6 @@ const BestSelling = () => {
             Best Selling Products
           </h2>
         </div>
-        <a
-          href="/view-all"
-          className="gap-2.5 self-stretch px-12 py-4 h-10 text-base font-medium bg-red-500 rounded text-neutral-50 max-md:px-5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700"
-        >
-          View All
-        </a>
       </div>
       <div className="grid grid-cols-4 gap-8 mt-16 text-base font-medium max-md:mt-10 max-md:max-w-full">
         {currentProducts.length === 0 ? (
@@ -94,16 +88,6 @@ const BestSelling = () => {
           onPageChange={handlePageChange}
         />
       </div>
-      {currentPage < totalPages && (
-        <div className="mt-8 text-center">
-          <button
-            onClick={handleShowMore}
-            className="px-4 py-2 text-base font-medium text-white bg-red-500 rounded focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-700"
-          >
-            Show More
-          </button>
-        </div>
-      )}
     </section>
   );
 };

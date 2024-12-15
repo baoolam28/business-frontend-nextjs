@@ -23,40 +23,22 @@ import { useEffect, useState, useMemo } from "react"
 import { Input } from "../../components/ui/input"
 import { Button } from "../../components/ui/button"
 import { Card } from "../../components/ui/card"
-import Link from "next/link"
 import { Separator } from "../../components/ui/separator"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "../../components/ui/dropdown-menu"
 import Menu from "../component/menu"
-import productAPI from "../../api/seller"
-import buyerAPI from "../../api/buyer"
 import sellerAPI from "../../api/seller"
-import inventoryAPI from "../../api/inventory";
 import BarcodeScanner from "../component/BarcodeScanner"
 import AddCustomerDialog from "../../components/component/addCustomer"
-import inventory from "./inventory"
 import { useRouter } from 'next/navigation';
 import formatVND from "../../utils/formatVND"
 import {useStore} from "../../context/StoreContext"; 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "../../components/ui/select"
-import order from "../../api/order"
+import BarcodeRender from '../../components/component/barcodeRender';
 // import { Navbar } from "../../components/component/navbar"
 export default function sales() {
 
-  const [loadingCustomers, setLoadingCustomers] = useState(false);
-  const [error, setError] = useState(null)
-  const [loadingOrders, setLoadingOrders] = useState(false);
   const { storeId } = useStore();
   const [searchTerm, setSearchTerm] = useState("");
   const [products, setProducts] = useState([]);
-  const [unpaidOrders, setUnpaidOrders] = useState([]);
   const [orders, setOrders] = useState([]);
   const [inventories, setInventories] = useState([]);
   const [cart, setCart] = useState([]);
@@ -66,24 +48,21 @@ export default function sales() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const handleOpenDialog = () => setDialogOpen(true);
   const handleCloseDialog = () => setDialogOpen(false);
-  const [unpaidOrderProducts, setUnpaidOrderProducts] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState("");
-
+  const [loadingCustomers,setLoadingCustomers] = useState(null);
+  const [error, setError] = useState(null);
 
   const router = useRouter();
 
-useEffect(() => {
+  useEffect(() => {
 
-  // console.log("Store ID:", storeId);
-  // console.log("User ID:", userId);
 
     const fetchProducts = async () => {
-      if (!storeId) return; // Nếu storeId không có, không gọi API
+      if (!storeId) return; 
 
       try {
         const response = await sellerAPI.product.getAllProductsByStoreId(storeId);
-        console.log("Response:", response);
         if (response.statusCode === 200) {
           setProducts(response.data); // Cập nhật danh sách sản phẩm
         } else {
@@ -125,7 +104,6 @@ useEffect(() => {
         if (response.statusCode === 200) {
       // Only set orders where paymentStatus is false
           setOrders(response.data.filter(order => order.paymentStatus === false));
-          console.log("sdhfkhsdjkahf " + JSON.stringify(response.data))
         } else {
           console.error("Failed to fetch orders: ", response.status);
       }
@@ -148,7 +126,6 @@ useEffect(() => {
 
       try {
         const response = await sellerAPI.customer.getAllCustomerByStoreId(storeId);
-        console.log("Customers Response:", response);
 
         if (response.statusCode === 200) {
           setCustomers(response.data); // Cập nhật danh sách khách hàng
@@ -204,7 +181,6 @@ useEffect(() => {
     if (cart.length === 0) {
       setCart((prevCart) => {
         const updatedCart = [...prevCart, { ...product, quantity: 1 }];
-        console.log("Cart after adding new product:", updatedCart);
         return updatedCart;
       });
       return;
@@ -220,14 +196,12 @@ useEffect(() => {
           ? { ...item, quantity: item.quantity + 1 }
           : item
       );
-      console.log("Cart after updating quantity:", updatedCart);
       return updatedCart;
     });
   } else {
     // Thêm sản phẩm mới vào giỏ hàng
     setCart((prevCart) => {
       const updatedCart = [...prevCart, { ...product, quantity: 1 }];
-      console.log("Cart after adding new product:", updatedCart);
       return updatedCart;
     });
   }
@@ -364,7 +338,6 @@ const createOrder = async (orderData) => {
 
 const updateOrder = async (orderData, orderId) => {
 
-  console.log("orderId: " + orderId)
   try {
      const response = await sellerAPI.order.updateOrderDetail(orderData, orderId);
 
@@ -384,7 +357,6 @@ const updateOrder = async (orderData, orderId) => {
     try {
       // Thêm storeId vào customerData
       const dataWithStoreId = { ...customerData, storeId };
-      console.log(dataWithStoreId)
       const response = await sellerAPI.customer.createCustomer(dataWithStoreId);
       // Giả sử response.data chứa khách hàng mới tạo
       if (response && response.data) {
@@ -403,6 +375,7 @@ const updateOrder = async (orderData, orderId) => {
   const handleCancel = () => {
     setCart([]);
     setSelectedCustomer(null);
+    setSelectedOrder("");
   };
 
 const handleChange = (event) => {
@@ -470,8 +443,8 @@ const handleSelectOrder = (selectedOrderObj) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {
             filteredProducts.map((product) => (
-              <Card key={product.barcode} className="group p-4">
-                <div className="relative">
+              <Card key={product.barcode} className="group p-4" >
+                <div className="relative" key={product.barcode}>
                   <img
                     src={product ? product.images[0] : '/placeholder.svg'}
                     alt={product.productName}
@@ -489,15 +462,18 @@ const handleSelectOrder = (selectedOrderObj) => {
                 </div>
                 <div className="flex flex-col gap-2 pt-4">
                   <h3 className="font-medium text-lg">{product.productName}</h3>
+                  
+                  <div className="flex items-center justify-between mt-1">
+                  <span className="text-primary font-medium text-md">{formatVND(product.price.toFixed(2))}</span>
                   <span className="font-medium text-sm text-gray-600">
                     Tồn kho: { 
-                      inventories.find((inventory) => inventory.barcode === product.barcode)?.quantityInStock || "Không có thông tin"
+                      inventories.find((inventory) => inventory.barcode === product.barcode)?.quantityInStock || "0"
                     }
                   </span>
                 </div>
-                <div className="flex items-center justify-between mt-2">
-                  <span className="text-primary font-medium">{formatVND(product.price.toFixed(2))}</span>
-                  <span className="text-xs text-muted-foreground">{product.barcode}</span>
+                </div>
+                <div className="border border-gray-300 shadow-lg mt-1">
+                  <BarcodeRender value={product.barcode} width={1.5} height={30} />
                 </div>
               </Card>
             ))
@@ -527,7 +503,7 @@ const handleSelectOrder = (selectedOrderObj) => {
           <div className="grid gap-4">
             {cart.map((product, index) => (
               <div
-                key={product.id}
+                key={product.barcode}
                 className="grid grid-cols-[50px_1fr_50px] items-center gap-4">
                 <img
                   src={product.images ? product.images[0] : '/placeholder.svg'}

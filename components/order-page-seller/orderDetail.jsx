@@ -39,7 +39,7 @@ export default function orderDetail({order, onCloseDetail}) {
                                     <div className="space-y-4">
                                         {order.orderDetails.map((item, index) => (
                                             <div key={index} className="flex items-center">
-                                            <img src={item?.imageUrl || "https://placehold.co/60x60"} alt={item.productName} className="w-16 h-16 rounded mr-4" />
+                                            <img src={item?.image || "https://placehold.co/60x60"} alt={item.productName} className="w-16 h-16 rounded mr-4" />
                                             <div className="flex-1">
                                                 <div className="font-bold">{item.productName? item.productName : ''}</div>
                                                 <div className="text-sm text-gray-500">Giá: <a href="#" className="text-blue-500">{item.price}</a></div>
@@ -95,7 +95,6 @@ export default function orderDetail({order, onCloseDetail}) {
                                     <div className="space-y-2">
                                         <div className="text-sm text-gray-500">{order.address}</div>
                                         <div className="text-sm text-gray-500">Điện thoại: {order.phone}</div>
-                                        <a href="#" className="text-blue-500">View map</a>
                                     </div>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">

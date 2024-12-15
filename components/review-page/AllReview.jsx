@@ -16,7 +16,7 @@ export default function ReviewPage({ productId }) {
     const [reviewCountByRating, setReviewCountByRating] = useState({});
 
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 6;
+    const itemsPerPage = 1;
 
     useEffect(() => {
         if(!productId) return;
@@ -134,7 +134,7 @@ export default function ReviewPage({ productId }) {
                                         <AvatarFallback>{review.username}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <div className="font-medium text-lg">{review.username}</div>
+                                        <div className="font-medium text-lg">{review.fullName}</div>
                                         <div className="flex gap-1">
                                             {[...Array(review.rating)].map((_, i) => (
                                             <Star key={i} className="w-5 h-5 fill-red-500 text-red-500" />

@@ -16,7 +16,7 @@ const ProductCard = ({
 }) => {
   const handleImageClick = () => {
     console.log(id) // Điều hướng đến trang chi tiết sản phẩm.
-    window.location.href = `/prductDetail?id=${id}`;
+    window.location.href = `/productDetail?id=${id}`;
   };
   return (
     <article className="flex flex-col w-[270px] p-4 bg-white shadow-lg rounded-lg">

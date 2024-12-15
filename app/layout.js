@@ -22,7 +22,7 @@ export default function RootLayout({ children }) {
           <UserProvider>
             <StoreProvider>
               <ChatProvider>
-                <EnhancedChatBox />
+                <EnhancedChatBox isVisible={true}/>
                 {children}
               </ChatProvider>
             </StoreProvider>

@@ -30,7 +30,7 @@ const publicPaths = ["/about", "/contact", "/register"];
 const redirectTo = (role) => {
   switch (role) {
     case "ROLE_SELLER":
-      return "/store/product"; // Đảm bảo chuyển hướng đúng cho ROLE_SELLER
+      return "/store"; // Đảm bảo chuyển hướng đúng cho ROLE_SELLER
     case "ROLE_BUYER":
       return "/home-page";
     case "ROLE_ADMIN":
@@ -96,7 +96,7 @@ export default async function middleware(req) {
 
   // Nếu người dùng đã xác thực và có quyền truy cập, cho phép tiếp tục
   if (hasAccess) {
-    if (pathname.includes("/home-page") && ["ROLE_SELLER", "ROLE_ADMIN", "ROLE_STAFF"].includes(userRole)) {
+    if (pathname.includes("/home-page") && ["ROLE_SELLER", "ROLE_ADMIN", "ROLE_STAFF"].includes((userRole as any))) {
       return NextResponse.redirect(new URL(redirectTo(userRole), req.url));
     } 
     return NextResponse.next();  // Tiếp tục yêu cầu
