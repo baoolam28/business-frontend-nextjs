@@ -21,6 +21,17 @@ var adminAPI = {
         active: active
       });
     }
+  },
+  account: {
+    getAllAccountAdmin: function getAllAccountAdmin() {
+      return _axiosClient["default"].get("".concat(baseUrl, "/accounts"));
+    },
+    createAccount: function createAccount(accountData) {
+      return _axiosClient["default"].post("".concat(baseUrl, "/register"), accountData);
+    },
+    deleteAccount: function deleteAccount(userId) {
+      return _axiosClient["default"]["delete"]("".concat(baseUrl, "/delete/").concat(userId));
+    }
   }
 };
 var _default = adminAPI;

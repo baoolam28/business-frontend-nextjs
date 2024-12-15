@@ -5,18 +5,16 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../components/component/Header";
 import ProductDetails from "./ProductDetails";
-import RelatedProducts from "./RelatedProducts";
 import AllReviewProduct from "../../components/review-page/AllReview"
 import Footer from "./Footer";
 import BuyerAPI from "../../api/buyer";
 import { useSearchParams } from 'next/navigation'
 import Loading from "../../components/component/loading-lottie"
 import Animation from "../../utils/lottie-animations/astronot.json"
-import FlashSale from "../../components/home-page/FlashSale"
+import FlashSale from "../../components/home-page/FlashSale";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-const queryClient = new QueryClient();
 function ProductPage() {
+  const queryClient = new QueryClient();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
   const [loading, setLoading ] = useState(true);
@@ -65,8 +63,9 @@ function ProductPage() {
       <div className="flex justify-center items-center flex-1">
         <main>
           <ProductDetails productData={productData}/>
-          {/* <RelatedProducts /> */}
-          <FlashSale/>
+          <QueryClientProvider client={queryClient}>
+          <FlashSale />
+          </QueryClientProvider>
         </main>
       </div>
       <AllReviewProduct productId={id}/>

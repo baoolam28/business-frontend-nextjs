@@ -1,10 +1,30 @@
+"use client"
+import { useStore } from "../../../context/StoreContext";
 import Inventory from "../../../components/component/inventory";
-export const metadata = {
-  title: 'Inventory',
-  description: 'This is a description for My Custom Site',
-};
+import { useRouter } from "next/navigation";
+import StoreLocked from "../../../components/store-page/Store-Locked";
+import { useEffect, useState } from "react";
 
 export default function inventory() {
+
+  const { store } = useStore();
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (store) {
+      setLoading(false);
+    }
+  }, [store]);
+
+  if (store && !store.active) {
+    return <StoreLocked />;
+  }
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <Inventory />

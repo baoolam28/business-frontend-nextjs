@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import OrderDetail from "../order-page-seller/orderDetail"; // Ensure you import with the correct casing
 import matVND from "../../utils/formatVND";
 import { format } from 'date-fns';
-
+import { Dialog, DialogContent, DialogFooter, DialogClose } from "../../components/ui/dialog";
 export default function OrderCard({ orders, updateOrderStatus }) {
   const [showMore, setShowMore] = useState({});
   const [statusDropdowns, setStatusDropdowns] = useState({});
   const [selectedOrder, setSelectedOrder] = useState(null); // Add state for selected order
-
+  const [isOpenDialog, setIsOpenDialog] = useState(false);
   const handleToggle = (orderId) => {
     setShowMore(prev => ({
       ...prev,
@@ -23,7 +23,6 @@ export default function OrderCard({ orders, updateOrderStatus }) {
   };
 
   const handleViewDetails = (order) => {
-    console.log("order: " + JSON.stringify(order))
     setSelectedOrder(order); // Set the selected order
   };
 
@@ -34,6 +33,14 @@ export default function OrderCard({ orders, updateOrderStatus }) {
     'DANG_DONG_GOI',
     'DON_HUY'
   ];
+
+  const statusTranslations = {
+    'CHO_XAC_NHAN': 'Chờ xác nhận',
+    'DANG_GIAO_HANG': 'Đang giao hàng',
+    'GIAO_HANG_THANH_CONG': 'Giao hàng thành công',
+    'DANG_DONG_GOI': 'Đang đóng gói',
+    'DON_HUY': 'Đơn hủy'
+  };
 
   const getStatusClass = (status) => {
     switch (status) {
@@ -75,7 +82,7 @@ export default function OrderCard({ orders, updateOrderStatus }) {
                 <input type="checkbox" className="mr-2" />
                 <h2 className="text-lg  font-semibold">Hóa đơn: {order.orderId}</h2>
                 <span className={`ml-2 px-2 py-1 text-sm rounded ${getStatusClass(order.status)}`}>
-                  {order.status.replaceAll('_', ' ')}
+                  {statusTranslations[order.status]|| order.status}
                 </span>
               </div>
               <div className="text-2xl font-bold text-red-500 underline">
@@ -99,7 +106,7 @@ export default function OrderCard({ orders, updateOrderStatus }) {
             )}
 
             <div className="text-blue-500 cursor-pointer" onClick={() => handleToggle(order.orderId)}>
-              {showMore[order.orderId] ? 'Show Less Items' : 'More Items'}{' '}
+              {showMore[order.orderId] ? 'Ẩn đi' : 'Xem thêmthêm'}{' '}
               <i className={`fas fa-chevron-${showMore[order.orderId] ? 'up' : 'down'}`}></i>
             </div>
 
@@ -116,7 +123,7 @@ export default function OrderCard({ orders, updateOrderStatus }) {
                         className={`px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 ${getStatusClass(status)}`}
                         onClick={() => updateOrderStatus(order.orderId, status)}
                       >
-                        {status.replaceAll('_', ' ')}
+                        {statusTranslations[status]|| status}
                       </div>
                     ))}
                   </div>
@@ -124,7 +131,12 @@ export default function OrderCard({ orders, updateOrderStatus }) {
               </div>
               <button 
                 className="px-4 py-2 text-sm text-white bg-blue-500 rounded"
-                onClick={() => handleViewDetails(order)} // Pass the order details to the handler
+                onClick={
+                  ( ) => {
+                    handleViewDetails(order);
+                    setIsOpenDialog(true);
+                  }
+                } // Pass the order details to the handler
               >
                 Xem chi tiết
               </button>
@@ -134,7 +146,15 @@ export default function OrderCard({ orders, updateOrderStatus }) {
       ) : (
         <p>Không có đơn hàng nào</p>
       )}
-      {selectedOrder && <OrderDetail order={selectedOrder} onCloseDetail={() => setSelectedOrder(null)} />} {/* Render OrderDetail if selectedOrder is not null */}
+      <Dialog open={isOpenDialog} onOpenChange={(open) => setIsOpenDialog(open)} >
+        <DialogContent  className="fullscreen-dialog">
+          {selectedOrder && (
+            <OrderDetail order={selectedOrder} onCloseDetail={() => setSelectedOrder(null)} />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      
     </>
   );
 }
