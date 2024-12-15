@@ -1,7 +1,9 @@
-import { useStore } from "@/context/StoreContext";
+"use client"
+import { useStore } from "../../../context/StoreContext";
 import Document from "../../../components/document-page/document-page";
 import { useRouter } from "next/navigation";
-import StoreLocked from "@/components/store-page/Store-Locked";
+import StoreLocked from "../../../components/store-page/Store-Locked";
+import { useEffect, useState } from "react";
 
 export default function page() {
 
