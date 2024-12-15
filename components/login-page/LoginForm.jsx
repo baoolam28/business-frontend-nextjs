@@ -27,15 +27,14 @@ const LoginForm = () => {
 
     if (data.error) {
       showErrorAlert("Đăng nhập thất bại","sai tên tài khoản hoặc mật khẩu")
+    }else{
+      router.push("/login");
     }
-     else {
 
-      router.push("/home-page");
-    }
   };
 
   const handleGoogleSignIn = async () => {
-    const data = await signIn("google",{redirect: false, callbackUrl:"http://localhost:3000/home-page"});
+    const data = await signIn("google",{redirect: false});
     console.log(data);
   };
 

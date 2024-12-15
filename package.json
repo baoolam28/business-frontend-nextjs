@@ -48,7 +48,7 @@
     "jsbarcode": "^3.11.6",
     "lucide-react": "^0.414.0",
     "next": "^14.2.4",
-    "next-auth": "^5.0.0-beta.22",
+    "next-auth": "^5.0.0-beta.25",
     "quagga": "^0.12.1",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
