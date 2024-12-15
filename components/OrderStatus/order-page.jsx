@@ -14,16 +14,28 @@ import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuItem } from "../../components/ui/dropdown-menu"
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from "../../components/ui/dialog";
 import { format } from "date-fns";
+import Pagination from "../../components/component/pagination";
 
 export default function OrderPage() {
 
   const { user } = useUser();
   const [shipments, setShipments] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('Tất cả');
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [reviewData, setReviewData] = useState(null);
+  const [reviewData, setReviewData] = useState([]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 2;
   
+  const indexOfLastReview = currentPage * itemsPerPage;
+  const indexOfFirstReview = indexOfLastReview - itemsPerPage;
+  
+  const currentReviews = shipments.slice(indexOfFirstReview, indexOfLastReview);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
   useEffect(() =>{  
     if(user && user.id){
       
@@ -94,7 +106,7 @@ export default function OrderPage() {
     try {
       const reviewResponse = await buyerAPI.review.getReview(productDetailId, user.id);
       if(reviewResponse.statusCode === 200) {
-        setReviewData(reviewResponse.data)
+        setReviewData((prev) => [...prev, reviewResponse.data]);
         console.log("review response",reviewResponse.data)
       }else{
         setReviewData(null);
@@ -104,10 +116,13 @@ export default function OrderPage() {
     }
   }
 
-  const showReview = (detail) => {
-    handleOpenDialog();
-    fetchReview(detail.productDetailId);
-    setSelectedProduct(detail);
+  const showReview = (shipment) => {
+    handleOpenDialog();  
+    const productDetailIds = shipment.orderOnlineDetails.map(detail => detail.productDetailId);
+    for (const id of productDetailIds) {
+      fetchReview(id);
+    }
+    setSelectedProduct(shipment.orderOnlineDetails);
   }
 
   const formatDate = (date) => {
@@ -117,104 +132,10 @@ export default function OrderPage() {
 
   const handleCloseDialog = () => {
     setIsOpen(false); // Đóng dialog
-    setReviewData(null);
+    setReviewData([]);
+
   };
 
-  const ProductReviewDialog = ({ selectedProduct, handleCloseDialog }) => {
-
-    return (
-      <>
-        {selectedProduct && (
-          <Dialog open={isOpen} onOpenChange={() => setIsOpen(!isOpen)}>
-            <DialogContent aria-describedby="dialog-description">
-              <p id="dialog-description" className="sr-only">Mô tả về đánh giá sản phẩm.</p>
-              <DialogHeader>
-                <DialogTitle>Đánh giá sản phẩm</DialogTitle>
-              </DialogHeader>
-  
-              <div className="space-y-4">
-                {/* Thông tin sản phẩm */}
-                <div className="flex items-start">
-                  <img
-                    src={selectedProduct?.image || "/placeholder.svg"}
-                    alt="Product"
-                    width={60}  // hoặc kích thước bạn muốn
-                    height={60}
-                    className="w-16 h-16 rounded-lg object-cover mr-4" />
-                  <div>
-                    <h3 className="font-medium text-sm">{selectedProduct?.productName}</h3>
-                    {Object.entries(selectedProduct?.attributes).map(([key, value]) => (
-                      <div
-                        key={key}
-                        className="inline-block mr-2 mb-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs"
-                      >
-                        <strong className="font-semibold text-gray-800">{key}:</strong>
-                        <span className="ml-1 text-gray-600">{value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-  
-                {/* Đánh giá */}
-                {reviewData ? 
-                  (
-                    <div className="space-y-2">
-                      <Avatar>
-                        <AvatarImage src={reviewData.imageUser || "/placeholder.svg"} />
-                      </Avatar>
-                      <div className="font-medium">{reviewData.username}</div>
-                      <div className="flex gap-1">
-                        {[...Array(reviewData.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-red-500 text-red-500" />
-                        ))}
-                      </div>
-                      <div className="space-y-2 mb-4">
-                        <div className="flex gap-2">
-                          {/* <span className="text-gray-600">Chất lượng sản phẩm:</span> */}
-                          <span>{reviewData.comment}</span>
-                        </div>
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {formatDate(reviewData.reviewDate)}
-                      </div>
-
-                      {reviewData.images?.length > 0 &&(
-                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                              {reviewData.images?.map((imageUrl, i) => (
-                                  <div key={i} className="relative rounded-lg overflow-hidden bg-gray-200 aspect-w-1 aspect-h-1">
-                                      <img
-                                          src={imageUrl || "/placeholder.svg"}
-                                          alt={`Review image ${i + 1}`}
-                                          fill
-                                          className="object-cover w-full h-full"
-                                      />
-                                  </div>
-                              ))}
-                          </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="text-gray-500">
-                      Sản phẩm chưa được đánh giá!
-                    </div>
-                  )
-                }
-               
-              </div>
-  
-              <DialogFooter>
-                <Button variant="outline" onClick={handleCloseDialog}>
-                  Đóng
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        )
-          
-        }
-      </>
-    );
-  };
 
 
   return (
@@ -235,7 +156,7 @@ export default function OrderPage() {
             </ul>
           </div>
         </nav>
-        <div className="bg-gray-200 py-4">
+        {/* <div className="bg-gray-200 py-4">
           <div className="container mx-auto px-4">
             <div className="relative max-w-3xl mx-auto">
               <Input
@@ -247,11 +168,11 @@ export default function OrderPage() {
                 size={20} />
             </div>
           </div>
-        </div>
+        </div> */}
         <main className="container mx-auto px-4 py-8 space-y-4">
 
         {filteredShipments.length > 0 ?(
-          filteredShipments.map((shipment, index) => (
+          currentReviews.map((shipment, index) => (
           <Card key={index} className="w-full mb-4 shadow-md hover:shadow-lg transition-shadow duration-300">
             <CardHeader className="flex justify-between items-start border-b pb-4 relative">
               <div className="flex items-center space-x-4">
@@ -280,6 +201,9 @@ export default function OrderPage() {
                   <Store className="mr-2 h-4 w-4" />
                   Xem Shop
                 </Button>
+              </div>
+              <div className="flex items-end w-full text-gray-500">
+                <span className="text-right w-full">{formatDate(shipment.orderDate)}</span>
               </div>
               <div className="absolute top-8 right-4">
                 <span className="font-medium text-red-600">{getStatusInVietnamese(shipment.shippingStatus)}</span>
@@ -358,16 +282,13 @@ export default function OrderPage() {
                 </Button>
 
                 <div className="space-y-2">
-                  {shipment.orderOnlineDetails.map((detail, index) => (
-                    <Button
-                      key={index}
-                      onClick={() => showReview(detail)}
-                      variant="outline"
-                      size="sm"
-                      className="hover:bg-gray-100">
-                        Xem Đánh Giá Shop
-                    </Button>
-                  ))}
+                  <Button
+                    onClick={() => showReview(shipment)}
+                    variant="outline"
+                    size="sm"
+                    className="hover:bg-gray-100">
+                      Xem Đánh Giá Shop
+                  </Button>
                 </div>
                 
               </div>
@@ -380,12 +301,98 @@ export default function OrderPage() {
         )}
         
         </main>
+        <div className="m-3">
+            <Pagination
+                currentPage={currentPage}
+                itemsPerPage={itemsPerPage}
+                totalItems={shipments.length}
+                onPageChange={handlePageChange}
+            />
+        </div>
       </div>
       {/* Dialog hiển thị đánh giá sản phẩm */}
-      <ProductReviewDialog
-        selectedProduct={selectedProduct}
-        handleCloseDialog={handleCloseDialog}
-      />
+      {selectedProduct && (
+        <Dialog open={isOpen} onOpenChange={() => setIsOpen(!isOpen)}>
+            <DialogContent className="w-3/4 max-w-5xl mx-auto">
+              <p id="dialog-description" className="sr-only">Mô tả về đánh giá sản phẩm.</p>
+              <DialogHeader>
+                <DialogTitle>Đánh giá sản phẩm</DialogTitle>
+              </DialogHeader>
+  
+              <div className="">
+          
+                <div className="max-h-96 overflow-y-auto space-y-4">
+                  {reviewData?.length > 0 ? (
+                    reviewData.map((review, index) => (
+                      <div className="space-y-2 rounded-xl shadow-md border border-gray-200 p-3" key={review.comment || index}>
+                        <img
+                          src={review.imageUser || "/placeholder.svg"}
+                          alt={review.comment}
+                          width={60} // Tùy chỉnh kích thước
+                          height={60}
+                          className="w-16 h-16 rounded-lg object-cover mr-4"
+                        />
+                        <div className="font-medium">{review.username}</div>
+                        <div className="flex gap-1">
+                          <p>{review.productName}</p>
+                          {[...Array(review.rating)].map((_, i) => (
+                            <div className="flex items-center">
+                              <Star key={i} className="w-4 h-4 fill-red-500 text-red-500" />
+                            </div>
+                          ))}
+                        </div>
+                        {Object.entries(review.attributes).map(([key, value]) => (
+                          <div
+                            key={key}
+                            className="inline-block mr-2 mb-2 rounded-full bg-gray-100 border border-gray-300 shadow-sm px-2 py-1 text-xs"
+                          >
+                            <strong className="font-semibold text-gray-800">{key}:</strong>
+                            <span className="ml-1 text-gray-600">{value}</span>
+                          </div>
+                        ))}
+                        <div className="space-y-2 mb-4">
+                          <div className="flex gap-2">
+                            <span>{review.comment}</span>
+                          </div>
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {formatDate(review.reviewDate)}
+                        </div>
+
+                        {review.images?.length > 0 && (
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                            {review.images.map((imageUrl, i) => (
+                              <div
+                                key={i}
+                                className="relative rounded-lg overflow-hidden bg-gray-200 aspect-w-1 aspect-h-1"
+                              >
+                                <img
+                                  src={imageUrl || "/placeholder.svg"}
+                                  alt={`Review image ${i + 1}`}
+                                  className="object-cover w-full h-full"
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-500">Sản phẩm chưa được đánh giá!</div>
+                  )}
+                </div>
+
+               
+              </div>
+  
+              <DialogFooter>
+                <Button variant="outline" onClick={handleCloseDialog}>
+                  Đóng
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+      )}
     </div>
   );
 }

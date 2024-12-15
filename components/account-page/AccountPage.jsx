@@ -42,8 +42,8 @@ const AccountPage = () => {
       <Header />
       <div className="flex flex-wrap gap-10 self-center mt-20 w-full text-sm max-w-[1170px] max-md:mt-10 max-md:max-w-full">
         <div className="flex flex-1 gap-3 items-center text-black">
-          <a href="#" className="self-stretch my-auto opacity-50">Home</a>
-          <span className="self-stretch my-auto">/ My Account</span>
+          {/* <a href="#" className="self-stretch my-auto opacity-50">Home</a>
+          <span className="self-stretch my-auto">/ My Account</span> */}
         </div>
         <div className="leading-5 text-red-500">
           Welcome! <span className="text-red-500">{userData ? userData.fullName : "Guest"}</span>

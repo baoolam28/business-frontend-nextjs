@@ -12,6 +12,10 @@ import BuyerAPI from "../../api/buyer";
 import { useSearchParams } from 'next/navigation'
 import Loading from "../../components/component/loading-lottie"
 import Animation from "../../utils/lottie-animations/astronot.json"
+import FlashSale from "../../components/home-page/FlashSale"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 function ProductPage() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -61,7 +65,8 @@ function ProductPage() {
       <div className="flex justify-center items-center flex-1">
         <main>
           <ProductDetails productData={productData}/>
-          <RelatedProducts />
+          {/* <RelatedProducts /> */}
+          <FlashSale/>
         </main>
       </div>
       <AllReviewProduct productId={id}/>
@@ -70,4 +75,10 @@ function ProductPage() {
   );
 }
 
-export default ProductPage;
+export default function ProductPageWrapper() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ProductPage />
+    </QueryClientProvider>
+  );
+}
