@@ -74,4 +74,10 @@ function ProductPage() {
   );
 }
 
-export default ProductPage;
+export default function ProductPageWrapper() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <ProductPage />
+    </QueryClientProvider>
+  );
+}
