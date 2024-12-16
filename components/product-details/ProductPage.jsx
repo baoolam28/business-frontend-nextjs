@@ -13,7 +13,7 @@ import Loading from "../../components/component/loading-lottie"
 import Animation from "../../utils/lottie-animations/astronot.json"
 import FlashSale from "../../components/home-page/FlashSale";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-function ProductPage() {
+export default function ProductPage() {
   const queryClient = new QueryClient();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
@@ -71,13 +71,5 @@ function ProductPage() {
       <AllReviewProduct productId={id}/>
       <Footer />
     </div>
-  );
-}
-
-export default function ProductPageWrapper() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ProductPage />
-    </QueryClientProvider>
   );
 }

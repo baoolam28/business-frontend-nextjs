@@ -11,7 +11,7 @@ import formatVND from "../../utils/formatVND"
 import QrCodeCard  from "../../components/component/qrCodeCard"
 import sellerAPI from "../../api/seller"
 import PaymentSuccess from "../../components/component/payment-success"
-
+import { PrinterCheck } from 'lucide-react';
 
 export default function Component() {
     const [loading, setLoading] = useState(false);
@@ -148,6 +148,17 @@ const GeneratePaymentData = (amount, addInfo) => {
     }
   };
 
+  const printerOrder = async () => {
+    setLoading(true);
+    try {
+      const invoice = await sellerAPI.invoice.printOrderOffline(orderId);
+    } catch (error) {
+      
+    }finally {
+      setLoading(false);
+    }
+  }
+
   if(isPayment) return <PaymentSuccess/>;
 
   return (
@@ -188,42 +199,53 @@ const GeneratePaymentData = (amount, addInfo) => {
           <div className="w-full lg:w-1/2">
             <Card>
               <CardHeader>
-                <CardTitle>Hóa đơn</CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Hóa đơn</CardTitle>
+                  <button
+                    onClick={printerOrder}
+                    className="flex items-center px-3 py-2 text-sm font-medium bg-orange-500 text-white rounded-lg hover:bg-orange-300"
+                  >
+                    <PrinterCheck />
+                    In hóa đơn
+                  </button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                    <div className="flex justify-between">
-                        <span>Khách hàng</span>
-                        <span>{order.customerName || 'khong co du lieu'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Số điện thoại</span>
-                        <span>{order.customerPhone || 'Khong co du lieu'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Email</span>
-                        <span>{order.customerEmail || 'Khong co du lieu'}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span>Địa chỉ</span>
-                        <span>{order.customerAddress || 'Khong co du lieu'}</span>
-                    </div>
+                  <div className="flex justify-between">
+                    <span>Khách hàng</span>
+                    <span>{order.customerName || 'khong co du lieu'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Số điện thoại</span>
+                    <span>{order.customerPhone || 'Khong co du lieu'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Email</span>
+                    <span>{order.customerEmail || 'Khong co du lieu'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Địa chỉ</span>
+                    <span>{order.customerAddress || 'Khong co du lieu'}</span>
+                  </div>
                 </div>
                 <ul className="space-y-2 border-t mt-4">
-                    <li className="flex justify-between font-bold">
-                        <span>Tên sản phẩm</span>
-                        <span>Số lượng</span>
-                        <span>Giá</span>
-                        <span>Tổng giá</span>
-                    </li>
-                  {order.orderDetails ? order.orderDetails.map((item, index) => (
-                    <li key={index} className="flex justify-between">
-                      <span>{item.name}</span>
-                      <span>(x{item.quantity})</span>
-                      <span>{formatVND(item.price)}</span>
-                      <span>{formatVND((item.quantity * item.price))}</span>
-                    </li>
-                  )) : null}
+                  <li className="flex justify-between font-bold">
+                    <span>Tên sản phẩm</span>
+                    <span>Số lượng</span>
+                    <span>Giá</span>
+                    <span>Tổng giá</span>
+                  </li>
+                  {order.orderDetails ? (
+                    order.orderDetails.map((item, index) => (
+                      <li key={index} className="flex justify-between">
+                        <span>{item.name}</span>
+                        <span>(x{item.quantity})</span>
+                        <span>{formatVND(item.price)}</span>
+                        <span>{formatVND(item.quantity * item.price)}</span>
+                      </li>
+                    ))
+                  ) : null}
                 </ul>
               </CardContent>
               <CardFooter>
@@ -233,6 +255,7 @@ const GeneratePaymentData = (amount, addInfo) => {
                 </div>
               </CardFooter>
             </Card>
+
           </div>
         </CardContent>
         <CardFooter>
