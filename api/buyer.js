@@ -81,9 +81,13 @@ const buyerAPI = {
       axiosClient.get(
         `${baseUrl}/reviews/review?productDetailId=${productDetailId}&userId=${userId}`
       ),
-    createNewReview: (productDetailId, reviewData) =>
+    checkIfReviewed : (productDetailId, userId) => 
+      axiosClient.get(
+        `${baseUrl}/reviews/is-reviewed?productDetailId=${productDetailId}&userId=${userId}`
+      ),  
+    createNewReview: (reviewData) =>
       axiosClient.post(
-        `${baseUrl}/reviews/newReview/${productDetailId}`,
+        `${baseUrl}/reviews/newReview`,
         reviewData
       ),
     updateReview: (reviewId, data) =>
@@ -93,5 +97,7 @@ const buyerAPI = {
     deleteReview: (reviewId) =>
       axiosClient.delete(`${baseUrl}/reviews`, { reviewId }),
   },
+
 };
 
+export default buyerAPI;

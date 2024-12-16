@@ -49,13 +49,11 @@ function CategoryBrowse({ categoryId }) {
             <div className="flex flex-col self-stretch my-auto w-5">
               <div className="flex shrink-0 h-10 bg-red-500 rounded" />
             </div>
-            <span className="self-stretch my-auto text-base font-semibold leading-none text-red-500">
-              Today's
-            </span>
+            <h2 className="mt-5 text-4xl font-semibold tracking-widest leading-none text-black">
+              Duyệt theo danh mục
+            </h2>
           </div>
-          <h2 className="mt-5 text-4xl font-semibold tracking-widest leading-none text-black">
-            Browse By Category
-          </h2>
+          
         </div>
       </div>
       <div className="container mx-auto px-4 py-8">
@@ -77,9 +75,9 @@ function CategoryBrowse({ categoryId }) {
                 />
               </div>
               <div className="w-full text-center">
-              <span className="text-sm font-medium text-gray-800 line-clamp-2 group-hover:text-primary transition-colors duration-300">
+              <h3 className="text-sm font-medium text-gray-800 line-clamp-2 group-hover:text-primary transition-colors duration-300">
                 {category.categoryName}
-              </span>
+              </h3>
             </div>
             </a>
           ))
@@ -102,7 +100,7 @@ function CategoryBrowse({ categoryId }) {
         )}
       </div>
     </div>
-      <div className="mt-[50px]">
+      <div className="mt-[10px]">
         <Pagination
           currentPage={currentPage}
           itemsPerPage={itemsPerPage}

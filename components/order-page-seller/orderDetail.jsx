@@ -1,15 +1,30 @@
 import React from 'react'
 import { format } from 'date-fns';
-export default function orderDetail({order}) {
+import {CircleX} from "lucide-react"
+export default function orderDetail({order, onCloseDetail}) {
+
+
+    const handleClose = () => {
+        onCloseDetail();
+    }
+
   return (
     <div>
         <div className="p-6 bg-gray-100 min-h-screen">
                     <div className="max-w-5xl mx-auto bg-white p-6 rounded-lg shadow-md">
-                        <div className="flex justify-between items-center mb-4">
+                        <div className="flex items-center justify-between mb-4">
                             <div className="text-sm text-gray-500">
-                                <a href="#" className="text-blue-500">Sale</a> &gt; <a href="#" className="text-blue-500">Order</a> &gt; <a href="#" className="text-blue-500">Order Details</a>
+                                Nội dung khác
                             </div>
+                            <button 
+                                onClick={handleClose} 
+                                className="flex items-center text-red-500 hover:text-red-700"
+                            >
+                                <CircleX />
+                                Tắt
+                            </button>
                         </div>
+
                         <div className="flex justify-between items-center mb-4">
                             <h1 className="text-2xl font-bold">Hóa đơn {order.orderId}</h1>
                             <span className="text-sm text-gray-500"><span className="text-sm text-gray-500">
@@ -24,9 +39,9 @@ export default function orderDetail({order}) {
                                     <div className="space-y-4">
                                         {order.orderDetails.map((item, index) => (
                                             <div key={index} className="flex items-center">
-                                            <img src={item?.imageUrl || "https://placehold.co/60x60"} alt={item.productName} className="w-16 h-16 rounded mr-4" />
+                                            <img src={item?.image || "https://placehold.co/60x60"} alt={item.productName} className="w-16 h-16 rounded mr-4" />
                                             <div className="flex-1">
-                                                <div className="font-bold">{item.productName}</div>
+                                                <div className="font-bold">{item.productName? item.productName : ''}</div>
                                                 <div className="text-sm text-gray-500">Giá: <a href="#" className="text-blue-500">{item.price}</a></div>
                                                 <div className="text-sm text-gray-500">Số lượng: {item.quantity}</div>
                                             </div>
@@ -58,13 +73,13 @@ export default function orderDetail({order}) {
                                 <div className="bg-gray-50 p-4 rounded-lg">
                                     <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-lg font-bold">Thông tin khách hàng</h2>
-                                        <button className="text-blue-500">Edit</button>
+                                        
                                     </div>
                                     <div className="space-y-2">
                                         <div className="flex items-center">
                                             <img src="https://placehold.co/40x40" alt="Customer profile" className="w-10 h-10 rounded-full mr-4"/>
                                             <div>
-                                                <div className="font-bold">Tên : {order.userName}</div>
+                                                <div className="font-bold">Tên : {order.fullName}</div>
                                                 <div className="text-sm text-gray-500">SDT: {order.phone}</div>
                                             </div>
                                         </div>
@@ -75,23 +90,22 @@ export default function orderDetail({order}) {
                                 <div className="bg-gray-50 p-4 rounded-lg">
                                     <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-lg font-bold">Địa chỉ</h2>
-                                        <button className="text-blue-500">Edit</button>
+                                        
                                     </div>
                                     <div className="space-y-2">
-                                        <div className="text-sm text-gray-500">Đường: 344a Bùi Thị Điệt , ấp 3 , Phạm Văn Cội , Củ Chi  ,TP Hồ Chí Minh</div>
+                                        <div className="text-sm text-gray-500">{order.address}</div>
                                         <div className="text-sm text-gray-500">Điện thoại: {order.phone}</div>
-                                        <a href="#" className="text-blue-500">View map</a>
                                     </div>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-lg">
                                     <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-lg font-bold"> Thông tin thanh toán</h2>
-                                        <button className="text-blue-500">Edit</button>
+                                        
                                     </div>
                                     <div className="space-y-2">
                                         <div className="text-sm text-gray-500">Trả tiền: {order.paymentStatus ? "Đã trả tiền" : "Chưa trả tiền"}</div>
                                         <div className="text-sm text-gray-500">Phương thức trả : {order.paymentMethod}</div>
-                                        <a href="#" className="text-blue-500">0911835993</a>
+                                        <a href="#" className="text-blue-500">{order.phone}</a>
                                     </div>
                                 </div>
                             </div>

@@ -65,9 +65,13 @@ const sellerAPI = {
       axiosClient.get(`${baseUrl}/orders/${storeId}/products`),
     updateOrderDetail: (orderData, orderId) =>
       axiosClient.put(`${baseUrl}/orders/update/${orderId}`, orderData),
-    updateOrderOnlineById: (orderId, newStatus) => 
+    updateOrderOnlineById: (orderId, newStatus) =>
       axiosClient.put(`${baseUrl}/orders/online/${orderId}/status`, newStatus),
-
+    updateOrderByStoreID: (storeId, status) =>
+      axiosClient.put(
+        `${baseUrl}/orders/online/stores/${storeId}/status`,
+        status
+      ),
   },
   customer: {
     getAllCustomerByStoreId: (storeId) =>
@@ -100,12 +104,14 @@ const sellerAPI = {
     getAllOrderByStoreId: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/all-orders`),
     getOrderDetailByStoreId: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/order-detail`)
   },
+
   auth: {
-    getAllStaffByStoreId: (storeId) => axiosClient.get(`${baseUrl}/auth/${storeId}`),
-    createNewStaff: (staffData) => axiosClient.post(`${baseUrl}/auth`, staffData),
-    deleteStaff: (userId) => axiosClient.delete(`${baseUrl}/auth/${userId}`)
-  }
+    getAllStaffByStoreId: (storeId) =>
+      axiosClient.get(`${baseUrl}/auth/${storeId}`),
+    createNewStaff: (staffData) =>
+      axiosClient.post(`${baseUrl}/auth`, staffData),
+    deleteStaff: (userId) => axiosClient.delete(`${baseUrl}/auth/${userId}`),
+  },
 };
 
 export default sellerAPI;
-

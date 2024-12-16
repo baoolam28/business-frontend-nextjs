@@ -22,11 +22,14 @@ import Sidebar from '../../components/admin-store/Sidebar';
 import adminAPI from '../../api/admin';
 import { showSuccessAlert } from '../../utils/reactSweetAlert'
 import { format } from 'date-fns';
+import Pagination from "../../components/component/pagination";
 const UserManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [store, setStore] = useState([]);
   const [activeFilter, setActiveFilter] = useState('all');
   const [filteredStores, setFilteredStores] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     const fetchStores = async () => {
@@ -89,6 +92,17 @@ const UserManagementPage = () => {
       alert("Something went wrong!");
     }
   };
+
+  const totalPages = Math.ceil(filteredStores.length / itemsPerPage);
+
+  const currentStores = filteredStores.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
   
 
   return (
@@ -145,7 +159,7 @@ const UserManagementPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredStores.map((store, index) => (
+              {currentStores.map((store, index) => (
                 <TableRow key={store.storeId}>
                   {/* Thay store.storeId bằng index + 1 để tạo số thứ tự */}
                   <TableCell>{index + 1}</TableCell>
@@ -197,22 +211,13 @@ const UserManagementPage = () => {
         </div>
 
         {/* Pagination */}
-        <div className="flex justify-between items-center mt-6">
-          <div>
-            <span className="text-sm text-gray-700">
-              Showing <span className="font-semibold">1</span> to <span className="font-semibold">5</span> of <span className="font-semibold">50</span> results
-            </span>
-          </div>
-          <div className="flex">
-            <Button variant="outline" size="sm" className="mr-2">
-              <ChevronLeft className="h-4 w-4" />
-              <span className="sr-only">Previous</span>
-            </Button>
-            <Button variant="outline" size="sm">
-              <ChevronRight className="h-4 w-4" />
-              <span className="sr-only">Next</span>
-            </Button>
-          </div>
+        <div className="mt-[50px]">
+          <Pagination
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            totalItems={filteredStores.length}
+            onPageChange={handlePageChange}
+          />
         </div>
       </main>
     </div>

@@ -10,6 +10,7 @@ import Link from 'next/link'
 import { Button } from "../ui/button"; 
 import buyerAPI from '../../api/buyer'
 import formatAsVND from '../../utils/formatVND'
+import { format } from "date-fns";
 
 export default function OrderDetailsComponent() {
 
@@ -17,6 +18,7 @@ export default function OrderDetailsComponent() {
   const router = useRouter();
   const [shipment, setShipment] = useState(null);
   const [address, setAddress] = useState(null);
+  const [isReviewed, setIsReviewed] = useState(false);
   const [shipmentStatus, setShipmentStatus] = useState([]);
   const shipmentId = searchParams.get('shipmentId');
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function OrderDetailsComponent() {
             setShipment(shipmentData);
 
             if(shipmentData.addressId){
-              fetchAddress(shipmentData.addressId)
+              await fetchAddress(shipmentData.addressId)
             }
 
             if (shipmentData.statusHistory && Array.isArray(shipmentData.statusHistory)) {
@@ -44,12 +46,17 @@ export default function OrderDetailsComponent() {
                 time: item.time
               }));
               setShipmentStatus(mappedStatus);
-              console.log("Shipment Status1:", shipmentStatus) 
+              
             } else {
               console.error("statusHistory is missing or not an array");
             }
             console.log(shipmentData)
             console.log("Shipment Id:", response.data.shipmentId);
+
+            if (shipmentData.orderOnlineDetails) {
+              await checkReviewStatus(shipmentData.orderOnlineDetails, shipmentData.userId);
+            }
+
           } else {
             console.error("Error fetching shipment: ", response.message);
           }
@@ -62,10 +69,11 @@ export default function OrderDetailsComponent() {
     }
   }, [searchParams]);
 
+
   const fetchAddress = async (addressId) => {
     try {
       const response = await buyerAPI.shippingAddress.getAddressById(addressId)
-
+      console.log("Address API Response:", response);
       if(response.statusCode === 200){
         setAddress(response.data)
         console.log("Address: ", response.data)
@@ -77,12 +85,27 @@ export default function OrderDetailsComponent() {
     }
   }
 
-  const orderEvents = [
-    { status: 'Đã đặt hàng', time: '10:00 AM, 15/10/2023' },
-    { status: 'Đã xác nhận', time: '11:30 AM, 15/10/2023' },
-    { status: 'Đang giao hàng', time: '2:30 PM, 16/10/2023' },
-    { status: 'Đã giao hàng', time: '9:15 AM, 17/10/2023' },
-  ];
+  const checkReviewStatus = async (orderOnlineDetails, userId) => {
+    for (const detail of orderOnlineDetails) {
+      try {
+        const response = await buyerAPI.review.checkIfReviewed(detail.productDetailId, userId);
+        if(response){
+          setIsReviewed(true)
+        }
+      } catch (error) {
+        console.log(`Error checking review status for productDetailId ${detail.productDetailId}:`, error);
+        
+      }
+    }
+  };
+  
+
+  // const orderEvents = [
+  //   { status: 'Đã đặt hàng', time: '10:00 AM, 15/10/2023' },
+  //   { status: 'Đã xác nhận', time: '11:30 AM, 15/10/2023' },
+  //   { status: 'Đang giao hàng', time: '2:30 PM, 16/10/2023' },
+  //   { status: 'Đã giao hàng', time: '9:15 AM, 17/10/2023' },
+  // ];
 
   const getStatusInVietnamese = (shippingStatus) => {
     switch (shippingStatus) {
@@ -118,8 +141,12 @@ export default function OrderDetailsComponent() {
     }
   };
   const handReviewProduct = (productDetailId) => {
-      router.push(`/review?productDetailId=${productDetailId}`)
+      router.push(`/review?productDetailId=${productDetailId}&shipmentId=${shipment.shipmentId}`)
   }
+  const formatDate = (date) => {
+    if (!date) return "";
+    return format(new Date(date), "dd/MM/yyyy HH:mm"); // Định dạng: Ngày/Tháng/Năm Giờ:Phút
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -154,7 +181,7 @@ export default function OrderDetailsComponent() {
                 </div>
                 <div className="text-center">
                   <p className="font-semibold">{status.text}</p>
-                  <p className="text-sm text-gray-500">{status.time}</p>
+                  <p className="text-sm text-gray-500">{formatDate(status.time)}</p>
                 </div>
               </div>
             ))}
@@ -174,23 +201,27 @@ export default function OrderDetailsComponent() {
           <FontAwesomeIcon icon={faComments} className="mr-2" />
           Liên Hệ Người Bán
         </button>
-        <button
-          className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 flex items-center"
-          onClick = {() => handReviewProduct(detail.productDetailId)} >
-          <FontAwesomeIcon icon={faComments} className="mr-2" />
-          Xác nhận đơn hàng
-        </button>
+        {!isReviewed && (
+          <button
+            className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 flex items-center"
+            onClick = {() => handReviewProduct(detail.productDetailId)} >
+            <FontAwesomeIcon icon={faComments} className="mr-2" />
+            Đánh giá sản phẩm 
+          </button>
+        )}
       </div>
       ))}
       
       {/* Shipping Address bị lỗi 404 */} 
-      {address && (
+      {address ? (
         <div className="bg-white shadow-md rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Địa chỉ nhận hàng</h2>
           <p className="font-semibold">{address.fullName}</p>
           <p>Số điện thoại: {address.phoneNumber}</p>
-          <p>{(address.address) + ", " + (address.district) + ", " + (address.province)}</p>
+          <p>{`${address.address}, ${address.district}, ${address.province}`}</p>
         </div>
+      ): (
+        <p>Không tìm thấy địa chỉ giao hàng.</p>
       )}
       
       {/* Order Events */}
@@ -232,7 +263,7 @@ export default function OrderDetailsComponent() {
                         </div>
                       ))}
                 </div>
-                <p className="text-sm text-gray-500">x{detail.quantity}</p>
+                <p className="text-sm text-gray-500">SL: {detail.quantity}</p>
               </div>
             </div>
         )))}
@@ -262,10 +293,15 @@ export default function OrderDetailsComponent() {
           
         
       </div>
-      
-      <div className="flex justify-between items-center shadow-md rounded-lg p-6 bg-amber-50">
-        <div className="flex ml-auto space-x-2">Phương thức thanh toán</div>
-        {/* <div>{shipment.paymentMethod}</div> */}
+
+      <div className="shadow-md rounded-lg p-6 mb- bg-amber-50">
+        <h2 className="text-xl font-semibold mb-4">Phương thức thanh toán</h2>
+        {shipment && shipment.paymentMethod ? (
+          <span className="font-medium text-gray-800">{shipment?.paymentMethod}</span>
+        ):(
+          <span className="font-medium text-gray-800">Chưa xác định phương thức thanh toán</span>
+        )} 
+       
       </div>
 
     </div>

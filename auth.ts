@@ -27,6 +27,7 @@ const handleToken = (token, user, provider, accessToken) => {
       id: user.userId,
       username: user.username,
       fullName: user.fullName,
+      image: user.image,
       phoneNumber: user.phoneNumber,
       role: user.role ? user.role.match(/roleName=([A-Z_]+)/)?.[1] : null,
       active: user.active,
@@ -102,6 +103,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             (user as any).userId = userInfo.userId;
             (user as any).username = userInfo.username;
             (user as any).fullName = userInfo.fullName;
+            (user as any).image = userInfo.image;
             (user as any).role = userInfo.role;
             (user as any).active = userInfo.active;
             return true;

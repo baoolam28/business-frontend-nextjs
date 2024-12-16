@@ -12,10 +12,16 @@ import { useUser } from "../../context/UserContext";
 import { useChatContext } from "../../context/chatContext";
 import ImageAPI from "../../api/upload";
 import EmojiPicker from 'emoji-picker-react';
+import { useRouter } from "next/navigation";
 
 
 
-const  EnhancedChatBox = () => {
+const  EnhancedChatBox = ({isVisible}) => {
+  const router = useRouter();
+  const hiddenPages = ["/login", "/register", "/admin","/unauthorized"];
+  const shouldShowChatBox = hiddenPages.includes(router.pathname);
+
+
   const { isExpanded, setIsExpanded } = useChatContext();
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [messages, setMessages] = useState({});
@@ -198,164 +204,170 @@ const  EnhancedChatBox = () => {
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
+  if(isVisible) return null;
+
   return (
-    <motion.div
-      className="fixed bottom-10 right-4 shadow-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 z-50"
-      animate={{
-        width: isExpanded ? 400 : 56,
-        height: isExpanded ? 550 : 56,
-        borderRadius: isExpanded ? 8 : 28,
-      }}
-      transition={{ duration: 0.3, ease: "easeInOut" }}
-    >
-      <div className="bg-transparent text-white p-3 flex justify-between items-center cursor-pointer" onClick={toggleExpand}>
-        {!isExpanded && (
-          <div className="flex items-center justify-center h-full w-full text-white">
-            <MessageCircle size={24} />
-          </div>
-        )}
-        <h3 className="font-semibold">Chat</h3>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white hover:bg-white/20 transition-colors duration-200"
-          onClick={toggleExpand}
+    <>
+      {shouldShowChatBox && (
+        <motion.div
+          className="fixed bottom-10 right-4 shadow-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 z-50"
+          animate={{
+            width: isExpanded ? 400 : 56,
+            height: isExpanded ? 550 : 56,
+            borderRadius: isExpanded ? 8 : 28,
+          }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
         >
-          {isExpanded ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
-        </Button>
-      </div>
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="bg-white rounded-b-lg"
-          >
-            <div className="flex h-[540px]">
-              <ScrollArea className="w-1/3 border-r border-gray-200 p-2">
-                {friends.map((friend) => (
-                  <div
-                    key={friend.friendId}
-                    className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
-                      selectedFriend?.friendId === friend.friendId ? 'bg-purple-100' : 'hover:bg-gray-100'
-                    }`}
-                    onClick={() => setSelectedFriend(friend)}
-                  >
-                    <Avatar>
-                      <AvatarImage src={friend.avatar} alt={friend.friendName} />
-                      <AvatarFallback>{friend.friendName[0]}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs font-medium truncate">{friend.friendName}</span>
-                  </div>
-                ))}
-              </ScrollArea>
-              <div className="w-2/3 flex flex-col">
-                {selectedFriend ? (
-                  <>
-                    <div className="p-3 bg-purple-100 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
+          <div className="bg-transparent text-white p-3 flex justify-between items-center cursor-pointer" onClick={toggleExpand}>
+            {!isExpanded && (
+              <div className="flex items-center justify-center h-full w-full text-white">
+                <MessageCircle size={24} />
+              </div>
+            )}
+            <h3 className="font-semibold">Chat</h3>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-white hover:bg-white/20 transition-colors duration-200"
+              onClick={toggleExpand}
+            >
+              {isExpanded ? <Minimize2 size={20} /> : <Maximize2 size={20} />}
+            </Button>
+          </div>
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="bg-white rounded-b-lg"
+              >
+                <div className="flex h-[540px]">
+                  <ScrollArea className="w-1/3 border-r border-gray-200 p-2">
+                    {friends.map((friend) => (
+                      <div
+                        key={friend.friendId}
+                        className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer transition-colors ${
+                          selectedFriend?.friendId === friend.friendId ? 'bg-purple-100' : 'hover:bg-gray-100'
+                        }`}
+                        onClick={() => setSelectedFriend(friend)}
+                      >
                         <Avatar>
-                          <AvatarImage src={selectedFriend.avatar} alt={selectedFriend.friendName} />
-                          <AvatarFallback>{selectedFriend.friendName[0]}</AvatarFallback>
+                          <AvatarImage src={friend.avatar} alt={friend.friendName} />
+                          <AvatarFallback>{friend.friendName[0]}</AvatarFallback>
                         </Avatar>
-                        <span className="font-medium">{selectedFriend.friendName}</span>
+                        <span className="text-xs font-medium truncate">{friend.friendName}</span>
                       </div>
-                      <Button variant="ghost" size="icon" onClick={() => setSelectedFriend(null)}>
-                        <X size={20} />
-                      </Button>
-                    </div>
-                    <ScrollArea className="flex-grow p-4">
-                      {chatMessagesArray.map((message, index) => (
-                        <div
-                          key={index}
-                          className={`mb-2 flex ${message.senderId === chatInfo.userId ? 'justify-end' : 'justify-start'}`}
-                        >
-                          <div
-                            className={`rounded-lg p-2 max-w-[80%] ${
-                              message.senderId === chatInfo.userId
-                                ? 'bg-purple-500 text-white'
-                                : 'bg-gray-200 text-black'
-                            }`}
-                          >
-                            {message.text && <span>{message.text}</span>}
-                            {message.image && (
-                              <img
-                                src={message.image}
-                                alt="Uploaded"
-                                className="mt-2 max-w-[100px] h-auto rounded"
-                              />
+                    ))}
+                  </ScrollArea>
+                  <div className="w-2/3 flex flex-col">
+                    {selectedFriend ? (
+                      <>
+                        <div className="p-3 bg-purple-100 flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Avatar>
+                              <AvatarImage src={selectedFriend.avatar} alt={selectedFriend.friendName} />
+                              <AvatarFallback>{selectedFriend.friendName[0]}</AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium">{selectedFriend.friendName}</span>
+                          </div>
+                          <Button variant="ghost" size="icon" onClick={() => setSelectedFriend(null)}>
+                            <X size={20} />
+                          </Button>
+                        </div>
+                        <ScrollArea className="flex-grow p-4">
+                          {chatMessagesArray.map((message, index) => (
+                            <div
+                              key={index}
+                              className={`mb-2 flex ${message.senderId === chatInfo.userId ? 'justify-end' : 'justify-start'}`}
+                            >
+                              <div
+                                className={`rounded-lg p-2 max-w-[80%] ${
+                                  message.senderId === chatInfo.userId
+                                    ? 'bg-purple-500 text-white'
+                                    : 'bg-gray-200 text-black'
+                                }`}
+                              >
+                                {message.text && <span>{message.text}</span>}
+                                {message.image && (
+                                  <img
+                                    src={message.image}
+                                    alt="Uploaded"
+                                    className="mt-2 max-w-[100px] h-auto rounded"
+                                  />
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          <div ref={messagesEndRef} />
+                        </ScrollArea>
+                        <div className="flex items-center p-3 bg-gray-100 gap-2">
+                          <div className="relative">
+                            {imageSelected && (
+                              <div className="flex items-center gap-2 mt-2">
+                                <img
+                                  src={imageSelected}
+                                  alt="Selected"
+                                  className="max-w-[50px] max-h-[50px] rounded"
+                                />
+                                <Button
+                                  variant="destructive"
+                                  size="icon"
+
+                                  onClick={handleDeleteImage}
+                                  className="absolute max-w-[20px] max-h-[20px] top-0 right-0"
+                                >
+                                  <X size={2} />
+                                </Button>
+                              </div>
                             )}
                           </div>
+
+                          <button onClick={() => setShowPicker(!showPicker)}>
+                              {showPicker ? '😡' : '😘'}
+                            </button>
+                            {showPicker && (
+                              <div className="absolute bottom-5 left-0 z-50 bg-white rounded-lg shadow-lg p-4">
+                                <EmojiPicker
+                                  onEmojiClick={handleEmojiClick}
+                                  pickerStyle={{ width: '100%' }}
+                                />
+                              </div>
+                            )}
+                          <Button onClick={handleImageUpload} variant="ghost" size="icon">
+                            <ImageIcon size={20} />
+                          </Button>
+                          <input
+                            type="file"
+                            ref={fileInputRef}
+                            style={{ display: 'none' }}
+                            onChange={handleFileChange}
+                            accept="image/*"
+                          />
+                          <Input
+                            placeholder="Type a message..."
+                            value={inputMessage}
+                            onChange={(e) => setInputMessage(e.target.value)}
+                            onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                          />
+                          <Button variant="primary" size="icon" onClick={() => handleSendMessage()}>
+                            <Send size={20} />
+                          </Button>
                         </div>
-                      ))}
-                      <div ref={messagesEndRef} />
-                    </ScrollArea>
-                    <div className="flex items-center p-3 bg-gray-100 gap-2">
-                      <div className="relative">
-                        {imageSelected && (
-                          <div className="flex items-center gap-2 mt-2">
-                            <img
-                              src={imageSelected}
-                              alt="Selected"
-                              className="max-w-[50px] max-h-[50px] rounded"
-                            />
-                            <Button
-                              variant="destructive"
-                              size="icon"
-
-                              onClick={handleDeleteImage}
-                              className="absolute max-w-[20px] max-h-[20px] top-0 right-0"
-                            >
-                              <X size={2} />
-                            </Button>
-                          </div>
-                        )}
+                      </>
+                    ) : (
+                      <div className="flex-grow flex items-center justify-center">
+                        <p className="text-gray-400 text-sm">Select a conversation to start chatting</p>
                       </div>
-
-                      <button onClick={() => setShowPicker(!showPicker)}>
-                          {showPicker ? '😡' : '😘'}
-                        </button>
-                        {showPicker && (
-                          <div className="absolute bottom-5 left-0 z-50 bg-white rounded-lg shadow-lg p-4">
-                            <EmojiPicker
-                              onEmojiClick={handleEmojiClick}
-                              pickerStyle={{ width: '100%' }}
-                            />
-                          </div>
-                        )}
-                      <Button onClick={handleImageUpload} variant="ghost" size="icon">
-                        <ImageIcon size={20} />
-                      </Button>
-                      <input
-                        type="file"
-                        ref={fileInputRef}
-                        style={{ display: 'none' }}
-                        onChange={handleFileChange}
-                        accept="image/*"
-                      />
-                      <Input
-                        placeholder="Type a message..."
-                        value={inputMessage}
-                        onChange={(e) => setInputMessage(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                      />
-                      <Button variant="primary" size="icon" onClick={() => handleSendMessage()}>
-                        <Send size={20} />
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex-grow flex items-center justify-center">
-                    <p className="text-gray-400 text-sm">Select a conversation to start chatting</p>
+                    )}
                   </div>
-                )}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </motion.div>
+      )}
+    </>
   );
 }
 

@@ -104,7 +104,7 @@ const handleViewDetails = async (orderId) => {
       storeId : storeId
     };
     try {
-      const response = await sellerAPI.auth.createNewStaff(staffData);
+const response = await sellerAPI.auth.createNewStaff(staffData);
       if (response.statusCode === 200) {
         // Xử lý khi thêm nhân viên thành công
         alert('Thêm nhân viên thành công!');
@@ -144,9 +144,7 @@ const handleViewDetails = async (orderId) => {
           revenue: item[0],     
           date: item[1],         
         }));
-    
           setRevenueData(formattedData);  
-          console.log("Dữ liệu đã được định dạng theo ngày:", JSON.stringify(formattedData));
       } else {
         setRevenueData(null)
       }
@@ -163,9 +161,7 @@ const handleViewDetails = async (orderId) => {
           date: `${item[0]}:${item[1]}:${item[2]}`, // Chuyển timestamp thành ngày
           revenue: item[3]
         }));
-
         setDayData(formattedData);
-        console.log("Today data: ", JSON.stringify(formattedData));
       } 
     } catch (error) {
       console.log("Error fetching report data", error);
@@ -178,12 +174,10 @@ const handleViewDetails = async (orderId) => {
       const response = await sellerAPI.report.getOrderByMonth(storeId);
       if (response.statusCode === 200) {
         const formattedData = response.data.map(item => ({
-          date: item[0],           // Tháng
-          revenue: item[1],         // Doanh thu
+          date: item[1],           // Tháng
+          revenue: item[2],         // Doanh thu
         }));
-
         setMonthData(formattedData);
-        console.log("Month Data:", JSON.stringify(formattedData));
       }
     } catch (error) {
       console.error("Error fetching report data", error);
@@ -201,7 +195,6 @@ const handleViewDetails = async (orderId) => {
           revenue: item[2],               // Tổng doanh thu trong tháng
         }));
         setYearData(formattedData);
-        console.log("year " + JSON.stringify(formattedData))
       }
     } catch (error) {
       console.error("Error fetching report data", error);
@@ -213,7 +206,6 @@ const handleViewDetails = async (orderId) => {
       const response = await sellerAPI.report.getTotalOrder(storeId);
       if (response.statusCode === 200) {
         setTotalOrder(response);
-        console.log("total " + JSON.stringify(response))
       }
     } catch (error) {
       console.error("Error fetching report total", error)
@@ -234,7 +226,6 @@ const handleViewDetails = async (orderId) => {
           rank: index === 0 ? 'Gold' : index === 1 ? 'Silver' : 'Bronze'
         }));
         setCustomersData(formattedCustomers);
-        console.log("Top 3 customers: " + JSON.stringify(formattedCustomers));
       }
     } catch (error) {
       console.error("Error fetching customers:", error);
@@ -253,7 +244,6 @@ const handleViewDetails = async (orderId) => {
           sold: product[2]
         }));
         setProductsData(formattedProducts);
-        console.log("Top 3 products: " + JSON.stringify(formattedProducts));
       }
 
     } catch (error) {
@@ -272,8 +262,6 @@ const handleViewDetails = async (orderId) => {
           phoneNumber: staff.phoneNumber,
           userId: staff.userId
         }));
-
-        console.log(response.data); 
         setStaffs(formattedStaffs); 
       } else {
         console.error("Invalid data format or no data available.");
@@ -298,7 +286,6 @@ const handleViewDetails = async (orderId) => {
           totalAmount: order[5]
         }));
         setInvoices(formattedOrders)
-        console.log(formattedOrders);
       }
     } catch (error) {
       console.error("Error fetching oders data:", error);
@@ -379,7 +366,6 @@ const handleViewDetails = async (orderId) => {
       fetchCustomers();
       fetchProducts();
       fetchrOders();
-      fetchOrderDetail();
     }
 
   }, [activeFilter, dateRange, storeId]);
@@ -444,7 +430,7 @@ const chartData = activeFilter === 'custom' ? revenueData : activeFilter === 'da
           className="w-[300px] justify-start text-left font-normal"
           onClick={() => setActiveFilter('custom')}
         >
-          <CalendarIcon className="mr-2 h-4 w-4" />
+<CalendarIcon className="mr-2 h-4 w-4" />
           {dateRange?.from ? (
             dateRange.to ? (
               <>
@@ -524,7 +510,7 @@ const chartData = activeFilter === 'custom' ? revenueData : activeFilter === 'da
                 <Badge variant={customer.rank}>{customer.rank}</Badge>
               </div>
             ))}
-          </div>
+</div>
         </CardContent>
         </Card>
 
@@ -704,7 +690,7 @@ const chartData = activeFilter === 'custom' ? revenueData : activeFilter === 'da
                 Thêm Nhân Viên
               </Button>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px', margin: '0 auto', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
+<div style={{ display: 'flex', flexDirection: 'column', gap: '15px', maxWidth: '400px', margin: '0 auto', padding: '20px', backgroundColor: '#f9f9f9', borderRadius: '8px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
                 <input
                   type="text"
                   placeholder="Nhập username"
@@ -758,7 +744,7 @@ const chartData = activeFilter === 'custom' ? revenueData : activeFilter === 'da
                   Thêm nhân viên
                 </Button>
               </div>
-            )}
+)}
           </CardContent>
         </Card>
       </div>
