@@ -88,11 +88,11 @@ export default async function middleware(req) {
 
   // Kiểm tra quyền truy cập dựa trên vai trò người dùng
   const allowedPaths = roleAccess[(userRole as any)] || [];
-  console.log("Allowed Paths for Role:", allowedPaths);  // Debug log
+
 
   // Kiểm tra nếu đường dẫn yêu cầu thuộc phạm vi quyền của vai trò
   const hasAccess = allowedPaths.some((path) => pathname.includes(path));  // Dùng startsWith để cho phép các đường dẫn con
-  console.log("Has access:", hasAccess);  // Debug log
+  
 
   // Nếu người dùng đã xác thực và có quyền truy cập, cho phép tiếp tục
   if (hasAccess) {

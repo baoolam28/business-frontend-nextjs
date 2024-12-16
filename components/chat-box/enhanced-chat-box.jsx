@@ -16,11 +16,10 @@ import { useRouter } from "next/navigation";
 
 
 
-const  EnhancedChatBox = ({isVisible}) => {
+const  EnhancedChatBox = () => {
   const router = useRouter();
   const hiddenPages = ["/login", "/register", "/admin","/unauthorized"];
   const shouldShowChatBox = hiddenPages.includes(router.pathname);
-
 
   const { isExpanded, setIsExpanded } = useChatContext();
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -204,11 +203,10 @@ const  EnhancedChatBox = ({isVisible}) => {
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 
-  if(isVisible) return null;
 
   return (
     <>
-      {shouldShowChatBox && (
+      {!shouldShowChatBox && (
         <motion.div
           className="fixed bottom-10 right-4 shadow-lg overflow-hidden bg-gradient-to-br from-purple-400 to-pink-400 z-50"
           animate={{

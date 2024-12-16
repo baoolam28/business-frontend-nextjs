@@ -116,10 +116,10 @@ export default function ReviewPage({ productId }) {
                             </Button>
                         ))}
                         </div>
-                        <div className="flex gap-3">
+                        {/* <div className="flex gap-3">
                         <Button variant="outline" className="h-8">Có Bình Luận (2.1k)</Button>
                         <Button variant="outline" className="h-8">Có Hình Ảnh / Video (992)</Button>
-                        </div>
+                        </div> */}
                     </div>
                     </div>
 

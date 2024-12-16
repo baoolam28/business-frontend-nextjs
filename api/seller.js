@@ -112,6 +112,10 @@ const sellerAPI = {
       axiosClient.post(`${baseUrl}/auth`, staffData),
     deleteStaff: (userId) => axiosClient.delete(`${baseUrl}/auth/${userId}`),
   },
+  invoice: {
+    printOrderOffline: (orderId) =>
+      axiosClient.post(`${baseUrl}/invoices/print/${orderId}`),
+  }
 };
 
 export default sellerAPI;
