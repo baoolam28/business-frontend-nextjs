@@ -92,20 +92,17 @@ const sellerAPI = {
         params: {
           startDate: startDate,
           endDate: endDate,
-        },
-      }),
-    getOrderByToday: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/by-toDay`),
-    getOrderByMonth: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/by-month`),
-    getOrderByYear: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/by-year`),
-    getTotalOrder: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/total-value`),
-    getTop3Customers: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/top-customers`),
-    getTop3Products: (storeId) =>
-      axiosClient.get(`${baseUrl}/reports/${storeId}/top-products`),
+        }
+      }
+    ),
+    getOrderByToday: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-toDay`),
+    getOrderByMonth: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-month`),
+    getOrderByYear: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/by-year`),
+    getTotalOrder: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/total-value`),
+    getTop3Customers: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/top-customers`),
+    getTop3Products: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/top-products`),
+    getAllOrderByStoreId: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/all-orders`),
+    getOrderDetailByStoreId: (storeId) => axiosClient.get(`${baseUrl}/reports/${storeId}/order-detail`)
   },
 
   auth: {

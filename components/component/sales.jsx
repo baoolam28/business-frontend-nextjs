@@ -583,27 +583,33 @@ const handleSelectOrder = (selectedOrderObj) => {
                       buttonIcon={""}
                       hidden
                     />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  {selectedCustomer ? selectedCustomer.name : "Chọn khách hàng"}
-                  <ChevronDownIcon className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {customers.map((customer) => (
-                  <DropdownMenuItem key={customer.customerId} onClick={() => handleSelectCustomer(customer)}>
-                    {customer.name}
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem >
-                  
-                  
-                </DropdownMenuItem>
-                
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="flex items-center gap-2">
+                      {selectedCustomer ? selectedCustomer.name : "Chọn khách hàng"}
+                      <ChevronDownIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="end"
+                    className="max-h-52 overflow-y-auto" // Thêm giới hạn chiều cao và cuộn
+                    style={{
+                      maxHeight: "200px", // 200px là chiều cao tối đa (tùy chỉnh)
+                      overflowY: "auto",  // Kích hoạt cuộn dọc
+                    }}
+                  >
+                    {customers.map((customer) => (
+                      <DropdownMenuItem key={customer.customerId} onClick={() => handleSelectCustomer(customer)}>
+                        {customer.name}
+                      </DropdownMenuItem>
+                    ))}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      {/* Nội dung khác nếu cần */}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
             
           </div>
          {selectedCustomer && (

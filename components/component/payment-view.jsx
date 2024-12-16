@@ -38,6 +38,7 @@ import orderAPI from '../../api/order'
 import formatVND from "../../utils/formatVND"
 import sellerAPI from "../../api/seller"
 
+
 export default function PaymentView() { // Đổi tên hàm theo quy ước PascalCase
 
   const [order, setOrder] = useState(null); // Khởi tạo order là null

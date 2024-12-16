@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { ArrowRight, DollarSign, ShoppingCart, Users, Calendar as CalendarIcon } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card"
 import { Button } from "../../components/ui/button"
@@ -35,13 +35,18 @@ export default function RevenueDashboardComponent() {
   const [totalOrder, setTotalOrder] = useState([])
   const [customersData, setCustomersData] = useState([])
   const [productsData, setProductsData] = useState([])
-const [isAddingStaff, setIsAddingStaff] = useState(false);
+  const [isAddingStaff, setIsAddingStaff] = useState(false);
   const [username, setUsername] = useState('');
-const [password, setPassword] = useState('');
-const [phoneNumber, setPhoneNumber] = useState('');
-const [fullName, setFullName] = useState('');
-const [email, setEmail] = useState('');
-const [staffs, setStaffs] = useState([])
+  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [staffs, setStaffs] = useState([])
+  const [showOverlay, setShowOverlay] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [invoices, setInvoices] = useState([]);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  const [invoiceDetails, setInvoiceDetails] = useState();
 
         // Hàm xử lý khi chọn ngày
   const handleDateSelect = (newDateRange) => {
@@ -53,6 +58,42 @@ const [staffs, setStaffs] = useState([])
       }
     };
 
+const handleViewDetails = async (orderId) => {
+  console.log("Order ID Input:", orderId);
+  
+  // Đảm bảo chuyển orderId thành chữ thường
+  const normalizedOrderId = orderId.toLowerCase(); // Lưu lại giá trị mới
+  
+  try {
+    const orderDetails = await fetchOrderDetail();
+    console.log("Fetched Order Details:", orderDetails); // Kiểm tra dữ liệu trả về
+
+    const selectedInvoice = orderDetails.find(
+      (invoice) => invoice.orderId.toLowerCase() === normalizedOrderId // So sánh với orderId đã chuyển sang chữ thường
+    );
+
+    if (!selectedInvoice) {
+      console.warn("Order ID not found in details:", normalizedOrderId);
+      return;
+    }
+
+    setSelectedInvoice(selectedInvoice);
+    setShowOverlay(true);
+  } catch (error) {
+    console.error("Error fetching order details:", error);
+  }
+};
+
+
+  const closeShowLay = () => {
+    setSelectedInvoice(null); // Xóa chi tiết hóa đơn khi đóng
+    setShowOverlay(true); // Mở lại overlay danh sách hóa đơn nếu cần
+  };
+
+  const filteredInvoices = invoices.filter((invoice) =>
+    invoice.fullName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const handleAddStaff = async () => {
     const staffData = {
       username: username,
@@ -62,7 +103,6 @@ const [staffs, setStaffs] = useState([])
       email: email,
       storeId : storeId
     };
-
     try {
 const response = await sellerAPI.auth.createNewStaff(staffData);
       if (response.statusCode === 200) {
@@ -78,231 +118,261 @@ const response = await sellerAPI.auth.createNewStaff(staffData);
     }
   };
 
-const handleDelete = async (userId) => {
-  try {
-    console.log("Gọi API xóa nhân viên với userId:", userId); // Log userId
-    const response = await sellerAPI.auth.deleteStaff(userId);
-    
-    console.log("Kết quả trả về từ API:", response); // Log toàn bộ kết quả trả về
-    if (response.statusCode === 200) { // Kiểm tra mã trạng thái HTTP trả về
-      setStaffs(staffs.filter((staff) => staff.userId !== userId));
-    } else {
-      console.error("Có lỗi xảy ra khi xóa nhân viên", response);
-    }
-  } catch (error) {
-    console.error("Có lỗi xảy ra khi xóa nhân viên:", error);
-  }
-};
-
-
-
-
-
-  
-const fetchReportDataByDay = async (startDate, endDate) => {
-  try {
-    const response = await sellerAPI.report.getOrderByDay(storeId, startDate.toISOString(), endDate.toISOString());
-    if (response.statusCode === 200) {
-      const formattedData = response.data.map(item => ({
-        revenue: item[0],     
-        date: item[1],         
-      }));
-  
-        setRevenueData(formattedData);  
-        console.log("Dữ liệu đã được định dạng theo ngày:", JSON.stringify(formattedData));
-    } else {
-      setRevenueData(null)
-    }
-  } catch (error) {
-    console.error('Error fetching report data:', error);
-  }
-};
-
-const fetchReportDataByToday = async () => {
-  try {
-    const response = await sellerAPI.report.getOrderByToday(storeId);
-    if(response.statusCode === 200) {
-      const formattedData = response.data.map(item => ({
-        revenue: item[0]
-      }));
-
-      setDayData(formattedData);
-      console.log("Today data: ", JSON.stringify(formattedData));
-    } 
-  } catch (error) {
-    console.log("Error fetching report data", error);
-  }
-}
-
-
-const fetchReportDataByMonth = async () => {
-  try {
-    const response = await sellerAPI.report.getOrderByMonth(storeId);
-    if (response.statusCode === 200) {
-      const formattedData = response.data.map(item => ({
-        date: item[0],           // Tháng
-        revenue: item[1],         // Doanh thu
-      }));
-
-      setMonthData(formattedData);
-      console.log("Month Data:", JSON.stringify(formattedData));
-    }
-  } catch (error) {
-    console.error("Error fetching report data", error);
-  }
-};
-
-
-const fetchReportDataByYear = async () => {
-  try {
-    const response = await sellerAPI.report.getOrderByYear(storeId);
-    if (response.statusCode === 200) {
-
-    const formattedData = response.data.map(item => ({
-date: `${item[0]}-${item[1]}`,  // Định dạng date theo dạng 'yyyy-MM' (năm-tháng)
-        revenue: item[2],               // Tổng doanh thu trong tháng
-      }));
-      setYearData(formattedData);
-      console.log("year " + JSON.stringify(formattedData))
-    }
-  } catch (error) {
-    console.error("Error fetching report data", error);
-  }
-}
-
-const fetchReportTotal = async () => {
-  try {
-    const response = await sellerAPI.report.getTotalOrder(storeId);
-    if (response.statusCode === 200) {
-      setTotalOrder(response);
-      console.log("total " + JSON.stringify(response))
-    }
-  } catch (error) {
-    console.error("Error fetching report total", error)
-  }
-}
-
-const fetchCustomers = async () => {
-  try {
-    
-    const response = await sellerAPI.report.getTop3Customers(storeId);
-    
-    
-    if (response.statusCode === 200) {
-     
-      const formattedCustomers = response.data.map((customer, index) => ({
-        name: customer[1],
-        orders: customer[3],
-        rank: index === 0 ? 'Gold' : index === 1 ? 'Silver' : 'Bronze'
-      }));
-      setCustomersData(formattedCustomers);
-      console.log("Top 3 customers: " + JSON.stringify(formattedCustomers));
-    }
-  } catch (error) {
-    console.error("Error fetching customers:", error);
-  }
-};
-
-const fetchProducts = async () => {
-  try {
-
-    const response = await sellerAPI.report.getTop3Products(storeId);
-
-    if (response.statusCode === 200) {
-
-      const formattedProducts = response.data.map((product, index) => ({
-        name: product[1],
-        sold: product[2]
-      }));
-      setProductsData(formattedProducts);
-      console.log("Top 3 products: " + JSON.stringify(formattedProducts));
-    }
-
-  } catch (error) {
-    console.error("Error fetching products", error)
-  }
-}
-
-const fetchStaffs = async () => {
-  try {
-    const response = await sellerAPI.auth.getAllStaffByStoreId(storeId);
-
-    if (response.statusCode === 200 && Array.isArray(response.data)) {
-      // Lấy và định dạng lại chỉ với fullName và phoneNumber
-      const formattedStaffs = response.data.map((staff) => ({
-        fullName: staff.fullName,
-        phoneNumber: staff.phoneNumber,
-        userId: staff.userId
-      }));
-
-      console.log(response.data); 
-      setStaffs(formattedStaffs); 
-    } else {
-      console.error("Invalid data format or no data available.");
-    }
-  } catch (error) {
-    console.error("Error fetching staff data:", error);
-  }
-};
-
-
-
-useEffect(() => {
-  if (!storeId) return;
-
-  const now = new Date();
-  let start, end;
-
-  switch (activeFilter) {
-   case 'day':
-      fetchReportDataByToday();
-      break;
-    case 'month':
-      fetchReportDataByMonth();
-      break;
-    case 'year':
-      fetchReportDataByYear();
-      break;
-    case 'custom':
-      if (dateRange?.from && dateRange?.to) {
-        start = dateRange.from;
-        end = dateRange.to;
+  const handleDelete = async (userId) => {
+    try {
+      console.log("Gọi API xóa nhân viên với userId:", userId); // Log userId
+      const response = await sellerAPI.auth.deleteStaff(userId);
+      
+      console.log("Kết quả trả về từ API:", response); // Log toàn bộ kết quả trả về
+      if (response.statusCode === 200) { // Kiểm tra mã trạng thái HTTP trả về
+        setStaffs(staffs.filter((staff) => staff.userId !== userId));
       } else {
-        start = startOfMonth(now);
-        end = endOfMonth(now);
+        console.error("Có lỗi xảy ra khi xóa nhân viên", response);
       }
-break;
-    default:
-      console.error("Active filter không hợp lệ:", activeFilter);
-      return; // Dừng lại nếu filter không hợp lệ
+    } catch (error) {
+      console.error("Có lỗi xảy ra khi xóa nhân viên:", error);
+    }
+  };
+
+
+
+  const fetchReportDataByDay = async (startDate, endDate) => {
+    try {
+      const response = await sellerAPI.report.getOrderByDay(storeId, startDate.toISOString(), endDate.toISOString());
+      if (response.statusCode === 200) {
+        const formattedData = response.data.map(item => ({
+          revenue: item[0],     
+          date: item[1],         
+        }));
+          setRevenueData(formattedData);  
+      } else {
+        setRevenueData(null)
+      }
+    } catch (error) {
+      console.error('Error fetching report data:', error);
+    }
+  };
+
+  const fetchReportDataByToday = async () => {
+    try {
+      const response = await sellerAPI.report.getOrderByToday(storeId);
+      if(response.statusCode === 200) {
+        const formattedData = response.data.map(item => ({
+          date: `${item[0]}:${item[1]}:${item[2]}`, // Chuyển timestamp thành ngày
+          revenue: item[3]
+        }));
+        setDayData(formattedData);
+      } 
+    } catch (error) {
+      console.log("Error fetching report data", error);
+    }
   }
 
-  // Gọi API fetch dữ liệu nếu `start` và `end` đã xác định
-  if (start && end) {
-    fetchReportDataByDay(start, end);
-  }
 
-  if (storeId) {
-    fetchReportDataByToday();
-    fetchStaffs();
-    fetchReportTotal();
-    fetchCustomers();
-    fetchProducts();
-  }
+  const fetchReportDataByMonth = async () => {
+    try {
+      const response = await sellerAPI.report.getOrderByMonth(storeId);
+      if (response.statusCode === 200) {
+        const formattedData = response.data.map(item => ({
+          date: item[1],           // Tháng
+          revenue: item[2],         // Doanh thu
+        }));
+        setMonthData(formattedData);
+      }
+    } catch (error) {
+      console.error("Error fetching report data", error);
+    }
+  };
 
-}, [activeFilter, dateRange, storeId]);
+
+  const fetchReportDataByYear = async () => {
+    try {
+      const response = await sellerAPI.report.getOrderByYear(storeId);
+      if (response.statusCode === 200) {
+
+      const formattedData = response.data.map(item => ({
+          date: `${item[0]}-${item[1]}`,  // Định dạng date theo dạng 'yyyy-MM' (năm-tháng)
+          revenue: item[2],               // Tổng doanh thu trong tháng
+        }));
+        setYearData(formattedData);
+      }
+    } catch (error) {
+      console.error("Error fetching report data", error);
+    }
+  };
+
+  const fetchReportTotal = async () => {
+    try {
+      const response = await sellerAPI.report.getTotalOrder(storeId);
+      if (response.statusCode === 200) {
+        setTotalOrder(response);
+      }
+    } catch (error) {
+      console.error("Error fetching report total", error)
+    }
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      
+      const response = await sellerAPI.report.getTop3Customers(storeId);
+      
+      
+      if (response.statusCode === 200) {
+      
+        const formattedCustomers = response.data.map((customer, index) => ({
+          name: customer[1],
+          orders: customer[3],
+          rank: index === 0 ? 'Gold' : index === 1 ? 'Silver' : 'Bronze'
+        }));
+        setCustomersData(formattedCustomers);
+      }
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+
+      const response = await sellerAPI.report.getTop3Products(storeId);
+
+      if (response.statusCode === 200) {
+
+        const formattedProducts = response.data.map((product, index) => ({
+          name: product[1],
+          sold: product[2]
+        }));
+        setProductsData(formattedProducts);
+      }
+
+    } catch (error) {
+      console.error("Error fetching products", error)
+    }
+  };
+
+  const fetchStaffs = async () => {
+    try {
+      const response = await sellerAPI.auth.getAllStaffByStoreId(storeId);
+
+      if (response.statusCode === 200 && Array.isArray(response.data)) {
+        // Lấy và định dạng lại chỉ với fullName và phoneNumber
+        const formattedStaffs = response.data.map((staff) => ({
+          fullName: staff.fullName,
+          phoneNumber: staff.phoneNumber,
+          userId: staff.userId
+        }));
+        setStaffs(formattedStaffs); 
+      } else {
+        console.error("Invalid data format or no data available.");
+      }
+    } catch (error) {
+      console.error("Error fetching staff data:", error);
+    }
+  };
+
+  const fetchrOders = async () => {
+    
+    try {
+
+      const response = await sellerAPI.report.getAllOrderByStoreId(storeId);
+
+      if (response.statusCode === 200) {
+        const formattedOrders = response.data.map((order) => ({
+          orderId: order[0],
+          fullName: order[2],
+          phoneNumber: order[3],
+          date: order[1],
+          totalAmount: order[5]
+        }));
+        setInvoices(formattedOrders)
+      }
+    } catch (error) {
+      console.error("Error fetching oders data:", error);
+    }
+  };
+
+
+  const fetchOrderDetail = async () => {
+  try {
+    const response = await sellerAPI.report.getOrderDetailByStoreId(storeId);
+
+    if (response.statusCode === 200) {
+      const formattedOrderDetail = response.data.map((order) => ({
+        orderId: order.orderId,
+        fullName: order.customerName,
+        phoneNumber: order.customerPhone,
+        totalAmount: order.orderDetails.reduce((total, detail) => total + detail.price * detail.quantity, 0), // Tính tổng giá
+        date: new Date(order.orderDate).toLocaleString("vi-VN"), // Định dạng ngày
+        paymentMethod: order.paymentMethod,
+        products: order.orderDetails.map((detail) => ({
+          productName: detail.name,
+          quantity: detail.quantity,
+          price: detail.price,
+          barcode: detail.barcode,
+        })),
+      }));
+      return formattedOrderDetail; // Trả về dữ liệu đã định dạng
+    } else {
+      throw new Error("Lỗi khi lấy chi tiết đơn hàng");
+    }
+  } catch (error) {
+    console.error("Error fetching order details:", error);
+    return [];
+  }
+};
+
+
+
+
+  useEffect(() => {
+    if (!storeId) return;
+
+    const now = new Date();
+    let start, end;
+
+    switch (activeFilter) {
+    case 'day':
+        fetchReportDataByToday();
+        break;
+      case 'month':
+        fetchReportDataByMonth();
+        break;
+      case 'year':
+        fetchReportDataByYear();
+        break;
+      case 'custom':
+        if (dateRange?.from && dateRange?.to) {
+          start = dateRange.from;
+          end = dateRange.to;
+        } else {
+          start = startOfMonth(now);
+          end = endOfMonth(now);
+        }
+        break;
+      default:
+        console.error("Active filter không hợp lệ:", activeFilter);
+        return; // Dừng lại nếu filter không hợp lệ
+    }
+
+    // Gọi API fetch dữ liệu nếu `start` và `end` đã xác định
+    if (start && end) {
+      fetchReportDataByDay(start, end);
+    }
+
+    if (storeId) {
+      fetchStaffs();
+      fetchReportTotal();
+      fetchCustomers();
+      fetchProducts();
+      fetchrOders();
+    }
+
+  }, [activeFilter, dateRange, storeId]);
 
   
-const chartData = 
-  activeFilter === 'custom' 
-    ? revenueData 
-    : activeFilter === 'month' 
-    ? monthData 
-    : activeFilter === 'year' 
-    ? yearData 
-    : activeFilter === 'day' 
-    ? dayData
-    : null;
+const chartData = activeFilter === 'custom' ? revenueData : activeFilter === 'day' ? dayData : activeFilter === 'month' ? monthData : yearData;
+
 
 
   const renderChart = () => {
@@ -455,16 +525,125 @@ const chartData =
           </div>  
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sales</CardTitle>
-            <ShoppingCart className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">+2350</div>
-            <p className="text-xs text-muted-foreground">+180.1% from last month</p>
-          </CardContent>
-        </Card>
+
+
+             <div className="relative">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Danh sách hoá đơn</CardTitle>
+                  <CardDescription>Bấm vào để xem hoá đơn chi tiết</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <button
+                    className="bg-black text-white px-4 py-2 rounded"
+                    onClick={() => setShowOverlay(true)}
+                  >
+                    Danh sách hoá đơn
+                  </button>
+                </CardContent>
+              </Card>
+
+              {/* Overlay - Danh sách hoá đơn */}
+              {showOverlay && !selectedInvoice && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white p-6 rounded shadow-lg w-full  relative">
+                    <button
+                      className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                      onClick={() => setShowOverlay(false)}
+                    >
+                      Đóng
+                    </button>
+                    <h2 className="text-lg font-bold mb-4">Danh sách hoá đơn</h2>
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm khách hàng..."
+                      className="w-full p-2 border border-gray-300 rounded mb-4"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <div className="max-h-[400px] overflow-y-auto border border-gray-300 rounded">
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-gray-200">
+                            <th className="border border-gray-300 px-4 py-2">ID Hoá Đơn</th>
+                            <th className="border border-gray-300 px-4 py-2">Tên Khách Hàng</th>
+                            <th className="border border-gray-300 px-4 py-2">Số điện thoại</th>
+                            <th className="border border-gray-300 px-4 py-2">Tổng giá</th>
+                            <th className="border border-gray-300 px-4 py-2">Ngày mua</th>
+                            <th className="border border-gray-300 px-4 py-2"></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {filteredInvoices.map((invoice) => (
+                            <tr key={invoice.orderId} className="hover:bg-gray-100">
+                              <td className="border border-gray-300 px-4 py-2">{invoice.orderId}</td>
+                              <td className="border border-gray-300 px-4 py-2">{invoice.fullName}</td>
+                              <td className="border border-gray-300 px-4 py-2">{invoice.phoneNumber}</td>
+                              <td className="border border-gray-300 px-4 py-2">{invoice.totalAmount}</td>
+                              <td className="border border-gray-300 px-4 py-2">{invoice.date}</td>
+                              <td className="border border-gray-300 px-4 py-2">
+                                <button
+                                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                                  onClick={() => handleViewDetails(invoice.orderId)}
+                                >
+                                  Xem Chi Tiết
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Overlay - Chi tiết hoá đơn */}
+              {selectedInvoice && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white p-6 rounded shadow-lg w-3/4 max-w-4xl relative">
+                    <button
+                      className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+                      onClick={closeShowLay}
+                    >
+                      Đóng
+                    </button>
+                    <h2 className="text-lg font-bold mb-4">Chi Tiết Hoá Đơn</h2>
+                    <div className="mb-4">
+                    <p><strong>ID Hoá Đơn:</strong> {selectedInvoice.orderId}</p>
+                    <p><strong>Ngày giờ:</strong> {selectedInvoice.date}</p>
+                    <p><strong>Tên Khách Hàng:</strong> {selectedInvoice.fullName}</p>
+                    <p><strong>Số Điện Thoại:</strong> {selectedInvoice.phoneNumber}</p>
+                    <p><strong>Phương Thức Thanh Toán:</strong> {selectedInvoice.paymentMethod}</p>
+                  </div>
+                  <h3 className="font-semibold mb-2">Danh Sách Sản Phẩm</h3>
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-200">
+                        <th className="border border-gray-300 px-4 py-2">Tên Sản Phẩm</th>
+                        <th className="border border-gray-300 px-4 py-2">Số Lượng</th>
+                        <th className="border border-gray-300 px-4 py-2">Giá</th>
+                        <th className="border border-gray-300 px-4 py-2">Barcode</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {selectedInvoice.products.map((product, index) => (
+                        <tr key={index} className="hover:bg-gray-100">
+                          <td className="border border-gray-300 px-4 py-2">{product.productName}</td>
+                          <td className="border border-gray-300 px-4 py-2">{product.quantity}</td>
+                          <td className="border border-gray-300 px-4 py-2">{product.price}</td>
+                          <td className="border border-gray-300 px-4 py-2">{product.barcode}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  </div>
+                </div>
+              )}
+            </div>
+
+
+
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Danh sách nhân viên</CardTitle>
@@ -497,6 +676,8 @@ const chartData =
               </div>
             </CardContent>
           </Card>
+
+
          {/* New card to add staff */}
            <Card>
           <CardHeader>

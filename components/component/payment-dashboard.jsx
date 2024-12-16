@@ -11,7 +11,13 @@ import formatVND from "../../utils/formatVND"
 import QrCodeCard  from "../../components/component/qrCodeCard"
 import sellerAPI from "../../api/seller"
 import PaymentSuccess from "../../components/component/payment-success"
+
+
+import {showConfirmAlert, showSuccessAlert} from "../../utils/reactSweetAlert"
+
+
 import { PrinterCheck } from 'lucide-react';
+
 
 export default function Component() {
     const [loading, setLoading] = useState(false);
@@ -137,7 +143,7 @@ const GeneratePaymentData = (amount, addInfo) => {
         const response = await sellerAPI.order.updateOrder(orderId, PaymentData);
 
         if(response.statusCode === 200){
-            alert("Thanh toán thành công");
+            showSuccessAlert("Thanh toán thành công", "Thanh toán thành công")
             router.push('/store/sale');
             return
         }
